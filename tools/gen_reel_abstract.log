@@ -1,0 +1,34 @@
+[18:59:07] INK angelegt: video_6a2997db021c8191bda87c1e22f762980cf8434c02db4a34
+[18:59:08] GLASS angelegt: video_6a2997dc30288190877c81d982e8634a00d9fd4abdccdb19
+[18:59:09] SLOWMO angelegt: video_6a2997dd431081919d26194c510a1f38066fc8471dd51974
+[18:59:10] FIBER angelegt: video_6a2997de6a7481908201beac6c9159d802cb89428c98b67f
+[18:59:26] INK: in_progress 0
+[18:59:26] GLASS: in_progress 0
+[18:59:27] SLOWMO: in_progress 0
+[18:59:27] FIBER: in_progress 0
+[18:59:43] INK: in_progress 0
+[18:59:43] GLASS: in_progress 0
+[18:59:44] SLOWMO: in_progress 0
+[18:59:44] FIBER: in_progress 0
+[19:00:00] INK: in_progress 85
+[19:00:01] GLASS: in_progress 0
+[19:00:01] SLOWMO: in_progress 0
+[19:00:02] FIBER: in_progress 85
+[19:00:17] INK: in_progress 0
+[19:00:18] GLASS: in_progress 0
+[19:00:18] SLOWMO: in_progress 0
+[19:00:19] FIBER: in_progress 0
+[19:00:35] INK: in_progress 99
+[19:00:35] GLASS: in_progress 99
+[19:00:36] SLOWMO: in_progress 99
+[19:00:36] FIBER: in_progress 99
+[19:00:52] INK: completed 100
+[19:00:56] INK geladen (4050KB)
+[19:00:56] GLASS: failed 99
+[19:00:56] GLASS FAILED: {'code': 'moderation_blocked', 'message': 'Your request was blocked by our moderation system.'} — übersprungen
+[19:00:57] SLOWMO: completed 100
+[19:00:59] SLOWMO geladen (3507KB)
+[19:01:00] FIBER: completed 100
+[19:01:04] FIBER geladen (7668KB)
+[19:01:04] Schnitt: INK + SLOWMO + FIBER
+[19:01:08] FERTIG: /Users/alexanderheyers/Documents/Claude/Projects/Vibe Coding Bootcamp/myflowmotion-lusion/assets/reel.mp4 (3245KB, 21.400000s)
