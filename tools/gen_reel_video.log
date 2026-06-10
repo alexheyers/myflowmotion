@@ -1,0 +1,16 @@
+[17:25:56] Referenz: /tmp/reel-ref-1280.jpg (115KB)
+[17:25:56] START Sora-2 Videogenerierung (12s, 1280x720)
+[17:25:58] Job angelegt: video_6a298206082c8190a33deebf14a115870bcc0c91bd43d72d status=queued
+[17:26:14] status=queued progress=0
+[17:26:29] status=in_progress progress=40
+[17:26:45] status=in_progress progress=54
+[17:27:01] status=in_progress progress=0
+[17:27:16] status=in_progress progress=0
+[17:27:32] status=in_progress progress=76
+[17:27:48] status=in_progress progress=0
+[17:28:03] status=in_progress progress=0
+[17:28:19] status=in_progress progress=99
+[17:28:35] status=in_progress progress=99
+[17:28:50] status=completed progress=100
+[17:28:54] Roh-Video: /tmp/reel-sora-raw.mp4 (5899KB)
+[17:28:56] FERTIG: /Users/alexanderheyers/Documents/Claude/Projects/Vibe Coding Bootcamp/myflowmotion-lusion/assets/reel.mp4 (752KB)
