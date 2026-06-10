@@ -40,6 +40,11 @@ img { display:block; width:100%; height:100%; object-fit:cover; }
 .prog i { width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.25; transition:opacity .3s, transform .3s; }
 .prog i.on { opacity:1; transform:scale(1.5); }
 
+/* ============ REVEAL-SYSTEM (Choreografie pro Station) ============ */
+.st .rev { opacity:0; transform:translateY(26px); transition:opacity .85s cubic-bezier(.16,1,.3,1) var(--d,0s), transform .85s cubic-bezier(.16,1,.3,1) var(--d,0s); }
+.st.live .rev { opacity:1; transform:none; }
+body.static .st .rev { opacity:1; transform:none; }
+
 /* ============ LOADER ============ */
 .loader { position:fixed; inset:0; z-index:200; background:var(--ivory); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .9s cubic-bezier(.16,1,.3,1), visibility .9s; }
 .loader.is-done { opacity:0; visibility:hidden; }
@@ -120,6 +125,8 @@ body.gl .stage-card__media img { opacity:0; }
 .st-galaxie .stats { display:flex; gap:clamp(1.4rem,4vw,3.4rem); margin-top:1.8rem; flex-wrap:wrap; justify-content:center; }
 .st-galaxie .stats b { font-family:var(--disp); font-size:clamp(1.1rem,1.8vw,1.5rem); display:block; color:var(--ivory); }
 .st-galaxie .stats span { font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--iv-30); }
+.st-galaxie .gal-cta { margin-top:1.7rem; display:inline-block; font-family:var(--mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ivory); border:1px solid var(--iv-30); padding:.75rem 1.6rem; border-radius:50px; transition:background .3s, border-color .3s; }
+.st-galaxie .gal-cta:hover { background:var(--teal); border-color:var(--teal); }
 
 /* ============ STATION 6: AGENTEN ============ */
 .st-agents { padding:0 clamp(1.2rem,4vw,3.2rem); display:flex; flex-direction:column; justify-content:center; align-items:flex-start; }
@@ -153,16 +160,25 @@ body.gl .stage-card__media img { opacity:0; }
 .st-end .foot { position:absolute; bottom:1.6rem; left:0; right:0; display:flex; justify-content:space-between; padding:0 clamp(1.2rem,4vw,3.2rem); font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--iv-30); }
 .st-end .foot b { color:var(--teal); }
 
-/* ============ PROJEKT-DETAIL (Transmorph-Ziel) ============ */
-.detail { position:fixed; inset:0; z-index:120; display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(1.4rem,4vw,3.2rem); visibility:hidden; pointer-events:none; }
+/* ============ PROJEKT-DETAIL (lebendige Unterseite) ============ */
+.detail { position:fixed; inset:0; z-index:120; display:flex; flex-direction:column; padding:clamp(1.2rem,3vw,2.6rem); padding-top:clamp(4.6rem,7vh,6rem); visibility:hidden; pointer-events:none; }
 .detail.is-open { visibility:visible; pointer-events:auto; }
 .detail__scrim { position:absolute; inset:0; background:rgba(14,34,68,0); transition:background .6s; }
-.detail.is-open .detail__scrim { background:rgba(14,34,68,.32); }
-.detail__panel { position:relative; color:var(--ivory); max-width:640px; opacity:0; transform:translateY(24px); transition:opacity .5s cubic-bezier(.16,1,.3,1) .25s, transform .5s cubic-bezier(.16,1,.3,1) .25s; }
+.detail.is-open .detail__scrim { background:rgba(11,22,45,.8); }
+.detail__media { position:relative; flex:1; min-height:0; border-radius:10px; overflow:hidden; background:#0B1A35; box-shadow:0 30px 80px rgba(0,0,0,.45); opacity:0; transform:translateY(22px) scale(.985); transition:opacity .6s cubic-bezier(.16,1,.3,1) .3s, transform .6s cubic-bezier(.16,1,.3,1) .3s; }
+.detail.is-open .detail__media { opacity:1; transform:none; }
+.detail__media iframe { width:100%; height:100%; border:0; display:block; background:#0B1A35; }
+.detail__media .hintbar { position:absolute; top:.7rem; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:.58rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(242,239,232,.6); background:rgba(11,22,45,.55); padding:.35rem .9rem; border-radius:40px; pointer-events:none; }
+.detail__bar { position:relative; display:flex; gap:clamp(1.2rem,4vw,3rem); align-items:flex-end; justify-content:space-between; padding-top:1.1rem; flex-wrap:wrap; }
+.detail__panel { position:relative; color:var(--ivory); max-width:560px; opacity:0; transform:translateY(24px); transition:opacity .5s cubic-bezier(.16,1,.3,1) .25s, transform .5s cubic-bezier(.16,1,.3,1) .25s; }
 .detail.is-open .detail__panel { opacity:1; transform:translateY(0); }
+.detail__facts { display:flex; gap:clamp(1.2rem,3vw,2.6rem); color:var(--ivory); opacity:0; transform:translateY(24px); transition:opacity .5s cubic-bezier(.16,1,.3,1) .35s, transform .5s cubic-bezier(.16,1,.3,1) .35s; }
+.detail.is-open .detail__facts { opacity:1; transform:translateY(0); }
+.detail__facts b { font-family:var(--disp); font-size:clamp(1rem,1.6vw,1.4rem); display:block; }
+.detail__facts span { font-family:var(--mono); font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; color:var(--iv-30); }
 .detail__tags { font-family:var(--mono); font-size:.64rem; letter-spacing:.2em; text-transform:uppercase; opacity:.75; margin-bottom:.8rem; }
-.detail__title { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,4.6vw,3.2rem); line-height:1.05; margin-bottom:.9rem; }
-.detail__text { font-weight:300; line-height:1.7; max-width:52ch; font-size:.95rem; }
+.detail__title { font-family:var(--disp); font-weight:900; font-size:clamp(1.5rem,3.4vw,2.4rem); line-height:1.05; margin-bottom:.6rem; }
+.detail__text { font-weight:300; line-height:1.65; max-width:58ch; font-size:.88rem; color:var(--iv-70); }
 .detail__close { position:absolute; top:clamp(1.4rem,4vw,3.2rem); right:clamp(1.4rem,4vw,3.2rem); width:50px; height:50px; border-radius:50%; border:1px solid rgba(242,239,232,.5); background:transparent; color:var(--ivory); font-family:var(--mono); font-size:.9rem; cursor:pointer; opacity:0; transition:opacity .4s .4s, background .3s, transform .3s; }
 .detail.is-open .detail__close { opacity:1; }
 .detail__close:hover { background:var(--pink); border-color:var(--pink); transform:rotate(90deg); }
@@ -180,6 +196,94 @@ body.static .card__media img, body.static .stage-card__media img { opacity:1; }
 body.static .st-galaxie { justify-content:center; }
 body.static .st-galaxie .stats b { color:var(--ivory); }
 body.static .st-hero .hint { display:none; }
+
+/* === Section-Agent: Station 2 — Ausgewählte Arbeiten (.st-work) === */
+/* ST2 — Karten-Mikrointeraktion */
+.st-work .work-grid{counter-reset:work}
+.st-work .card{counter-increment:work}
+.st-work .card::before{content:counter(work,decimal-leading-zero);display:block;font-family:var(--mono);font-size:.6rem;letter-spacing:.22em;color:var(--ink-30);margin-bottom:.5rem;transition:color .35s}
+.st-work .card:hover::before{color:var(--teal)}
+.st-work .card__media{transition:transform .55s cubic-bezier(.16,1,.3,1),box-shadow .55s cubic-bezier(.16,1,.3,1)}
+.st-work .card:hover .card__media{transform:translateY(-6px);box-shadow:0 22px 44px -20px rgba(14,34,68,.38)}
+.st-work .card__title{display:inline-block;padding-bottom:3px;background:linear-gradient(var(--teal),var(--teal)) 0 100%/0% 2px no-repeat;transition:background-size .5s cubic-bezier(.16,1,.3,1)}
+.st-work .card:hover .card__title{background-size:100% 2px}
+.st-work .card__tags{transition:color .35s}
+.st-work .card:hover .card__tags{color:var(--teal)}
+.st-work .count em{font-style:normal;color:var(--teal)}
+
+/* === Section-Agent: Station 3 — Void/Tunnel (.st-void) === */
+/* St.3 · Zeile 2: eigene typografische Stimme */
+.st-void .line[data-line="1"] h2{display:flex;flex-direction:column;align-items:center;gap:1.15rem}
+.st-void .vd-word{font-style:italic;font-size:clamp(2.8rem,8.5vw,7rem);line-height:1;letter-spacing:.015em;padding-left:.015em}
+.st-void .vd-rule{display:block;width:74px;height:1px;background:var(--teal)}
+.st-void .vd-rest{font-family:var(--mono);font-weight:400;font-size:clamp(.68rem,.95vw,.8rem);letter-spacing:.46em;padding-left:.46em;text-transform:uppercase;color:var(--iv-70)}
+.st-void .vd-rest b{font-weight:400;color:var(--teal)}
+.st-void.live .vd-word{animation:vdTrack 2.6s .35s cubic-bezier(.16,1,.3,1) both}
+.st-void.live .vd-rule{animation:vdRule 1.8s 1.05s cubic-bezier(.16,1,.3,1) both}
+.st-void.live .vd-rest{animation:vdRest 1.6s 1.4s ease both}
+@keyframes vdTrack{from{letter-spacing:.34em;padding-left:.34em}to{letter-spacing:.015em;padding-left:.015em}}
+@keyframes vdRule{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes vdRest{from{opacity:0;letter-spacing:.72em;padding-left:.72em}to{opacity:1;letter-spacing:.46em;padding-left:.46em}}
+
+/* === Section-Agent: Station 4 — Studio (.st-studio) === */
+.st-studio .stage-card{position:relative}
+.st-studio .stage-card+.stage-card::before{content:'';position:absolute;top:16vh;right:100%;width:clamp(.9rem,2vw,2rem);height:1px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .7s ease .5s}
+.st-studio .stage-card+.stage-card::after{content:'';position:absolute;top:16vh;left:-8px;width:5px;height:5px;margin-top:-3px;border-top:1px solid var(--teal);border-right:1px solid var(--teal);transform:rotate(45deg);opacity:0;transition:opacity .4s .9s}
+.st-studio .stage-card:nth-child(3)::before{transition-delay:.75s}
+.st-studio.live .stage-card+.stage-card::before,body.static .stage-card+.stage-card::before{transform:scaleX(1)}
+.st-studio.live .stage-card+.stage-card::after,body.static .stage-card+.stage-card::after{opacity:.55}
+.st-studio .stage-card__num{display:flex;align-items:baseline;gap:.6rem}
+.st-studio .stage-card__num b{font-family:var(--disp);font-weight:900;font-size:1.6rem;color:var(--teal)}
+.st-studio .stage-card__media{transition:transform .55s ease,box-shadow .55s ease}
+.st-studio .stage-card:hover .stage-card__media{transform:translateY(-8px);box-shadow:0 24px 44px -20px rgba(14,34,68,.4)}
+@media (max-width:860px){.st-studio .stage-card::before,.st-studio .stage-card::after{display:none}}
+
+/* === Section-Agent: Station 5 Galaxie (.st-galaxie) === */
+@keyframes galBlink{0%,100%{opacity:1}50%{opacity:.12}}
+.st-galaxie .kicker{display:inline-flex;align-items:center;gap:.55em}
+.st-galaxie .kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px rgba(26,165,145,.7);animation:galBlink 1.5s ease-in-out infinite}
+.st-galaxie .stats{position:relative;padding:1.15rem 1.9rem 1rem;border:1px solid rgba(242,239,232,.09);background:linear-gradient(var(--teal),var(--teal)) top right/11px 1px no-repeat,linear-gradient(var(--teal),var(--teal)) top right/1px 11px no-repeat,linear-gradient(var(--teal),var(--teal)) bottom left/11px 1px no-repeat,linear-gradient(var(--teal),var(--teal)) bottom left/1px 11px no-repeat}
+.st-galaxie .stats::before,.st-galaxie .stats::after{content:"";position:absolute;width:11px;height:11px;pointer-events:none}
+.st-galaxie .stats::before{top:-1px;left:-1px;border-top:1px solid var(--teal);border-left:1px solid var(--teal)}
+.st-galaxie .stats::after{bottom:-1px;right:-1px;border-bottom:1px solid var(--teal);border-right:1px solid var(--teal)}
+@keyframes galPulse{0%{box-shadow:0 0 0 0 rgba(26,165,145,.38)}70%{box-shadow:0 0 0 13px rgba(26,165,145,0)}100%{box-shadow:0 0 0 0 rgba(26,165,145,0)}}
+.st-galaxie.live .gal-cta:not(.gal-seen){animation:galPulse 2.2s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.st-galaxie .kicker::before,.st-galaxie .gal-cta{animation:none!important}}
+
+/* === Section-Agent: Station 6 — Agenten (.st-agents) === */
+/* ST6: Zahlen aus der Zeile */
+.st-agents h2 .num{font-size:1.3em;line-height:1;letter-spacing:-.02em;vertical-align:-.045em;}
+/* ST6: Nachtschicht-Strich: pink blitzt, teal bleibt */
+.agent-card--night{position:relative;border-top-color:transparent;}
+.agent-card--night::before{content:"";position:absolute;top:-1px;left:0;right:0;height:2px;background:var(--ink-12);transform-origin:left;}
+.st-agents.live .agent-card--night::before{animation:nightPulse 2.4s cubic-bezier(.16,1,.3,1) .6s both;}
+@keyframes nightPulse{
+0%{transform:scaleX(0);background:var(--pink);box-shadow:0 0 0 rgba(233,75,93,0);}
+30%{transform:scaleX(1);background:var(--pink);box-shadow:0 0 16px rgba(233,75,93,.55);}
+62%{background:var(--pink);box-shadow:0 0 6px rgba(233,75,93,.25);}
+100%{transform:scaleX(1);background:var(--teal);box-shadow:0 0 0 rgba(26,165,145,0);}
+}
+.st-agents.live .agent-card--night .agent-card__label{animation:nightLabel 2.4s cubic-bezier(.16,1,.3,1) .6s both;}
+@keyframes nightLabel{0%,55%{color:var(--pink);}100%{color:var(--teal);}}
+body.static .agent-card--night::before{background:var(--teal);}
+@media (prefers-reduced-motion:reduce){.st-agents.live .agent-card--night::before,.st-agents.live .agent-card--night .agent-card__label{animation:none;}}
+
+/* === Section-Agent: Station 7 · About (.st-about) === */
+/* — Station 7 · About: Signatur & Wärme — */
+.st-about .panel p { font-size:1.07rem; line-height:1.85; max-width:54ch; margin-left:auto; margin-right:auto; }
+.st-about .sig { width:190px; height:28px; margin:1.9rem auto 0; background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 30"><path d="M6 21C38 5 58 27 88 16S138 4 162 18s34-9 44-9" fill="none" stroke="%231AA591" stroke-width="2.2" stroke-linecap="round" opacity=".85"/><circle cx="213" cy="11" r="2.6" fill="%23E94B5D"/></svg>') center/contain no-repeat; clip-path:inset(-4px 100% -4px 0); transition:clip-path 1.2s cubic-bezier(.16,1,.3,1) .45s; }
+.st-about.live .sig, body.static .st-about .sig { clip-path:inset(-4px -4px -4px 0); }
+.st-about .facts > div { position:relative; }
+.st-about .facts > div + div::before { content:""; position:absolute; left:-1.5rem; top:50%; transform:translateY(-50%); width:1px; height:30px; background:linear-gradient(to bottom, transparent, var(--ink-12) 25%, var(--ink-12) 75%, transparent); }
+@media (max-width:600px) { .st-about .facts > div + div::before { display:none; } }
+
+/* === Section-Agent: Station 8 Finale (.st-end) === */
+/* ST8 Finale — Conversion-Moment */
+.st-end .mail{margin-top:3.2rem;font-size:clamp(1.15rem,2.6vw,1.85rem);letter-spacing:.02em;display:inline-flex;align-items:baseline;gap:.55em;padding-bottom:.45rem;border-bottom:2px solid var(--teal);transition:color .35s,border-color .35s}
+.st-end .mail__arr{display:inline-block;color:var(--teal);transform:translateX(0);transition:transform .5s cubic-bezier(.16,1,.3,1),color .35s}
+.st-end .mail:hover .mail__arr{transform:translateX(.5em);color:var(--pink)}
+.st-end .foot{bottom:2.6rem;row-gap:.7rem;flex-wrap:wrap}
+@media (max-width:640px){.st-end .foot{flex-direction:column;align-items:center;gap:.45rem;text-align:center}}
 </style>
 </head>
 <body>
@@ -223,22 +327,22 @@ body.static .st-hero .hint { display:none; }
   <section class="st st-work" data-st="2">
     <div class="head">
       <h2>Ausgewählte <em>Arbeiten</em></h2>
-      <div class="count">04 / 06 — Auswahl</div>
+      <div class="count">04 / 06 — Auswahl · <em>Klick öffnet die Live-Demo</em></div>
     </div>
     <div class="work-grid" id="workGrid">
-      <article class="card" data-title="AI-Adoption-Studio" data-tags="ai · web · agents" data-text="Ein Multi-Agent-System, das Unternehmen durch die KI-Einführung führt: Voice-Intake, Dokumenten-Analyse, Systemlandkarte. Next.js, FastAPI, Supabase — live gebaut und öffentlich dokumentiert.">
+      <article class="card rev" style="--d:.05s" data-title="AI-Adoption-Studio" data-tags="ai · web · agents" data-live="live/studio.html" data-hint="Live-Prototyp — scrollen &amp; klicken" data-facts="3 Stufen|Verstehen → Bauen;7|Analyse-Agenten;105|Fragen im Pool" data-text="Ein Multi-Agent-System, das Unternehmen durch die KI-Einführung führt: Voice-Intake, Dokumenten-Analyse, Systemlandkarte. Next.js, FastAPI, Supabase — live gebaut und öffentlich dokumentiert.">
         <div class="card__media gl-img"><img src="assets/card-studio.jpg" alt="AI-Adoption-Studio"></div>
         <div class="card__title">AI-Adoption-Studio</div><div class="card__tags">ai · web · agents</div>
       </article>
-      <article class="card" data-title="System-Galaxie" data-tags="3d · dataviz" data-text="Eine begehbare Three.js-Galaxie der eigenen Systemlandschaft: jeder Workflow ein Satellit, jede Verbindung eine Linie. Datengetrieben — die Karte zeichnet sich selbst.">
+      <article class="card rev" style="--d:.15s" data-title="System-Galaxie" data-tags="3d · dataviz" data-live="live/galaxie.html" data-hint="Echte Systemkarte — ziehen, zoomen, klicken" data-facts="119|Knoten;100|Verbindungen;48|n8n-Workflows" data-text="Eine begehbare Three.js-Galaxie der eigenen Systemlandschaft: jeder Workflow ein Satellit, jede Verbindung eine Linie. Datengetrieben — die Karte zeichnet sich selbst.">
         <div class="card__media gl-img"><img src="assets/card-galaxie.jpg" alt="System-Galaxie"></div>
         <div class="card__title">System-Galaxie</div><div class="card__tags">3d · dataviz</div>
       </article>
-      <article class="card" data-title="Voice-Agent Ada" data-tags="voice · ai" data-text="Ein Sprach-Agent, der Erstgespräche führt: erklärt, fragt nach, fasst zusammen — mit sauberer KI-Deklaration und Consent von der ersten Sekunde.">
+      <article class="card rev" style="--d:.25s" data-title="Voice-Agent Ada" data-tags="voice · ai" data-live="live/studio.html#st-voice" data-hint="Live-Sektion aus dem Studio-Prototyp" data-facts="105|Fragen im Pool;10–15|pro Gespräch;Sek. 1|KI-Deklaration" data-text="Ein Sprach-Agent, der Erstgespräche führt: erklärt, fragt nach, fasst zusammen — mit sauberer KI-Deklaration und Consent von der ersten Sekunde.">
         <div class="card__media gl-img"><img src="assets/card-ada.jpg" alt="Voice-Agent Ada"></div>
         <div class="card__title">Voice-Agent Ada</div><div class="card__tags">voice · ai</div>
       </article>
-      <article class="card" data-title="Flow-Automationen" data-tags="automation · integration" data-text="Workflows, die im Hintergrund arbeiten: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines — selbst gehostet, versioniert, überwacht.">
+      <article class="card rev" style="--d:.35s" data-title="Flow-Automationen" data-tags="automation · integration" data-live="live/studio.html#agents" data-hint="8-Agenten-Pipeline — live im Prototyp" data-facts="48|Workflows;35|aktiv;8|Agenten-Pipeline" data-text="Workflows, die im Hintergrund arbeiten: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines — selbst gehostet, versioniert, überwacht.">
         <div class="card__media gl-img"><img src="assets/card-flows.jpg" alt="Flow-Automationen"></div>
         <div class="card__title">Flow-Automationen</div><div class="card__tags">automation · integration</div>
       </article>
@@ -253,7 +357,7 @@ body.static .st-hero .hint { display:none; }
     </div>
     <div class="line" data-line="1">
       <div class="mono">Schritt 2 — Verdichten</div>
-      <h2>Klarheit ist der <em>Skill</em>.</h2>
+      <h2><span class="vd-word">Klarheit</span><i class="vd-rule" aria-hidden="true"></i><span class="vd-rest">ist der <b>Skill</b>.</span></h2>
     </div>
   </section>
 
@@ -263,21 +367,21 @@ body.static .st-hero .hint { display:none; }
     <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
     <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
     <div class="stage-grid">
-      <article class="stage-card">
+      <article class="stage-card rev" style="--d:.08s">
         <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-verstehen.jpg" alt="Stufe 1 — Verstehen"></div>
-        <div class="stage-card__num">01 · Verstehen</div>
+        <div class="stage-card__num"><b>01</b><span>Verstehen</span></div>
         <div class="stage-card__title">Ada fragt nach.</div>
         <p class="stage-card__text">Voice-Agent Ada führt das Interview — 105 Fragen im Pool, gestellt werden nur die richtigen. Sieben Agenten zerlegen die Antworten in Befunde.</p>
       </article>
-      <article class="stage-card">
+      <article class="stage-card rev" style="--d:.22s">
         <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-designen.jpg" alt="Stufe 2 — Designen"></div>
-        <div class="stage-card__num">02 · Designen</div>
+        <div class="stage-card__num"><b>02</b><span>Designen</span></div>
         <div class="stage-card__title">Jede Kante hat einen Mechanismus.</div>
         <p class="stage-card__text">Aus Befunden wird die Ziel-Systemlandschaft. Keine Tool-Liste: jede Verbindung hat einen Mechanismus, jeder Datenfluss eine Quelle.</p>
       </article>
-      <article class="stage-card">
+      <article class="stage-card rev" style="--d:.36s">
         <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-bauen.jpg" alt="Stufe 3 — Bauen"></div>
-        <div class="stage-card__num">03 · Bauen</div>
+        <div class="stage-card__num"><b>03</b><span>Bauen</span></div>
         <div class="stage-card__title">n8n schaltet scharf.</div>
         <p class="stage-card__text">Aus dem Design wird Workflow-JSON — generiert, validiert, deployt. Kein Report. Ein laufendes System.</p>
       </article>
@@ -290,28 +394,29 @@ body.static .st-hero .hint { display:none; }
     <h2>Die Systemkarte zeichnet sich <em>selbst</em>.</h2>
     <p class="sub">Keine Illustration. Jeder Knoten ein System, jede Linie eine Verbindung — aus Live-Daten. Der Unterschied zwischen einer Präsentation und einem System, das Präsentationen baut.</p>
     <div class="stats">
-      <div><b data-count="70" id="galStatN">70</b><span>Bausteine</span></div>
-      <div><b data-count="90" id="galStatE">90</b><span>Verbindungen</span></div>
-      <div><b data-count="48" id="galStatW">48</b><span>Workflows · 35 aktiv</span></div>
+      <div class="rev" style="--d:.1s"><b data-count="70" id="galStatN">70</b><span>Bausteine</span></div>
+      <div class="rev" style="--d:.25s"><b data-count="90" id="galStatE">90</b><span>Verbindungen</span></div>
+      <div class="rev" style="--d:.4s"><b data-count="48" id="galStatW">48</b><span>Workflows · 35 aktiv</span></div>
     </div>
+    <a class="gal-cta rev" style="--d:.55s" id="galCta" href="#" onmouseenter="this.classList.add('gal-seen')" data-title="System-Galaxie" data-tags="3d · dataviz · live" data-live="live/galaxie.html" data-hint="Ziehen, zoomen, Knoten anklicken" data-facts="119|Knoten;100|Verbindungen;48|n8n-Workflows" data-text="Die komplette Systemlandschaft als begehbare 3D-Karte — jede Kugel ein echtes System, jeder Satellit ein laufender Workflow.">Galaxie live erkunden</a>
   </section>
 
   <!-- 6 · AGENTEN -->
   <section class="st st-agents" data-st="6">
     <div class="kicker">Wie hier gebaut wird</div>
-    <h2>8 Agenten. 1 Nacht. 2.462 <em>Zeilen</em>.</h2>
+    <h2><span class="num">8</span> Agenten. <span class="num">1</span> Nacht. <span class="num">2.462</span> <em>Zeilen</em>.</h2>
     <div class="agent-grid">
-      <article class="agent-card">
+      <article class="agent-card rev" style="--d:.08s">
         <div class="agent-card__label">Voice</div>
         <div class="agent-card__title">Ada stellt sich vor</div>
         <p class="agent-card__text">KI-Deklaration, Consent, „unterbrich mich“ — ab Sekunde eins. Dann erst das Gespräch. 105 Fragen im Pool, 10–15 pro Run.</p>
       </article>
-      <article class="agent-card">
+      <article class="agent-card agent-card--night rev" style="--d:.22s">
         <div class="agent-card__label">Nachtschicht</div>
         <div class="agent-card__title">Die Nacht der Agenten</div>
         <p class="agent-card__text">Jeder Agent isoliert im eigenen Worktree. Keine Kollisionen, kein Chaos. Am Morgen: Code, der läuft — und ein Showstopper, der nie live ging.</p>
       </article>
-      <article class="agent-card">
+      <article class="agent-card rev" style="--d:.36s">
         <div class="agent-card__label">Build-in-Public</div>
         <div class="agent-card__title">Doku = Content</div>
         <p class="agent-card__text">Jeder Bauschritt öffentlich. Doku und Content sind dasselbe Artefakt. Nicht das fertige Tool zählt — der Weg dorthin.</p>
@@ -322,21 +427,22 @@ body.static .st-hero .hint { display:none; }
   <!-- 7 · LICHT/ABOUT -->
   <section class="st st-about" data-st="7">
     <div class="panel">
-      <h2>20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
-      <p>MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Hier entstehen keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Gebaut im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive.</p>
+      <h2 class="rev" style="--d:.05s">20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
+      <p class="rev" style="--d:.2s">MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Hier entstehen keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Gebaut im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive.</p>
+      <div class="sig" aria-hidden="true"></div>
       <div class="facts">
-        <div><b>20+ Jahre</b><span>Gastro → Digital → KI</span></div>
-        <div><b>6 Systeme</b><span>live &amp; dokumentiert</span></div>
-        <div><b>100 % öffentlich</b><span>Build-in-Public</span></div>
+        <div class="rev" style="--d:.55s"><b>20+ Jahre</b><span>Gastro → Digital → KI</span></div>
+        <div class="rev" style="--d:.68s"><b>6 Systeme</b><span>live &amp; dokumentiert</span></div>
+        <div class="rev" style="--d:.81s"><b>100 % öffentlich</b><span>Build-in-Public</span></div>
       </div>
     </div>
   </section>
 
   <!-- 8 · FINALE -->
   <section class="st st-end" data-st="8">
-    <h2>Eine Idee?<br><em>Lass uns reden.</em></h2>
-    <a class="mail" href="mailto:a.heyers@gmail.com">a.heyers@gmail.com</a>
-    <div class="foot">
+    <h2 class="rev">Eine Idee?<br><em>Lass uns reden.</em></h2>
+    <a class="mail rev" style="--d:.25s" href="mailto:a.heyers@gmail.com"><span class="mail__txt">a.heyers@gmail.com</span><span class="mail__arr" aria-hidden="true">→</span></a>
+    <div class="foot rev" style="--d:.45s">
       <div>© 2026 <b>MyFlowMotion</b> · Alex Heyers</div>
       <div>Eigenbau · Three.js · Blender · Lusion-inspiriert</div>
     </div>
@@ -347,10 +453,14 @@ body.static .st-hero .hint { display:none; }
 <div class="detail" id="detail">
   <div class="detail__scrim" id="detailScrim"></div>
   <button class="detail__close" id="detailClose" aria-label="Schließen">✕</button>
-  <div class="detail__panel">
-    <div class="detail__tags" id="detailTags"></div>
-    <div class="detail__title" id="detailTitle"></div>
-    <p class="detail__text" id="detailText"></p>
+  <div class="detail__media" id="detailMedia"></div>
+  <div class="detail__bar">
+    <div class="detail__panel">
+      <div class="detail__tags" id="detailTags"></div>
+      <div class="detail__title" id="detailTitle"></div>
+      <p class="detail__text" id="detailText"></p>
+    </div>
+    <div class="detail__facts" id="detailFacts"></div>
   </div>
 </div>
 
@@ -457,6 +567,38 @@ if (!isTouch){
 /* ============================================================
    WEBGL-AUFBAU
    ============================================================ */
+/* Detail-Overlay: lebendige Unterseite füllen/leeren (GL- und Static-Pfad) */
+const detailEls = {
+  media: document.getElementById('detailMedia'),
+  facts: document.getElementById('detailFacts'),
+  title: document.getElementById('detailTitle'),
+  tags: document.getElementById('detailTags'),
+  text: document.getElementById('detailText'),
+};
+function fillDetail(src){
+  const d = src.dataset;
+  detailEls.title.textContent = d.title || '';
+  detailEls.tags.textContent = d.tags || '';
+  detailEls.text.textContent = d.text || '';
+  detailEls.facts.innerHTML = (d.facts || '').split(';').filter(Boolean)
+    .map(f => { const [v, l] = f.split('|'); return `<div><b>${v}</b><span>${l}</span></div>`; }).join('');
+  if (d.live){
+    detailEls.media.innerHTML = `<iframe src="${d.live}" title="${d.title}"></iframe>` +
+      (d.hint ? `<div class="hintbar">${d.hint}</div>` : '');
+  } else {
+    const img = src.querySelector('img');
+    detailEls.media.innerHTML = img ? `<img src="${img.src}" alt="">` : '';
+  }
+}
+function clearDetailMedia(){ detailEls.media.innerHTML = ''; }
+const galCta = document.getElementById('galCta');
+if (galCta) galCta.addEventListener('click', e => {
+  e.preventDefault();
+  fillDetail(galCta);
+  document.getElementById('detail').classList.add('is-open');
+  document.body.classList.add('is-locked');
+});
+
 const canvas = document.getElementById('gl');
 let glctx = null;
 try { glctx = canvas.getContext('webgl2',{ antialias:false, alpha:false }); } catch(e){}
@@ -469,13 +611,11 @@ if (!glctx || reduced){
   detailS.querySelector('.detail__scrim').style.background = 'rgba(14,34,68,.94)';
   document.querySelectorAll('.card').forEach(card=>{
     card.addEventListener('click',()=>{
-      document.getElementById('detailTitle').textContent = card.dataset.title;
-      document.getElementById('detailTags').textContent = card.dataset.tags;
-      document.getElementById('detailText').textContent = card.dataset.text;
+      fillDetail(card);
       detailS.classList.add('is-open'); document.body.classList.add('is-locked');
     });
   });
-  const closeS = ()=>{ detailS.classList.remove('is-open'); document.body.classList.remove('is-locked'); };
+  const closeS = ()=>{ detailS.classList.remove('is-open'); document.body.classList.remove('is-locked'); setTimeout(clearDetailMedia, 400); };
   document.getElementById('detailClose').addEventListener('click',closeS);
   document.getElementById('detailScrim').addEventListener('click',closeS);
 } else {
@@ -1108,14 +1248,15 @@ document.querySelectorAll('.card').forEach((card,i)=>{
     openPlane = plane;
     plane.userData.rectFrom = plane.userData.holder.getBoundingClientRect();
     plane.userData.openDir = 1;
-    document.getElementById('detailTitle').textContent = card.dataset.title;
-    document.getElementById('detailTags').textContent = card.dataset.tags;
-    document.getElementById('detailText').textContent = card.dataset.text;
+    fillDetail(card);
     detail.classList.add('is-open'); document.body.classList.add('is-locked');
   });
 });
-function closeDetail(){ if(!openPlane) return; openPlane.userData.openDir=-1;
-  detail.classList.remove('is-open'); document.body.classList.remove('is-locked'); }
+function closeDetail(){
+  if (openPlane) openPlane.userData.openDir = -1;
+  detail.classList.remove('is-open'); document.body.classList.remove('is-locked');
+  setTimeout(clearDetailMedia, 500);
+}
 document.getElementById('detailClose').addEventListener('click',closeDetail);
 document.getElementById('detailScrim').addEventListener('click',closeDetail);
 addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
@@ -1269,6 +1410,7 @@ function domStep(p, detailOpen){
     const el = sts[i];
     el.style.opacity = o.toFixed(3);
     el.classList.toggle('on', o > 0.01);
+    el.classList.toggle('live', o > 0.35);
     const dy = (1 - o) * 26 * (p > (a+b)/2 ? -1 : 1);
     el.style.transform = `translateY(${dy.toFixed(1)}px)`;
   }

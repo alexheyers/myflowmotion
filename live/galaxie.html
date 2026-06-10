@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das System · Alex × Claude — Galaxie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#FAF9F5; --paper:#F0EEE6; --ink:#1F1E1D; --slate:#6B6A66;
+    --terra:#D97757; --terra-deep:#BF5F3F; --line:#DAD6CB;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:var(--ivory);
+    font-family:'Source Serif 4',Georgia,serif;color:var(--ink)}
+  #scene{position:fixed;inset:0;cursor:grab}
+  #scene:active{cursor:grabbing}
+
+  /* paper grain */
+  .grain{position:fixed;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:multiply;z-index:3;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .vignette{position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(31,30,29,.07) 100%)}
+
+  /* ---------- HUD ---------- */
+  .hud{position:fixed;z-index:10}
+  #title{top:34px;left:38px;max-width:430px}
+  #title .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--terra);margin-bottom:10px}
+  #title h1{font-size:34px;font-weight:600;line-height:1.12;letter-spacing:-.01em}
+  #title h1 em{font-style:italic;font-weight:400;color:var(--terra-deep)}
+  #title .sub{margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--slate);line-height:1.7}
+  #title .sub b{color:var(--ink);font-weight:500}
+
+  #controls{top:34px;right:38px;display:flex;gap:8px}
+  .btn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
+    padding:9px 14px;border:1px solid var(--line);border-radius:99px;background:rgba(255,255,255,.75);
+    backdrop-filter:blur(8px);color:var(--ink);cursor:pointer;transition:all .2s}
+  .btn:hover{border-color:var(--terra);color:var(--terra-deep)}
+  .btn.on{background:var(--terra);border-color:var(--terra);color:#fff}
+
+  /* ---------- Legend ---------- */
+  #legend{bottom:34px;left:38px;display:flex;flex-wrap:wrap;gap:7px;max-width:560px}
+  .chip{display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    padding:7px 12px;border:1px solid var(--line);border-radius:99px;background:rgba(255,255,255,.78);
+    backdrop-filter:blur(8px);cursor:pointer;user-select:none;transition:all .2s;color:var(--ink)}
+  .chip .dot{width:9px;height:9px;border-radius:50%}
+  .chip .n{color:var(--slate)}
+  .chip.off{opacity:.38;filter:grayscale(.7)}
+  .chip:hover{border-color:var(--terra)}
+  #legend-hint{width:100%;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate);
+    letter-spacing:.08em;margin-top:4px}
+
+  /* ---------- Tooltip ---------- */
+  #tip{position:fixed;z-index:20;pointer-events:none;display:none;max-width:300px;
+    background:rgba(255,255,255,.96);border:1px solid var(--line);border-left:3px solid var(--terra);
+    border-radius:8px;padding:11px 14px;box-shadow:0 12px 34px rgba(31,30,29,.13)}
+  #tip .t-name{font-size:15.5px;font-weight:600;line-height:1.25}
+  #tip .t-cat{font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--terra-deep);margin-top:4px}
+
+  /* ---------- Info panel ---------- */
+  #panel{top:0;right:0;height:100%;width:380px;transform:translateX(105%);transition:transform .45s cubic-bezier(.2,.8,.2,1);
+    background:rgba(253,252,249,.95);backdrop-filter:blur(14px);border-left:1px solid var(--line);
+    padding:90px 34px 34px;overflow-y:auto;z-index:9}
+  #panel.open{transform:translateX(0)}
+  #panel .p-cat{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.26em;
+    text-transform:uppercase;color:#fff;display:inline-block;padding:5px 11px;border-radius:99px;margin-bottom:16px}
+  #panel h2{font-size:27px;font-weight:600;line-height:1.15;margin-bottom:14px;letter-spacing:-.01em}
+  #panel .p-detail{font-size:15.5px;line-height:1.65;color:#3d3c39;font-style:italic;margin-bottom:26px}
+  #panel .p-sec{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.26em;
+    text-transform:uppercase;color:var(--slate);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+  #panel .con{display:flex;align-items:baseline;gap:9px;padding:7px 0;font-size:14px;cursor:pointer;
+    border-bottom:1px dashed #E7E3D8}
+  #panel .con:hover .c-name{color:var(--terra-deep)}
+  #panel .con .c-arrow{color:var(--terra);font-family:'IBM Plex Mono',monospace;font-size:12px;flex-shrink:0}
+  #panel .con .c-name{font-weight:600;transition:color .15s}
+  #panel .con .c-via{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--slate);margin-left:auto;text-align:right;flex-shrink:0}
+  #panel-close{position:absolute;top:34px;right:30px;width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:#fff;cursor:pointer;font-size:15px;color:var(--slate)}
+  #panel-close:hover{border-color:var(--terra);color:var(--terra-deep)}
+  #panel .wf-meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--slate);line-height:2}
+  #panel .wf-meta b{color:var(--ink)}
+
+  /* ---------- Zoom-Steuerung ---------- */
+  #zoom{position:fixed;right:38px;top:50%;transform:translateY(-50%);z-index:10;
+    display:flex;flex-direction:column;gap:8px}
+  .zbtn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,255,255,.85);backdrop-filter:blur(8px);cursor:pointer;
+    font-family:'IBM Plex Mono',monospace;font-size:21px;color:var(--ink);
+    display:flex;align-items:center;justify-content:center;transition:all .18s;
+    box-shadow:0 4px 14px rgba(31,30,29,.08);user-select:none}
+  .zbtn:hover{border-color:var(--terra);color:var(--terra-deep);transform:scale(1.08)}
+  .zbtn:active{transform:scale(.95)}
+  .zbtn.fit{font-size:13px}
+  #zoom .zhint{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--slate);
+    text-align:center;letter-spacing:.08em;margin-top:2px}
+
+  #loading{position:fixed;inset:0;z-index:50;background:var(--ivory);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px;transition:opacity .8s;font-style:italic}
+  #loading.done{opacity:0;pointer-events:none}
+  #loading .l-dot{width:10px;height:10px;border-radius:50%;background:var(--terra);animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(2.1);opacity:.35}}
+  #loading p{color:var(--slate);font-size:15px}
+
+  @media (max-width:760px){
+    #title h1{font-size:24px} #panel{width:100%}
+    #legend{max-width:calc(100% - 60px)}
+  }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+<div class="vignette"></div>
+<div class="grain"></div>
+
+<div id="loading"><div class="l-dot"></div><p>Die Galaxie ordnet sich&hellip;</p></div>
+
+<div class="hud" id="title">
+  <div class="eyebrow">System-Kartografie · Stand 04.06.2026</div>
+  <h1>Das System.<br><em>Alex &times; Claude — eine Galaxie.</em></h1>
+  <div class="sub" id="stats"></div>
+</div>
+
+<div class="hud" id="controls">
+  <button class="btn" id="btn-rotate">⟳ Auto-Rotation</button>
+  <button class="btn" id="btn-reset">Ansicht zurücksetzen</button>
+</div>
+
+<div class="hud" id="legend"></div>
+
+<div id="tip"><div class="t-name"></div><div class="t-cat"></div></div>
+
+<div id="zoom">
+  <button class="zbtn" id="z-in" title="Reinzoomen (+)">+</button>
+  <button class="zbtn" id="z-out" title="Rauszoomen (−)">−</button>
+  <button class="zbtn fit" id="z-fit" title="Alles im Blick (0)">◎</button>
+  <div class="zhint">+ / − / 0</div>
+</div>
+
+<div class="hud" id="panel">
+  <button id="panel-close">✕</button>
+  <div id="panel-body"></div>
+</div>
+
+<script type="importmap">
+{"imports":{
+  "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+
+/* ============================================================
+   DATEN — automatisch inventarisiert am 04.06.2026
+   (Workflow: 3 parallele Scanner + n8n-API live)
+============================================================ */
+const CAT = {
+  core:      {label:'Core',              color:'#D97757'},
+  plugin:    {label:'Plugins',           color:'#A8763E'},
+  skill:     {label:'Skills',            color:'#6A8A5E'},
+  'mcp-local':{label:'MCP · Lokal',      color:'#5E7B8A'},
+  'mcp-cloud':{label:'MCP · Cloud',      color:'#5B7DB1'},
+  hook:      {label:'Hooks',             color:'#8A6E9E'},
+  infra:     {label:'Infrastruktur',     color:'#6E6A63'},
+  service:   {label:'Dienste & APIs',    color:'#B08968'},
+  output:    {label:'Output & Domains',  color:'#BF5F6F'},
+  workflow:  {label:'n8n-Workflows',     color:'#EA4B71'},
+};
+
+/* Galaxie-Scheibe: Cluster als Spiralarme um den Kern, flach mit leichter Neigung */
+const CLUSTERS = {
+  core:      {pos:[0,0,0],      label:'Core · Mac & Claude',           r:10},
+  mcpcloud:  {pos:[64,8,17],    label:'MCP · Cloud-Connectoren',       r:16},
+  services:  {pos:[24,-6,53],   label:'Daten & KI-Dienste',            r:14},
+  automation:{pos:[-30,10,57],  label:'Automation · VPS & n8n',        r:14},
+  skills:    {pos:[-61,-4,11],  label:'Skills · Plugins · Hooks',      r:18},
+  studio:    {pos:[-45,8,-40],  label:'AI-Adoption-Studio · Showcase', r:13},
+  output:    {pos:[4,-8,-64],   label:'Deploy & Output',               r:16},
+  mcplocal:  {pos:[41,4,-28],   label:'MCP · Lokal',                   r:11},
+};
+
+/* id, label, cat, cluster, icon(simple-icons slug), size, detail */
+const NODES = [
+ // ---- CORE ----
+ {id:'claude-code',l:'Claude Code',cat:'core',cl:'core',icon:'claude',sz:2.4,d:'Zentrale Steuerzentrale im Terminal — Hub für alle Skills, Plugins, MCP-Server, Hooks und Workflows. Opus 4.8.'},
+ {id:'mac',l:'MacBook · Terminal',cat:'core',cl:'core',icon:'apple',sz:1.1,d:'Primäre Arbeitsumgebung — zsh, Claude Code CLI als Kommandozentrale für alles.'},
+ {id:'cowork',l:'Cowork (Desktop)',cat:'core',cl:'core',icon:'anthropic',sz:1,d:'Claude Desktop / Cowork als visuelle Ergänzung — teilt das Memory per Symlink mit dem Terminal.'},
+ {id:'chrome-ext',l:'Claude in Chrome',cat:'core',cl:'core',icon:'googlechrome',sz:1,d:'Chrome-Extension — Claude direkt im Browser, u.a. für Miro-Board-Befüllung.'},
+ {id:'memory',l:'Memory-System',cat:'core',cl:'core',sz:1,d:'Persistentes Datei-Memory (~/.claude/memory) — User-, Feedback-, Projekt- & Referenz-Wissen. Dream-Konsolidierung alle 24h.'},
+
+ // ---- SKILLS / PLUGINS / HOOKS ----
+ {id:'plugin-superpowers',l:'Superpowers',cat:'plugin',cl:'skills',icon:'anthropic',sz:1.25,d:'Offizielles Plugin v5.1.0 — Brainstorming, TDD, Debugging, Plan-Ausführung, Code-Review, Git-Worktrees, parallele Agenten.'},
+ {id:'plugin-vercel',l:'Vercel Plugin',cat:'plugin',cl:'skills',icon:'vercel',sz:1.25,d:'Offizielles Plugin v0.43.0 — Deploy, Env-Management, Next.js/AI-SDK/Storage-Guidance, Marketplace.'},
+ {id:'skill-bmad',l:'BMAD Method · 42 Skills',cat:'skill',cl:'skills',sz:1.3,d:'Projektlokale BMAD-Suite: 7 Agenten (PM, Architekt, Dev, UX…), PRD/Story-Workflows, Reviews, Sprint-Planning — 42 Skills.'},
+ {id:'skill-algorithmic-art',l:'algorithmic-art',cat:'skill',cl:'skills',icon:'p5dotjs',sz:.9,d:'Generative Kunst mit p5.js — Flow-Fields, Partikelsysteme, seeded Randomness.'},
+ {id:'skill-canvas-design',l:'canvas-design',cat:'skill',cl:'skills',sz:.9,d:'Poster & visuelle Kunst als PNG/PDF nach Design-Philosophie.'},
+ {id:'skill-deploy-studio',l:'deploy-ai-adoption-studio',cat:'skill',cl:'skills',sz:.9,d:'Deployt das AI-Adoption-Studio per git push + SSH-Build auf den Hostinger-VPS (myflowmotion.cloud).'},
+ {id:'skill-dream',l:'dream',cat:'skill',cl:'skills',sz:.9,d:'Memory-Konsolidierung: scannt Session-Transkripte nach Korrekturen & Entscheidungen — wie Schlaf fürs Gedächtnis.'},
+ {id:'skill-frontend-design',l:'frontend-design',cat:'skill',cl:'skills',sz:.9,d:'Distinktive Production-Frontends mit hoher Designqualität — keine generische AI-Ästhetik.'},
+ {id:'skill-linkedin-content',l:'linkedin-content',cat:'skill',cl:'skills',sz:.9,d:'LinkedIn-Posts mit Hook-Formeln, Formatierungsregeln und Engagement-Patterns.'},
+ {id:'skill-n8n-builder',l:'n8n-builder',cat:'skill',cl:'skills',icon:'n8n',sz:.9,d:'Baut, deployt, testet & versioniert n8n-Workflows per Sprache — 14 Pattern-Templates inkl. MCP-Server-Trigger.'},
+ {id:'skill-social-carousel',l:'social-media-carousel',cat:'skill',cl:'skills',sz:.9,d:'Multi-Slide-Carousels für LinkedIn/Instagram/X — Swipe-Psychologie & Layout-Regeln.'},
+ {id:'skill-theme-factory',l:'theme-factory',cat:'skill',cl:'skills',sz:.9,d:'Styling-Toolkit für Slides, Docs & Landingpages — 10 Preset-Themes.'},
+ {id:'vibe-carousel-skill',l:'Vibe-Carousel Skill',cat:'skill',cl:'skills',sz:1,d:'Eigener Skill für die 90-Tage-LinkedIn-Serie — Brand-System, Slide-Architektur, Python-Patterns.'},
+ {id:'hook-session-log',l:'session-log.py',cat:'hook',cl:'skills',icon:'python',sz:.85,d:'Hook bei PreCompact + SessionEnd — postet Session-Logs automatisch ans Notion Decision-Log (REST).'},
+ {id:'hook-stop-dream',l:'Stop-Hook · Dream',cat:'hook',cl:'skills',sz:.85,d:'Stop-Event-Hook — triggert alle 24h die Memory-Konsolidierung im Hintergrund.'},
+
+ // ---- MCP LOKAL ----
+ {id:'mcp-n8n-czlonkowski',l:'n8n-MCP',cat:'mcp-local',cl:'mcplocal',icon:'n8n',sz:1.1,d:'Lokaler MCP (global): 525-Node-Coverage, Workflow-Management, Validierung, Deployment — direkter Draht zur n8n-Instanz.'},
+ {id:'mcp-agentmail',l:'AgentMail MCP',cat:'mcp-local',cl:'mcplocal',sz:.9,d:'Lokaler MCP (global): programmatische Postfächer, Threads, Drafts & Mailversand für Agenten.'},
+ {id:'mcp-playwright',l:'Playwright',cat:'mcp-local',cl:'mcplocal',sz:.9,d:'Lokaler MCP: Browser-Automation & Testing.'},
+ {id:'mcp-freepik',l:'Freepik MCP',cat:'mcp-local',cl:'mcplocal',icon:'freepik',sz:.9,d:'Lokaler MCP: Freepik/Pikaso Asset- und Bild-Zugriff.'},
+ {id:'mcp-21st-magic',l:'21st Magic',cat:'mcp-local',cl:'mcplocal',sz:.9,d:'Lokaler MCP (Projekt-Scope): UI-Komponenten-Generierung via 21st.dev.'},
+ {id:'mcp-browser-tools',l:'browser-tools',cat:'mcp-local',cl:'mcplocal',sz:.9,d:'Lokaler MCP (Projekt-Scope): Browser-Inspektion, Logs & Debugging.'},
+
+ // ---- MCP CLOUD ----
+ {id:'mcp-notion',l:'Notion',cat:'mcp-cloud',cl:'mcpcloud',icon:'notion',sz:1.15,d:'claude.ai-Connector: Single Source of Truth — Projektmanagement, CRM, Architektur-DB, Command Center.'},
+ {id:'mcp-slack',l:'Slack',cat:'mcp-cloud',cl:'mcpcloud',icon:'slack',sz:1,d:'claude.ai-Connector: Nachrichten, Kanäle, Canvas.'},
+ {id:'mcp-supabase',l:'Supabase',cat:'mcp-cloud',cl:'mcpcloud',icon:'supabase',sz:1.15,d:'claude.ai-Connector: DB-Management, SQL, Migrationen, Edge Functions.'},
+ {id:'mcp-gmail',l:'Gmail',cat:'mcp-cloud',cl:'mcpcloud',icon:'gmail',sz:1,d:'claude.ai-Connector: Threads suchen, Drafts & Labels verwalten.'},
+ {id:'mcp-gcal',l:'Google Calendar',cat:'mcp-cloud',cl:'mcpcloud',icon:'googlecalendar',sz:1,d:'claude.ai-Connector: Events erstellen & verwalten, Zeitvorschläge.'},
+ {id:'mcp-gdrive',l:'Google Drive',cat:'mcp-cloud',cl:'mcpcloud',icon:'googledrive',sz:1,d:'claude.ai-Connector: Dateien suchen, lesen, erstellen.'},
+ {id:'mcp-canva',l:'Canva',cat:'mcp-cloud',cl:'mcpcloud',icon:'canva',sz:1,d:'claude.ai-Connector: Designs generieren, exportieren, Brand-Templates.'},
+ {id:'mcp-excalidraw',l:'Excalidraw',cat:'mcp-cloud',cl:'mcpcloud',icon:'excalidraw',sz:1,d:'claude.ai-Connector: Diagramme & Sketches erstellen und exportieren.'},
+ {id:'mcp-cloudinary',l:'Cloudinary',cat:'mcp-cloud',cl:'mcpcloud',icon:'cloudinary',sz:1,d:'claude.ai-Connector: Asset-Upload, Transformation, Media-Verwaltung.'},
+ {id:'mcp-zoom',l:'Zoom',cat:'mcp-cloud',cl:'mcpcloud',icon:'zoom',sz:1,d:'claude.ai-Connector: Meeting-Recordings durchsuchen & Assets abrufen.'},
+ {id:'mcp-n8n-cloud',l:'n8n (claude.ai)',cat:'mcp-cloud',cl:'mcpcloud',icon:'n8n',sz:1,d:'claude.ai-Connector: Workflows suchen, Details abrufen, ausführen.'},
+ {id:'mcp-airtable',l:'Airtable',cat:'mcp-cloud',cl:'mcpcloud',icon:'airtable',sz:1,d:'claude.ai-Connector: Basen & Datensätze.'},
+ {id:'mcp-pdf-viewer',l:'PDF Viewer',cat:'mcp-cloud',cl:'mcpcloud',sz:.9,d:'claude.ai-Connector: PDFs anzeigen, lesen, speichern.'},
+ {id:'mcp-linear',l:'Linear',cat:'mcp-cloud',cl:'mcpcloud',icon:'linear',sz:1.05,d:'claude.ai-Connector: Issues, Projekte, Milestones & Cycles — Dev-Steuerung fürs AI-Adoption-Studio.'},
+
+ // ---- AUTOMATION ----
+ {id:'vps',l:'VPS srv1405308',cat:'infra',cl:'automation',icon:'hostinger',sz:1.5,d:'Hostinger-VPS — Host für 6+1 Docker-Container, Deploy-Ziel für das AI-Adoption-Studio, Webhook-Bridge für Shell-Zugriff.'},
+ {id:'n8n',l:'n8n (self-hosted)',cat:'infra',cl:'automation',icon:'n8n',sz:1.5,d:'Self-hosted Automation-Engine auf dem VPS — 48 Workflows (35 aktiv): NEO-Suite, Generatoren, Studio-Agenten, CRM.'},
+ {id:'supabase-studio',l:'Supabase Studio',cat:'infra',cl:'automation',icon:'supabase',sz:1,d:'Supabase-Studio-Container auf dem VPS (Teil der 6+1 Docker-Container).'},
+ {id:'telegram',l:'Telegram Bot',cat:'service',cl:'automation',icon:'telegram',sz:1,d:'Benachrichtigungs-Kanal — Briefings, Lead-Alerts, Termin-Erinnerungen via n8n.'},
+ {id:'elevenlabs',l:'ElevenLabs',cat:'service',cl:'automation',icon:'elevenlabs',sz:1,d:'Conversational-AI-Plattform — Voice-Agent Ada (TTS+STT, WebRTC) fürs Studio-Intake.'},
+ {id:'voice-agent-ada',l:'Voice-Agent „Ada"',cat:'service',cl:'automation',icon:'elevenlabs',sz:1.1,d:'Geführtes Voice-Intake fürs AI-Adoption-Studio — KI-Deklaration, Consent, Discovery. ElevenLabs + n8n.'},
+
+ // ---- DATEN & KI-DIENSTE ----
+ {id:'notion',l:'Notion · SSOT',cat:'service',cl:'services',icon:'notion',sz:1.35,d:'Single Source of Truth — Projektmanagement, CRM (4 DBs), Command Center, Architektur-Bausteine, Kampagnen-System.'},
+ {id:'supabase-cloud',l:'Supabase Cloud',cat:'service',cl:'services',icon:'supabase',sz:1.3,d:'Cloud-Projekt (eu-central-1) — Datenbank + Storage fürs AI-Adoption-Studio, voice_sessions, Run-Results.'},
+ {id:'anthropic-api',l:'Anthropic API',cat:'service',cl:'services',icon:'anthropic',sz:1.1,d:'Claude API — Multi-Agent-Runs im AI-Adoption-Studio (Sonnet Conversation, Haiku Tool-Calls).'},
+ {id:'openai',l:'OpenAI · gpt-image',cat:'service',cl:'services',icon:'openai',sz:1.1,d:'gpt-image-Pipeline für Carousel-Backgrounds & Karikaturen; GPT-4V als Backup für Dokument-Parsing.'},
+ {id:'gemini',l:'Gemini API',cat:'service',cl:'services',icon:'googlegemini',sz:.95,d:'Google Gemini (Free Tier) — Content-Workflows in n8n.'},
+ {id:'agentmail',l:'AgentMail',cat:'service',cl:'services',icon:'maildotru',sz:.9,d:'Programmatische Agenten-Postfächer — Inbox-Infrastruktur für autonome Workflows.'},
+ {id:'freepik',l:'Freepik / Pikaso',cat:'service',cl:'services',icon:'freepik',sz:.9,d:'KI-Bilder via Pikaso — angebunden über aktiven n8n-Workflow (38 Nodes!).'},
+ {id:'out-notion-log',l:'Notion Decision-Log',cat:'output',cl:'services',icon:'notion',sz:.9,d:'Notion-Seite, an die der session-log-Hook automatisch jeden Session-Log schreibt.'},
+
+ // ---- DEPLOY & OUTPUT ----
+ {id:'github',l:'GitHub',cat:'infra',cl:'output',icon:'github',sz:1.2,d:'Code-Hosting — User alexheyers. Push-Quelle für Vercel-Deploys und VPS-Builds.'},
+ {id:'vercel',l:'Vercel',cat:'infra',cl:'output',icon:'vercel',sz:1.2,d:'Hosting & Deploy-Plattform — CLI installiert, Deploy-Ziel für Landingpages.'},
+ {id:'lovable',l:'Lovable',cat:'service',cl:'output',icon:'lovable',sz:1.05,d:'AI-App-Builder — AIVA-Landingpage gebaut; n8n-Workflow „Lovable Projekt-Generator" verbindet beide Welten.'},
+ // ---- AI-ADOPTION-STUDIO (eigener Cluster) ----
+ {id:'ai-adoption-studio',l:'AI-Adoption-Studio',cat:'output',cl:'studio',sz:1.6,d:'Bewerbungs-Portfolio-Showcase für Hospitality-SaaS — KI-Adoptions-Beratung als Produkt-Demo. Live auf myflowmotion.cloud.'},
+ {id:'studio-frontend',l:'Frontend · Next.js',cat:'output',cl:'studio',icon:'nextdotjs',sz:1.05,d:'Next.js-Frontend — Build-Story-Bildwelt, Three.js-Partikel-Headlines („Aus Worten wird Struktur"), Trevor-Noah-Voice.'},
+ {id:'studio-backend',l:'Backend · FastAPI',cat:'output',cl:'studio',icon:'fastapi',sz:1.05,d:'FastAPI-Backend — orchestriert Agent-Runs, REST-Schnittstelle, läuft als Docker-Container auf dem VPS.'},
+ {id:'studio-agents',l:'Multi-Agent-Engine',cat:'output',cl:'studio',icon:'anthropic',sz:1.1,d:'Multi-Agent-Report: Master + 5 Sub-Agenten (Use-Case, Compliance, Process-Auditor, ROI, Tool-Recommender) — Sonnet für Konversation, Haiku für Tool-Calls.'},
+ {id:'studio-prototype',l:'Design-Prototyp',cat:'output',cl:'studio',sz:.9,d:'Kanonische Datei ai-adoption-studio-masterpiece.hw2.html — Cinematic-Design, Partikel immer vorderste Ebene, Brand-Pink #E94B5D.'},
+ {id:'studio-miro',l:'Miro · Visual-Planning',cat:'service',cl:'studio',icon:'miro',sz:.95,d:'Visuelle Planungsoberfläche — Boards pro Modul (VC_K2–K6), Befüllung via Chrome-Extension. Notion bleibt SSOT.'},
+ {id:'linear',l:'Linear · Dev-SSOT',cat:'service',cl:'studio',icon:'linear',sz:1.1,d:'SSoT für die Dev-Umsetzung des AI-Adoption-Studios — Team ALE, Projekt + 5 Phasen-Milestones + 46 Issues. Steuerung via Skill /studio + Linear-CLI. Meldet Status nach oben an Notion (Layered SSoT, 08.06.2026).'},
+ {id:'carousel-pipeline',l:'Carousel-Pipeline',cat:'output',cl:'output',icon:'python',sz:1.05,d:'Python + gpt-image Build-Pipeline — 1080×1350 LinkedIn-Carousels, PDF + PNG-Previews.'},
+ {id:'linkedin',l:'LinkedIn · 90 Tage',cat:'output',cl:'output',icon:'linkedin',sz:1.3,d:'90-Tage-Kampagne „Learning in Public" — 26 Posts, 3 Tonalitäts-Modi, Carousels aus der Pipeline.'},
+ {id:'bootcamp',l:'Vibe Coding Bootcamp',cat:'service',cl:'output',sz:1.05,d:'Digitale Leute School — 6 Module, 26 Sessions, 636 Unterrichtseinheiten, 86 Tage. Der Input für alles.'},
+ {id:'dom-dbp',l:'deinebusinesspage.de',cat:'output',cl:'output',sz:.8,d:'Live seit 31.03. — 990/1490€, 8 Personas.'},
+ {id:'dom-mva',l:'meinvoiceagent.de',cat:'output',cl:'output',sz:.8,d:'Voice Agents DACH — 990/1990/2990€ + 199€/Monat.'},
+ {id:'dom-mfm',l:'myflowmotion.cloud',cat:'output',cl:'output',sz:.8,d:'Portfolio-Schaufenster — Host des AI-Adoption-Studios auf dem VPS.'},
+ 
+];
+
+const EDGES = [
+ // Core
+ ['mac','claude-code','Terminal'],['cowork','claude-code','Desktop'],['chrome-ext','claude-code','Browser'],
+ ['memory','claude-code','Persistenz'],['memory','cowork','Symlink'],['bootcamp','claude-code','Session-Input'],
+ // Plugins/Skills/Hooks → Hub
+ ['plugin-superpowers','claude-code','Plugin'],['plugin-vercel','claude-code','Plugin'],
+ ['skill-algorithmic-art','claude-code','Skill'],['skill-canvas-design','claude-code','Skill'],
+ ['skill-deploy-studio','claude-code','Skill'],['skill-dream','claude-code','Skill'],
+ ['skill-frontend-design','claude-code','Skill'],['skill-linkedin-content','claude-code','Skill'],
+ ['skill-n8n-builder','claude-code','Skill'],['skill-social-carousel','claude-code','Skill'],
+ ['skill-theme-factory','claude-code','Skill'],['skill-bmad','claude-code','42 Skills'],
+ ['vibe-carousel-skill','claude-code','Skill'],
+ ['hook-session-log','claude-code','Hook'],['hook-stop-dream','claude-code','Hook'],
+ ['hook-stop-dream','skill-dream','Trigger 24h'],['hook-session-log','out-notion-log','REST'],
+ // MCP lokal
+ ['mcp-n8n-czlonkowski','claude-code','MCP'],['mcp-agentmail','claude-code','MCP'],
+ ['mcp-playwright','claude-code','MCP'],['mcp-freepik','claude-code','MCP'],
+ ['mcp-21st-magic','claude-code','MCP'],['mcp-browser-tools','claude-code','MCP'],
+ ['mcp-n8n-czlonkowski','n8n','REST-API'],
+ // MCP cloud
+ ['mcp-notion','claude-code','MCP'],['mcp-slack','claude-code','MCP'],['mcp-supabase','claude-code','MCP'],
+ ['mcp-gmail','claude-code','MCP'],['mcp-gcal','claude-code','MCP'],['mcp-gdrive','claude-code','MCP'],
+ ['mcp-canva','claude-code','MCP'],['mcp-excalidraw','claude-code','MCP'],['mcp-cloudinary','claude-code','MCP'],
+ ['mcp-zoom','claude-code','MCP'],['mcp-n8n-cloud','claude-code','MCP'],['mcp-airtable','claude-code','MCP'],
+ ['mcp-pdf-viewer','claude-code','MCP'],['mcp-linear','claude-code','MCP'],
+ ['mcp-notion','notion','API'],['mcp-supabase','supabase-cloud','API'],['mcp-n8n-cloud','n8n','API'],
+ ['mcp-freepik','freepik','API'],['mcp-agentmail','agentmail','API'],['mcp-linear','linear','API'],
+ // Infra & Automation
+ ['claude-code','vps','SSH / Bridge'],['claude-code','n8n','Webhook-Bridge'],
+ ['vps','n8n','Docker'],['vps','supabase-studio','Docker'],
+ ['n8n','telegram','Bot-API'],['n8n','elevenlabs','Voice'],['n8n','freepik','Pikaso'],
+ ['n8n','gemini','Content'],['n8n','notion','API-Sync'],['n8n','lovable','Projekt-Generator'],
+ // Dienste
+ ['claude-code','notion','MCP'],['claude-code','supabase-cloud','MCP'],['claude-code','agentmail','MCP'],
+ ['claude-code','openai','API · Bilder'],['claude-code','anthropic-api','API'],
+ ['elevenlabs','supabase-cloud','voice_sessions'],['anthropic-api','supabase-cloud','Run-Results'],
+ // Deploy & Output
+ ['claude-code','github','git push'],['claude-code','vercel','Deploy CLI'],['github','vercel','CI/CD'],
+ ['vercel','dom-dbp','Hosting'],['vercel','dom-mva','Hosting'],
+ ['vps','dom-mfm','Hosting'],
+ ['claude-code','ai-adoption-studio','Build'],['ai-adoption-studio','vps','Deploy'],
+ ['ai-adoption-studio','dom-mfm','Live'],['ai-adoption-studio','voice-agent-ada','Intake'],
+ // Studio-Innenleben
+ ['studio-frontend','ai-adoption-studio','Next.js'],['studio-backend','ai-adoption-studio','FastAPI'],
+ ['studio-backend','supabase-cloud','DB + Storage'],['studio-backend','anthropic-api','Agent-Runs'],
+ ['studio-agents','ai-adoption-studio','Reports'],['studio-agents','n8n','Master + 5 Subs'],
+ ['studio-agents','anthropic-api','Sonnet/Haiku'],
+ ['studio-prototype','ai-adoption-studio','Design-Spec'],['claude-code','studio-prototype','Iteration'],
+ ['studio-miro','ai-adoption-studio','Planung'],['studio-miro','chrome-ext','Board-Befüllung'],
+ ['ai-adoption-studio','notion','PM-Kanban'],['studio-backend','vps','Docker'],
+ ['claude-code','linear','Linear-CLI'],['ai-adoption-studio','linear','Dev-SSOT'],['linear','notion','Status ↑'],
+ ['voice-agent-ada','elevenlabs','WebRTC'],['voice-agent-ada','n8n','Webhook'],
+ ['claude-code','carousel-pipeline','Python'],['vibe-carousel-skill','carousel-pipeline','Build-Spec'],
+ ['carousel-pipeline','openai','gpt-image'],['carousel-pipeline','linkedin','PDF/PNG'],
+];
+
+/* 48 n8n-Workflows — live von der Instanz (04.06.2026) · a=aktiv n=Nodes */
+const WORKFLOWS = [
+ {w:'VPS Bridge Remote Shell',a:1,n:3},{w:'NEO — Gmail Echtzeit → Analyse & Tasks',a:1,n:5},
+ {w:'📊 Tägliches Bizz-Briefing (08:00)',a:1,n:5},{w:'🎨 Cowork Image Generator',a:1,n:4},
+ {w:'NEO — Gmail Send Reply',a:1,n:3},{w:'🎨 KI Image Generator',a:1,n:8},
+ {w:'📱 Content Machine — Social Media Posts',a:0,n:13},{w:'Studio · Reservation-Triage',a:0,n:18},
+ {w:'NEO — Wöchentlicher Rückblick (So 20:00)',a:1,n:4},{w:'NEO — Google Drive Eingang Monitor',a:1,n:2},
+ {w:'NEO — GCal Push → Datenbank (Echtzeit)',a:1,n:4},{w:'NEO — GCal Sync → DB (alle 5 Min)',a:1,n:3},
+ {w:'NEO — Webhook Trigger → Telegram',a:1,n:3},{w:'NEO — Mobile Briefings',a:1,n:6},
+ {w:'Studio · Voice-Discovery',a:0,n:12},{w:'NEO — GDrive Neue Datei → Telegram',a:1,n:3},
+ {w:'📥 hallo@dbp.de → Lead Capture Bridge',a:0,n:3},{w:'🎯 Lead Capture → CRM + Telegram',a:1,n:6},
+ {w:'Cowork ImageGen',a:1,n:3},{w:'NEO — Wichtige Gmail-Mails → Telegram',a:1,n:4},
+ {w:'NEO — GCal Watch Registrierung (wö.)',a:1,n:4},{w:'Sub · Use-Case-Generator (VUFVE)',a:0,n:6},
+ {w:'Sub · Compliance-Checker (DSGVO/TSE)',a:0,n:6},{w:'Sub · Process-Auditor (15 Domains)',a:0,n:6},
+ {w:'Sub · ROI-Calculator (Cashflow)',a:0,n:6},{w:'🌅 CEO Morning Briefing',a:1,n:5},
+ {w:'Studio · Multi-Agent-Report (Master)',a:0,n:13},{w:'🎬 Master Video Generator (v1)',a:0,n:24},
+ {w:'🎬 Master Video Generator',a:1,n:24},{w:'[STRESSTEST] All-In-One Skill-Demo',a:1,n:21},
+ {w:'NEO — Gmail Sync → DB (alle 15 Min)',a:1,n:3},{w:'Studio · MCP-Bridge',a:1,n:9},
+ {w:'Cold Outreach Test',a:1,n:2},{w:'Studio · Document-Analyst',a:0,n:15},
+ {w:'Cold Mail SMTP Sender',a:1,n:2},{w:'NEO — Dashboard Live-Sync (WebSocket)',a:1,n:2},
+ {w:'⏰ Rechnung Überfällig Check (täglich)',a:1,n:5},{w:'NEO — Termin-Erinnerung (30 Min)',a:1,n:4},
+ {w:'🤖 Studio — Hospitality-Berater',a:1,n:8},{w:'🔄 Angebot Follow-up Reminder (3 Tage)',a:1,n:5},
+ {w:'_debug_webhook_test',a:1,n:2},{w:'🔐 NEO Master Credentials Übersicht',a:0,n:6},
+ {w:'NEO — Morgen-Briefing (täglich 7:30)',a:1,n:4},{w:'NEO — Freepik AI Generator',a:1,n:38},
+ {w:'NEO — Daily Insight Artikel (7+16 Uhr)',a:1,n:2},{w:'NEO — Termin → GCal Push',a:1,n:2},
+ {w:'NEO — Lovable Projekt-Generator',a:1,n:4},{w:'Sub · Tool-Recommender (Stack)',a:0,n:6},
+];
+
+/* ============================================================
+   SZENE
+============================================================ */
+const container = document.getElementById('scene');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#FAF9F5');
+scene.fog = new THREE.Fog('#FAF9F5', 300, 640);
+
+const camera = new THREE.PerspectiveCamera(46, innerWidth/innerHeight, .1, 600);
+camera.position.set(0, 92, 168);  // Blick leicht von oben auf die Galaxie-Scheibe
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+/* Environment für Glas-Reflexionen + Licht für Glanzpunkte */
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+const sun = new THREE.DirectionalLight('#FFF6EA', 2.4);
+sun.position.set(50, 80, 60);
+scene.add(sun, new THREE.AmbientLight('#FAF9F5', .5));
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = .09;
+controls.minDistance = 7; controls.maxDistance = 300;   // Mikro: einzelner Knoten formatfüllend · Makro: alles im Bild
+controls.zoomSpeed = 2.4;                               // Scroll-Zoom deutlich direkter
+controls.autoRotateSpeed = .5;
+const FIT_POS = new THREE.Vector3(0, 92, 168);         // Galaxie-Totale (leicht von oben)
+
+/* deterministic PRNG für organische Streuung */
+function mulberry(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rnd = mulberry(2026);
+
+/* ---------- Hilfen: Canvas-Texturen ---------- */
+function roundRect(x,y,w,h,r,ctx){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+function wrapText(ctx, text, x, y, maxW, lh, maxLines=2){
+  const words = text.split(' '); let line='', lines=[];
+  for(const w of words){
+    if(ctx.measureText(line+w).width > maxW && line){lines.push(line.trim()); line=w+' ';}
+    else line += w+' ';
+  }
+  lines.push(line.trim());
+  if(lines.length>maxLines){lines=lines.slice(0,maxLines); lines[maxLines-1]=lines[maxLines-1].replace(/\s*\S*$/,'…');}
+  lines.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));
+}
+
+/* Icon schwebt IN der Glas-Bubble — transparente Textur, nur das Icon */
+function iconTexture(node, iconImg){
+  const c = document.createElement('canvas'); c.width=c.height=512;
+  const x = c.getContext('2d');
+  const col = CAT[node.cat].color;
+  if(node.icon==='linkedin' && !iconImg){
+    x.fillStyle='#0A66C2'; roundRect(116,116,280,280,56,x); x.fill();
+    x.fillStyle='#fff'; x.font='700 185px Georgia'; x.textAlign='center'; x.textBaseline='middle';
+    x.fillText('in',256,268);
+  } else if(iconImg){
+    // weicher weißer Schein hinter dem Icon, damit es im Glas lesbar bleibt
+    const g=x.createRadialGradient(256,256,40,256,256,235);
+    g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(0,0,512,512);
+    x.drawImage(iconImg, 116, 116, 280, 280);
+  } else {
+    const g=x.createRadialGradient(256,256,40,256,256,235);
+    g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g; x.fillRect(0,0,512,512);
+    x.fillStyle=col; x.font='700 250px Georgia'; x.textAlign='center'; x.textBaseline='middle';
+    x.fillText(node.l.replace(/[^A-Za-zÄÖÜäöü0-9]/g,'').charAt(0).toUpperCase()||'·', 256, 276);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.anisotropy = 8; t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/* Label hängt unter der Bubble */
+function labelTexture(node){
+  const c = document.createElement('canvas'); c.width=760; c.height=190;
+  const x = c.getContext('2d');
+  x.fillStyle='#1F1E1D'; x.font='600 50px Georgia'; x.textAlign='center'; x.textBaseline='top';
+  wrapText(x, node.l, 380, 18, 700, 60);
+  x.fillStyle=CAT[node.cat].color;
+  x.fillRect(330, 158, 100, 7);
+  const t = new THREE.CanvasTexture(c);
+  t.anisotropy = 8; t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/* Seifenblasen-Material — Glas mit Klarlack, Irisierung & Kategorie-Tönung */
+function bubbleMat(hex, opts={}){
+  return new THREE.MeshPhysicalMaterial({
+    color: new THREE.Color(hex).lerp(new THREE.Color('#FFFFFF'), opts.solid? .25 : .52),
+    metalness: 0, roughness: opts.solid? .18 : .06,
+    transparent: true, opacity: opts.solid? .96 : .38,
+    clearcoat: 1, clearcoatRoughness: .07,
+    iridescence: opts.solid? .15 : .45, iridescenceIOR: 1.32,
+    envMapIntensity: 1.15,
+    depthWrite: false,
+  });
+}
+
+function dotTexture(color, ring='#FFFFFF'){
+  const c=document.createElement('canvas'); c.width=c.height=128;
+  const x=c.getContext('2d');
+  x.save(); x.shadowColor='rgba(31,30,29,.25)'; x.shadowBlur=10;
+  x.fillStyle=ring; x.beginPath(); x.arc(64,64,46,0,7); x.fill(); x.restore();
+  x.fillStyle=color; x.beginPath(); x.arc(64,64,34,0,7); x.fill();
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+
+function glowTexture(color){
+  const c=document.createElement('canvas'); c.width=c.height=256;
+  const x=c.getContext('2d');
+  const g=x.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0, color); g.addColorStop(1,'rgba(217,119,87,0)');
+  x.fillStyle=g; x.fillRect(0,0,256,256);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace; return t;
+}
+
+function clusterLabelSprite(text){
+  const c=document.createElement('canvas'); c.width=1400; c.height=170;
+  const x=c.getContext('2d');
+  x.font='italic 500 78px Georgia'; x.textAlign='center'; x.textBaseline='middle';
+  x.fillStyle='rgba(110,106,99,.85)';
+  x.fillText(text, 700, 78);
+  // feine Linie darunter
+  x.strokeStyle='rgba(191,95,63,.5)'; x.lineWidth=3;
+  const w=x.measureText(text).width;
+  x.beginPath(); x.moveTo(700-w/2,140); x.lineTo(700+w/2,140); x.stroke();
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.SRGBColorSpace;
+  const m=new THREE.SpriteMaterial({map:t, transparent:true, depthWrite:false, opacity:.9});
+  const s=new THREE.Sprite(m); s.scale.set(26,3.15,1); return s;
+}
+
+/* ---------- Positionierung: Fibonacci-Kugel pro Cluster ---------- */
+const byCluster = {};
+NODES.forEach(n=>{(byCluster[n.cl]??=[]).push(n)});
+const GOLDEN = Math.PI*(3-Math.sqrt(5));
+for(const [cl, list] of Object.entries(byCluster)){
+  const C = CLUSTERS[cl];
+  list.forEach((n,i)=>{
+    if(n.id==='claude-code'){ n.pos=new THREE.Vector3(0,0,0); return; }
+    if(cl==='core'){
+      const a = (i/list.length)*Math.PI*2 + .6;
+      n.pos = new THREE.Vector3(Math.cos(a)*10.5, Math.sin(a*1.7)*4.5, Math.sin(a)*10.5);
+      return;
+    }
+    const k = list.length;
+    const y = 1-(i/(k-1||1))*2;
+    const rad = Math.sqrt(Math.max(0,1-y*y));
+    const th = GOLDEN*i;
+    const jit = ()=> (rnd()-.5)*C.r*.28;
+    // flachgedrückte Sternhaufen — Galaxie-Scheibe statt Kugel-Knäuel
+    n.pos = new THREE.Vector3(
+      C.pos[0] + Math.cos(th)*rad*C.r*1.08 + jit(),
+      C.pos[1] + y*C.r*.42 + jit()*.4,
+      C.pos[2] + Math.sin(th)*rad*C.r*1.08 + jit());
+  });
+}
+
+/* ---------- Nodes als 3D-Glas-Bubbles ---------- */
+const sphereGeo = new THREE.SphereGeometry(1, 48, 32);
+const nodeMap = {}, nodeObjs = [], nodeMeshes = [];
+const ICON_CDN = s => `https://cdn.simpleicons.org/${s}`;
+
+NODES.forEach((n,i)=>{
+  const grp = new THREE.Group();
+  grp.position.copy(n.pos);
+  const r = 3.7*n.sz;
+
+  // Glaskugel
+  const mat = bubbleMat(CAT[n.cat].color);
+  const sph = new THREE.Mesh(sphereGeo, mat);
+  sph.scale.setScalar(r);
+  sph.renderOrder = 4;
+  sph.userData = {node:n};
+  grp.add(sph);
+
+  // Icon schwebt in der Kugel (Billboard)
+  const iMat = new THREE.SpriteMaterial({map:iconTexture(n,null), transparent:true, depthWrite:false});
+  const ico = new THREE.Sprite(iMat);
+  ico.scale.setScalar(r*1.22);
+  ico.renderOrder = 3;
+  grp.add(ico);
+
+  // Label unter der Kugel
+  const lMat = new THREE.SpriteMaterial({map:labelTexture(n), transparent:true, depthWrite:false});
+  const lbl = new THREE.Sprite(lMat);
+  lbl.scale.set(r*2.45, r*2.45*(190/760), 1);
+  lbl.position.y = -(r + 1.6);
+  lbl.renderOrder = 3;
+  grp.add(lbl);
+
+  grp.userData = {node:n, reveal:400+i*22};
+  grp.scale.setScalar(.001);
+  scene.add(grp);
+  nodeMap[n.id]=grp;
+  nodeObjs.push({grp, sph, mat, iMat, lMat, node:n});
+  nodeMeshes.push(sph);
+
+  // Icon nachladen → Textur tauschen (Fallback-Kette: simple-icons → LobeHub color → LobeHub mono)
+  if(n.icon && n.icon!=='linkedin'){
+    const candidates = [
+      ICON_CDN(n.icon),
+      `https://unpkg.com/@lobehub/icons-static-svg/icons/${n.icon}-color.svg`,
+      `https://unpkg.com/@lobehub/icons-static-svg/icons/${n.icon}.svg`,
+    ];
+    (async ()=>{
+      for(const u of candidates){
+        try{
+          const r2 = await fetch(u); if(!r2.ok) continue;
+          let svg = await r2.text();
+          svg = svg.replace('<svg ', '<svg width="512" height="512" ')
+                   .replaceAll('currentColor', '#1F1E1D');
+          const url = URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+          await new Promise((res,rej)=>{
+            const img = new Image();
+            img.onload = ()=>{ iMat.map = iconTexture(n,img); iMat.needsUpdate=true; URL.revokeObjectURL(url); res(); };
+            img.onerror = rej; img.src = url;
+          });
+          return;
+        }catch(e){}
+      }
+    })();
+  }
+});
+
+/* ---------- Cluster-Halos + Labels ---------- */
+const haloTex = glowTexture('rgba(217,119,87,.10)');
+for(const [cl,C] of Object.entries(CLUSTERS)){
+  if(cl!=='core'){
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex, transparent:true, opacity:.7, depthWrite:false}));
+    halo.position.set(...C.pos); halo.scale.set(C.r*5.2,C.r*5.2,1); halo.renderOrder=0;
+    scene.add(halo);
+  }
+  const lbl = clusterLabelSprite(C.label);
+  lbl.position.set(C.pos[0], C.pos[1] + (cl==='core'? 16 : CLUSTERS[cl].r+8.5), C.pos[2]);
+  lbl.renderOrder=1;
+  scene.add(lbl);
+}
+
+/* ---------- Kanten als Kurven ---------- */
+const edgeObjs = [];
+EDGES.forEach(([a,b,via])=>{
+  const A = nodeMap[a], B = nodeMap[b];
+  if(!A||!B) return;
+  const p1 = A.position, p2 = B.position;
+  const mid = p1.clone().add(p2).multiplyScalar(.5);
+  const ctrl = mid.clone().multiplyScalar(.74); // sanft Richtung Zentrum gebogen
+  ctrl.y += p1.distanceTo(p2)*.06;
+  const curve = new THREE.QuadraticBezierCurve3(p1.clone(), ctrl, p2.clone());
+  const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(36));
+  const mat = new THREE.LineBasicMaterial({color:'#ABA69A', transparent:true, opacity:.14});
+  const line = new THREE.Line(geo, mat);
+  line.renderOrder = 1;
+  scene.add(line);
+  edgeObjs.push({line, mat, curve, a, b, via});
+});
+
+/* ---------- Daten-Pulse entlang der Kanten ---------- */
+const pulseTex = dotTexture('#D97757');
+const pulses = [];
+for(let i=0;i<64;i++){
+  const m = new THREE.SpriteMaterial({map:pulseTex, transparent:true, opacity:.95, depthWrite:false});
+  const s = new THREE.Sprite(m);
+  s.scale.set(1.05,1.05,1); s.renderOrder=3;
+  scene.add(s);
+  pulses.push({s, e:Math.floor(rnd()*edgeObjs.length), t:rnd(), v:.10+rnd()*.22});
+}
+
+/* ---------- n8n-Satelliten: 48 Workflows ---------- */
+const satGroup = new THREE.Group();
+satGroup.position.copy(nodeMap['n8n'].position);
+scene.add(satGroup);
+const satMatA = bubbleMat('#D97757', {solid:true});
+const satMatI = bubbleMat('#C9C4B8', {solid:true});
+const satMeshes = [];
+WORKFLOWS.forEach((wf,i)=>{
+  const s = new THREE.Mesh(sphereGeo, wf.a?satMatA:satMatI);
+  const y = 1-(i/(WORKFLOWS.length-1))*2;
+  const rad = Math.sqrt(1-y*y);
+  const th = GOLDEN*i*1.8;
+  const R = 5.2 + (i%3)*1.7;
+  s.position.set(Math.cos(th)*rad*R, y*R*.8, Math.sin(th)*rad*R);
+  s.scale.setScalar(.34 + wf.n/75);
+  s.userData = {wf};
+  s.renderOrder=3;
+  satGroup.add(s); satMeshes.push(s);
+});
+// dezente Orbital-Ringe
+[5.2,6.9,8.6].forEach((R,k)=>{
+  const pts=[]; for(let i=0;i<=72;i++){const a=i/72*Math.PI*2; pts.push(new THREE.Vector3(Math.cos(a)*R,0,Math.sin(a)*R))}
+  const g=new THREE.BufferGeometry().setFromPoints(pts);
+  const ring=new THREE.Line(g,new THREE.LineBasicMaterial({color:'#BF5F3F',transparent:true,opacity:.13}));
+  ring.rotation.x = .5+k*.42; ring.rotation.z = k*.6;
+  satGroup.add(ring);
+});
+
+/* ---------- Papier-Staub ---------- */
+{
+  const N=520, pos=new Float32Array(N*3);
+  for(let i=0;i<N;i++){
+    const v=new THREE.Vector3(rnd()-.5,rnd()-.5,rnd()-.5).normalize().multiplyScalar(70+rnd()*130);
+    pos.set([v.x,v.y,v.z],i*3);
+  }
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:'#D8D3C6',size:.9,transparent:true,opacity:.65})));
+}
+
+/* ============================================================
+   INTERAKTION
+============================================================ */
+const ray = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-2,-2);
+const tip = document.getElementById('tip');
+let hovered=null, selected=null;
+const camTween = {active:false, pos:new THREE.Vector3(), look:new THREE.Vector3()};
+
+addEventListener('pointermove', e=>{
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  tip.style.left=(e.clientX+18)+'px'; tip.style.top=(e.clientY+14)+'px';
+});
+
+function pickList(){
+  return [
+    ...nodeMeshes.filter(m=>m.parent.visible),
+    ...(satGroup.visible? satMeshes.filter(m=>m.visible) : []),
+  ];
+}
+renderer.domElement.addEventListener('click', e=>{
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickList(), false)[0]?.object;
+  if(hit){
+    if(hit.userData.node) selectNode(hit.userData.node);
+    else if(hit.userData.wf) selectWorkflow(hit.userData.wf);
+  } else deselect();
+});
+
+const panel=document.getElementById('panel'), panelBody=document.getElementById('panel-body');
+document.getElementById('panel-close').onclick = deselect;
+
+function selectNode(n){
+  selected = n.id;
+  const col = CAT[n.cat].color;
+  const cons = EDGES.filter(([a,b])=>a===n.id||b===n.id).map(([a,b,via])=>{
+    const otherId = a===n.id? b : a;
+    const other = NODES.find(x=>x.id===otherId);
+    return other? {id:otherId, name:other.l, via, dir:a===n.id?'→':'←'} : null;
+  }).filter(Boolean);
+  panelBody.innerHTML = `
+    <span class="p-cat" style="background:${col}">${CAT[n.cat].label}</span>
+    <h2>${n.l}</h2>
+    <p class="p-detail">${n.d}</p>
+    <div class="p-sec">Verbindungen · ${cons.length}</div>
+    ${cons.map(c=>`<div class="con" data-id="${c.id}">
+       <span class="c-arrow">${c.dir}</span><span class="c-name">${c.name}</span>
+       <span class="c-via">${c.via||''}</span></div>`).join('')}
+    ${n.id==='n8n' ? `<div class="p-sec" style="margin-top:24px">Satelliten</div>
+      <div class="wf-meta"><b>48 Workflows</b> umkreisen diesen Knoten —<br><b>35 aktiv</b> (terracotta) · 13 pausiert (grau).<br>Größe = Node-Anzahl. Hover für Namen.</div>`:''}
+  `;
+  panelBody.querySelectorAll('.con').forEach(el=>{
+    el.onclick = ()=>{ const t=NODES.find(x=>x.id===el.dataset.id); if(t) selectNode(t); flyTo(nodeMap[t.id].position); };
+  });
+  panel.classList.add('open');
+  flyTo(nodeMap[n.id].position);
+  updateHighlight();
+}
+
+function selectWorkflow(wf){
+  selected='n8n';
+  panelBody.innerHTML = `
+    <span class="p-cat" style="background:${CAT.workflow.color}">n8n-Workflow</span>
+    <h2>${wf.w}</h2>
+    <p class="p-detail">Workflow auf der self-hosted n8n-Instanz (VPS srv1405308).</p>
+    <div class="p-sec">Status</div>
+    <div class="wf-meta">
+      Status: <b>${wf.a?'● aktiv':'○ inaktiv'}</b><br>
+      Nodes: <b>${wf.n}</b><br>
+      Host: <b>n8n · Docker auf VPS srv1405308</b>
+    </div>`;
+  panel.classList.add('open');
+  updateHighlight();
+}
+
+function deselect(){ selected=null; panel.classList.remove('open'); updateHighlight(); }
+
+function flyTo(target){
+  const dir = camera.position.clone().sub(controls.target).normalize();
+  camTween.pos.copy(target.clone().add(dir.multiplyScalar(34)));
+  camTween.look.copy(target);
+  camTween.active = true;
+}
+controls.addEventListener('start', ()=>{ camTween.active=false; });
+
+function updateHighlight(){
+  edgeObjs.forEach(e=>{
+    const touch = selected && (e.a===selected||e.b===selected);
+    e.mat.opacity = selected ? (touch? .65 : .04) : .14;
+    e.mat.color.set(touch? '#BF5F3F' : '#ABA69A');
+  });
+  nodeObjs.forEach(o=>{
+    const id = o.node.id;
+    const connected = !selected || id===selected ||
+      EDGES.some(([a,b])=> (a===selected&&b===id)||(b===selected&&a===id));
+    o.mat.opacity  = connected? .38 : .06;
+    o.iMat.opacity = connected? 1   : .12;
+    o.lblBase      = connected? 1   : .12;  // finale Label-Opacity = lblBase × Distanz-Fade (im Loop)
+  });
+}
+
+/* ---------- Legende & Filter ---------- */
+const catOff = new Set();
+const legend = document.getElementById('legend');
+const counts = {};
+NODES.forEach(n=>counts[n.cat]=(counts[n.cat]||0)+1);
+counts['workflow']=WORKFLOWS.length;
+for(const [k,c] of Object.entries(CAT)){
+  if(!counts[k]) continue;
+  const el=document.createElement('div'); el.className='chip';
+  el.innerHTML=`<span class="dot" style="background:${c.color}"></span>${c.label} <span class="n">${counts[k]}</span>`;
+  el.onclick=()=>{
+    catOff.has(k)? catOff.delete(k) : catOff.add(k);
+    el.classList.toggle('off');
+    applyFilter();
+  };
+  legend.appendChild(el);
+}
+const hint=document.createElement('div'); hint.id='legend-hint';
+hint.textContent='Klick auf Kategorie = ein/ausblenden · Klick auf Knoten = Details · Ziehen = Drehen · Scrollen = Zoom';
+legend.appendChild(hint);
+
+function applyFilter(){
+  nodeObjs.forEach(o=>{ o.grp.visible = !catOff.has(o.node.cat); });
+  satMeshes.forEach(m=>{ m.visible = !catOff.has('workflow'); });
+  edgeObjs.forEach(e=>{
+    e.line.visible = nodeMap[e.a].visible && nodeMap[e.b].visible;
+  });
+}
+
+/* ---------- Stufen-Zoom: +/− Buttons & Tasten ---------- */
+let zoomTarget = null;
+function zoomStep(f){
+  const d = camera.position.distanceTo(controls.target);
+  zoomTarget = THREE.MathUtils.clamp(d*f, controls.minDistance+1, controls.maxDistance);
+  camTween.active = false;
+}
+document.getElementById('z-in').onclick  = ()=>zoomStep(.6);
+document.getElementById('z-out').onclick = ()=>zoomStep(1.65);
+document.getElementById('z-fit').onclick = ()=>{
+  deselect(); zoomTarget=null;
+  camTween.pos.copy(FIT_POS); camTween.look.set(0,0,0); camTween.active=true;
+};
+addEventListener('keydown', e=>{
+  if(e.key==='+'||e.key==='=') zoomStep(.6);
+  else if(e.key==='-'||e.key==='_') zoomStep(1.65);
+  else if(e.key==='0') document.getElementById('z-fit').click();
+});
+controls.addEventListener('start', ()=>{ zoomTarget=null; });
+
+/* ---------- Buttons & Stats ---------- */
+const btnRot=document.getElementById('btn-rotate');
+btnRot.onclick=()=>{ controls.autoRotate=!controls.autoRotate; btnRot.classList.toggle('on'); };
+document.getElementById('btn-reset').onclick=()=>{
+  camTween.pos.copy(FIT_POS); camTween.look.set(0,0,0); camTween.active=true; deselect();
+};
+document.getElementById('stats').innerHTML =
+  `<b>${NODES.length + WORKFLOWS.length} Knoten</b> · <b>${EDGES.length} Verbindungen</b> · <b>48 n8n-Workflows</b> (35 aktiv)<br>`+
+  `Inventarisiert von Claude — 3 parallele Scan-Agenten + n8n-API live.`;
+
+/* ============================================================
+   RENDER-LOOP
+============================================================ */
+const clock = new THREE.Clock();
+let elapsed=0;
+const easeOut = t=>1-Math.pow(1-t,3);
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), .05);
+  elapsed += dt*1000;
+
+  // Intro: Bubbles poppen gestaffelt auf · Labels faden mit Distanz aus (Makro = aufgeräumt)
+  nodeObjs.forEach(o=>{
+    const u = o.grp.userData;
+    const t = Math.max(0, Math.min(1, (elapsed-u.reveal)/650));
+    const hoverBoost = (hovered===o.sph)? 1.13 : 1;
+    o.grp.scale.setScalar(Math.max(.001, easeOut(t)*hoverBoost));
+    const dCam = camera.position.distanceTo(o.grp.position);
+    let fade = 1 - THREE.MathUtils.clamp((dCam-75)/65, 0, 1);   // <75 voll · >140 weg
+    if(o.node.id==='claude-code' || hovered===o.sph) fade = 1;  // Hub & Hover immer lesbar
+    o.lMat.opacity = (o.lblBase ?? 1) * fade;
+  });
+
+  // Satelliten-Orbit
+  satGroup.rotation.y += dt*.12;
+  satGroup.rotation.x = Math.sin(elapsed*.00012)*.1;
+
+  // Pulse
+  pulses.forEach(p=>{
+    p.t += dt*p.v;
+    if(p.t>1){ p.t=0; p.e=Math.floor(Math.random()*edgeObjs.length); }
+    const e = edgeObjs[p.e];
+    p.s.visible = e.line.visible && e.mat.opacity>.1;
+    if(p.s.visible) p.s.position.copy(e.curve.getPoint(p.t));
+    p.s.material.opacity = Math.sin(p.t*Math.PI)*.9;
+  });
+
+  // Stufen-Zoom sanft animieren
+  if(zoomTarget!==null){
+    const dir = camera.position.clone().sub(controls.target);
+    const d = dir.length();
+    const nd = THREE.MathUtils.lerp(d, zoomTarget, .14);
+    camera.position.copy(controls.target).add(dir.normalize().multiplyScalar(nd));
+    if(Math.abs(nd-zoomTarget)<.3) zoomTarget=null;
+  }
+
+  // Kamera-Tween
+  if(camTween.active){
+    camera.position.lerp(camTween.pos, .055);
+    controls.target.lerp(camTween.look, .07);
+    if(camera.position.distanceTo(camTween.pos)<.4) camTween.active=false;
+  }
+
+  // Hover-Raycast
+  ray.setFromCamera(mouse, camera);
+  const hits = ray.intersectObjects(pickList(), false);
+  const h = hits[0]?.object || null;
+  if(h!==hovered){
+    hovered=h;
+    document.body.style.cursor = h? 'pointer':'';
+    if(h){
+      const d=h.userData;
+      tip.querySelector('.t-name').textContent = d.node? d.node.l : d.wf.w;
+      tip.querySelector('.t-cat').textContent = d.node
+        ? CAT[d.node.cat].label
+        : `n8n-Workflow · ${d.wf.a?'aktiv':'inaktiv'} · ${d.wf.n} Nodes`;
+      tip.style.display='block';
+    } else tip.style.display='none';
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+addEventListener('resize', ()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+updateHighlight();
+animate();
+setTimeout(()=>document.getElementById('loading').classList.add('done'), 900);
+</script>
+</body>
+</html>

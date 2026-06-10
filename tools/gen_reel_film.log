@@ -1,0 +1,27 @@
+[18:31:11] S1 Versuch 1: 400 — warte 20s
+[18:31:32] S1 Versuch 2: 400 — warte 20s
+[18:31:52] S1 Versuch 3: 400 — warte 20s
+[18:32:13] S1 Versuch 4: 400 — warte 20s
+[18:32:33] S1 Versuch 5: 400 — warte 20s
+[18:43:09] S1 angelegt: video_6a29941cdac4819191e0be286ec2f2b505063061be2069b3
+[18:43:10] S5 angelegt: video_6a29941e3bb481919bf3b710876756fa0fa9d90dce5a2741
+[18:43:36] S1: in_progress 52
+[18:43:37] S5: in_progress 0
+[18:43:52] S1: in_progress 0
+[18:43:53] S5: in_progress 0
+[18:44:08] S1: in_progress 0
+[18:44:09] S5: in_progress 0
+[18:44:24] S1: in_progress 99
+[18:44:25] S5: in_progress 0
+[18:44:40] S1: failed 99
+[18:46:17] S1 neu angelegt: video_6a2994d95e8c819095dce900d068cbc2054191382515e11e
+[18:46:33] S5: failed 0
+[18:46:33] S5 FAILED: {'code': 'moderation_blocked', 'message': 'Your request was blocked by our moderation system.'} — Szene wird übersprungen
+[18:46:33] S1: in_progress 0
+[18:46:49] S1: in_progress 0
+[18:47:04] S1: in_progress 0
+[18:47:20] S1: in_progress 0
+[18:47:36] S1: in_progress 99
+[18:47:51] S1: completed 100
+[18:47:53] S1 geladen (3149KB)
+[18:47:57] FERTIG: /Users/alexanderheyers/Documents/Claude/Projects/Vibe Coding Bootcamp/myflowmotion-lusion/assets/reel.mp4 (1503KB, 25.200000s)

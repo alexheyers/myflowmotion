@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Adoption Studio — Alex Heyers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700;1,900&family=Bricolage+Grotesque:opsz,wght@12..48,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   AI-ADOPTION STUDIO · Immersive Partikel-Edition
+   Chaos → Botschaft → Pipeline → Mensch. three.js, kein Build.
+   Brand Navy/Magenta/Teal/Amber/Cream · Amber 1×.
+   ============================================================ */
+:root{--navy:#0E2244;--navy-deep:#06101f;--magenta:#E94B5D;--teal:#1AA591;--amber:#F2A645;--cream:#FBF6EA;--slate:#8e98ad;--ease:cubic-bezier(.16,1,.3,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{overflow-x:clip}
+body{background:var(--navy-deep);color:var(--cream);font-family:'Bricolage Grotesque',sans-serif;cursor:none}
+@media(pointer:coarse){body{cursor:auto}}
+::selection{background:var(--magenta);color:#fff}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+/* ===== Cinematic Backdrops — HINTER dem Canvas (z-index:-1) ===== */
+#scene-bg{position:fixed;inset:0;z-index:-2;overflow:hidden;background:radial-gradient(ellipse 120% 90% at 50% 45%,#0E2244 0%,#091a33 55%,#06101f 100%)}
+#scene-bg .layer{position:absolute;inset:-6%;background-size:cover;background-position:center;opacity:0;filter:brightness(.34) saturate(.8);will-change:transform,opacity;transition:opacity .4s linear}
+#scene-bg .layer::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,transparent 0%,rgba(6,16,31,.3) 70%,rgba(6,16,31,.55) 100%);mix-blend-mode:multiply}
+#bg-hero{background-image:url('studio-assets/studio-bg-hero.jpg');animation:kb1 52s var(--ease) infinite alternate}
+#bg-data{background-image:url('studio-assets/studio-bg-data.jpg');animation:kb2 58s var(--ease) infinite alternate}
+#bg-craft{background-image:url('studio-assets/studio-bg-craft.jpg');animation:kb3 46s var(--ease) infinite alternate}
+@keyframes kb1{0%{transform:scale(1.04) translate(0,0)}100%{transform:scale(1.14) translate(-2%,-2%)}}
+@keyframes kb2{0%{transform:scale(1.12) translate(1%,-1%)}100%{transform:scale(1.02) translate(-1%,2%)}}
+@keyframes kb3{0%{transform:scale(1.02) translate(-1%,1%)}100%{transform:scale(1.13) translate(2%,-2%)}}
+@media(prefers-reduced-motion:reduce){#scene-bg .layer{animation:none!important}}
+/* ===== Vignette — ueber Canvas, unter Overlays ===== */
+.vignette{position:fixed;inset:0;z-index:20;pointer-events:none;mix-blend-mode:multiply;background:radial-gradient(ellipse 78% 78% at 50% 50%,transparent 0%,transparent 42%,rgba(6,16,31,.55) 88%,rgba(6,16,31,.85) 100%)}
+/* ===== FOTO-STORY-MOMENTE — cinematische Panels HINTER Overlays, UEBER Canvas.
+   Dunkler Verlauf + Grain, damit Partikel lesbar bleiben. z-index:2. ===== */
+.story{position:absolute;left:0;right:0;height:118vh;height:118svh;height:118dvh;z-index:-1;pointer-events:none;overflow:hidden;opacity:0;will-change:opacity}
+.story .ph{position:absolute;inset:-9% -4%;background-size:cover;background-position:center;filter:brightness(.32) saturate(.8) contrast(1.04);will-change:transform;transform:scale(1.08)}
+.story .scap{display:none!important}
+#st-clarity{display:none!important}
+.story .grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,31,.92) 0%,rgba(6,16,31,.34) 26%,rgba(6,16,31,.30) 62%,rgba(6,16,31,.95) 100%),radial-gradient(ellipse 90% 70% at 50% 48%,transparent 0%,rgba(6,16,31,.5) 100%)}
+.story .grain{position:absolute;inset:0;opacity:.10;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:200px 200px}
+.story .scap{position:absolute;left:6vw;bottom:16vh;bottom:16svh;bottom:16dvh;max-width:560px}
+.story .scap .k{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--teal);margin-bottom:.7rem;display:block}
+.story .scap .h{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.55rem,7.2vw,2.4rem);line-height:1.04;letter-spacing:-.01em;overflow-wrap:anywhere;text-shadow:0 6px 34px rgba(6,16,31,.95)}
+@media(min-width:1024px){.story .scap .h{font-size:clamp(2.4rem,4.4vw,3rem)}}
+.story .scap .h em{font-style:italic;color:var(--magenta)}
+.story .scap .d{margin-top:.7rem;font-weight:300;color:#dfe4ee;font-size:clamp(.92rem,1.5vw,1.06rem);line-height:1.55;max-width:480px;text-shadow:0 2px 22px rgba(6,16,31,.95)}
+.story.right .scap{left:auto;right:6vw;text-align:right}
+.story.right .scap .d{margin-left:auto}
+@media(max-width:900px){.story .scap{left:6vw;right:6vw;bottom:14vh;max-width:none}.story.right .scap{right:6vw;text-align:left}}
+@media(prefers-reduced-motion:reduce){.story .ph{transform:scale(1.05)!important}}
+.spacer-a{height:620vh;position:relative;z-index:1;pointer-events:none}
+.spacer-b{height:620vh;position:relative;z-index:1;pointer-events:none}
+.spacer-mid{height:240vh;position:relative;z-index:1;pointer-events:none}
+
+/* ===== ERGEBNIS-SZENE #result — Scrollytelling, erbt Idee vom #agents-Layout ===== */
+.result{position:relative;z-index:2;padding:30vh 6vw 16vh;padding:30svh 6vw 16svh;padding:30dvh 6vw 16dvh}
+.result-inner{display:grid;grid-template-columns:1.05fr .95fr;gap:5vw;max-width:1280px;margin:0 auto;align-items:start}
+.result-left{display:flex;flex-direction:column;gap:14vh;padding:4vh 0 28vh}
+.result-right{position:sticky;top:30vh;top:30svh;top:30dvh;align-self:start}
+.result-right .rlabel{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--magenta);margin-bottom:1.3rem}
+.result-right h3{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.9rem,3.6vw,3rem);line-height:1.03;margin:.2rem 0 .9rem;overflow-wrap:anywhere;text-shadow:0 4px 30px rgba(6,16,31,.85)}
+.result-right h3 em{font-style:italic;color:var(--magenta)}
+.result-right p{font-size:1.1rem;font-weight:300;color:#e9edf3;line-height:1.6;max-width:430px;text-shadow:0 2px 22px rgba(6,16,31,.95)}
+.rcard{position:relative;background:var(--cream);color:var(--navy);border-radius:14px;padding:1.5rem 1.7rem;box-shadow:0 18px 46px rgba(0,0,0,.45);max-width:380px;opacity:.4;transform:scale(.9) translateY(14px);transition:transform .55s var(--ease),opacity .55s var(--ease),box-shadow .55s}
+.rcard.on{opacity:1;transform:scale(1.02) translateY(0);box-shadow:0 34px 80px rgba(0,0,0,.55)}
+.rcard:nth-child(even){margin-left:auto}
+.rcard .rk{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:.5rem}
+.rcard h4{font-family:'Playfair Display',serif;font-weight:800;font-size:1.35rem;line-height:1.06;margin-bottom:.5rem}
+.rcard p{font-size:.96rem;line-height:1.55;color:#33405a}
+.rcard .fmt{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;margin-top:.8rem;display:inline-block;padding:.28rem .65rem;border-radius:20px;background:rgba(26,165,145,.16);color:#0E7A6A}
+
+/* ===== 8-AGENTEN Scrollytelling (Banner oben hält, links Beschreibung, rechts Sticky-Notes) ===== */
+.agents{position:relative;z-index:2;padding:38vh 6vw 14vh;padding:38svh 6vw 14svh;padding:38dvh 6vw 14dvh}
+.agents-inner{display:grid;grid-template-columns:.95fr 1.05fr;gap:5vw;max-width:1280px;margin:0 auto;align-items:start}
+@media(max-width:900px){.agents-inner{grid-template-columns:1fr;gap:2vh}}
+.agents-left{position:sticky;top:32vh;top:32svh;top:32dvh;align-self:start}
+.agents-left .alabel{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--teal);margin-bottom:1.4rem}
+.aActive .anum{font-family:'Playfair Display',serif;font-style:italic;font-size:3.2rem;color:var(--magenta);line-height:1}
+.aActive .aEyebrow{font-family:'Playfair Display',serif;font-weight:900;font-style:italic;font-size:clamp(2rem,4vw,3.2rem);line-height:1.02;color:var(--magenta);margin:0 0 .9rem;letter-spacing:-.01em;overflow-wrap:anywhere;text-shadow:0 4px 30px rgba(6,16,31,.85)}
+.aActive h3{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2rem,4vw,3.2rem);line-height:1.02;margin:.3rem 0 .9rem;letter-spacing:-.01em;overflow-wrap:anywhere;text-shadow:0 4px 30px rgba(6,16,31,.85)}
+.aActive .st{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;padding:.3rem .7rem;border-radius:30px;display:inline-block;margin-bottom:1.1rem}
+.st.live{color:var(--teal);background:rgba(26,165,145,.16);border:1px solid var(--teal)}
+.st.build{color:var(--magenta);background:rgba(233,75,93,.14);border:1px solid var(--magenta)}
+.st.plan{color:var(--slate);background:rgba(142,152,173,.16);border:1px solid var(--slate)}
+.aActive p{font-size:1.15rem;font-weight:300;color:#e9edf3;line-height:1.6;max-width:430px;text-shadow:0 2px 22px rgba(6,16,31,.95)}
+.agents-right{display:flex;flex-direction:column;gap:16vh;padding:4vh 0 30vh}
+.note{position:relative;background:var(--cream);color:var(--navy);border-radius:14px;padding:1.5rem 1.7rem;box-shadow:0 18px 46px rgba(0,0,0,.45);max-width:360px;transition:transform .55s var(--ease),opacity .55s var(--ease),box-shadow .55s;opacity:.4;transform:scale(.88) rotate(var(--rot,-2.5deg))}
+.note.on{opacity:1;transform:scale(1.05) rotate(0deg);box-shadow:0 34px 80px rgba(0,0,0,.6)}
+.note:nth-child(even){--rot:2.5deg;margin-left:auto}
+.note .nn{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--magenta);margin-bottom:.35rem}
+.note h4{font-family:'Playfair Display',serif;font-weight:800;font-size:1.4rem;line-height:1.05}
+.note .tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;margin-top:.7rem;display:inline-block;padding:.25rem .6rem;border-radius:20px}
+.note .tag.live{background:rgba(26,165,145,.2);color:#0E7A6A}
+.note .tag.build{background:rgba(233,75,93,.18);color:#a8303e}
+.note .tag.plan{background:rgba(142,152,173,.22);color:#5a6378}
+
+/* ===== Cinematic Film-Still unter dem Detail-Text (#agents links / #result rechts) =====
+   Zwei gestapelte Ebenen fuer weichen Crossfade. Echtes Kino: Cinemascope-Rahmen,
+   feine helle Innenkante, farbiger Aussen-Glow (--accent), Vignette, Film-Grain, Mono-Caption. */
+.filmstill{--accent:var(--teal);position:relative;width:100%;max-width:470px;margin-top:1.9rem;opacity:0;transform:translateY(16px) scale(.965);transition:opacity .8s var(--ease),transform .8s var(--ease),box-shadow .8s var(--ease);will-change:transform,opacity}
+.filmstill.in{opacity:1;transform:translateY(0) scale(1)}
+/* Caption-Zeile oben: Mono, getrackt — "SZENE" + Begriff */
+.filmstill .fcap{display:flex;align-items:center;gap:.6rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.26em;text-transform:uppercase;color:var(--slate);margin-bottom:.6rem;opacity:.92}
+.filmstill .fcap .fk{color:var(--accent);font-weight:600;flex:0 0 auto}
+.filmstill .fcap .fln{flex:1 1 auto;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 55%,transparent),transparent)}
+.filmstill .fcap .fnm{flex:0 0 auto;color:var(--cream);letter-spacing:.18em;font-weight:500;transition:color .5s ease}
+/* Die eigentliche Leinwand: Cinemascope 2.39:1, gerundet, Innenkante + Aussen-Glow */
+.morphimg{position:relative;width:100%;aspect-ratio:4/5;border-radius:13px;overflow:hidden;background:var(--navy-deep);box-shadow:0 24px 70px rgba(6,16,31,.62),0 0 0 1px rgba(255,255,255,.05),0 0 38px -4px color-mix(in srgb,var(--accent) 42%,transparent),inset 0 0 0 1px rgba(255,255,255,.12),inset 0 0 60px -14px rgba(6,16,31,.7);transition:box-shadow .8s var(--ease)}
+.filmstill.in .morphimg{box-shadow:0 30px 84px rgba(6,16,31,.66),0 0 0 1px rgba(255,255,255,.06),0 0 60px -2px color-mix(in srgb,var(--accent) 58%,transparent),inset 0 0 0 1px rgba(255,255,255,.13),inset 0 0 60px -14px rgba(6,16,31,.7)}
+.morphimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;filter:brightness(.86) saturate(1.04) contrast(1.06);transition:opacity .7s ease,transform 1.2s var(--ease);transform:scale(1.05);will-change:opacity,transform}
+.morphimg img.show{opacity:1;transform:scale(1)}
+/* Cinematischer Vignette/Letterbox-Gradient — blendet edel ins Dunkel */
+.morphimg::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(180deg,rgba(6,16,31,.34) 0%,rgba(6,16,31,.04) 30%,rgba(6,16,31,.06) 62%,rgba(6,16,31,.5) 100%),radial-gradient(ellipse 88% 78% at 50% 46%,transparent 0%,rgba(6,16,31,.46) 100%),linear-gradient(0deg,color-mix(in srgb,var(--accent) 9%,transparent),transparent 55%)}
+/* Subtiler Film-Grain-Overlay (gleiches SVG-Noise wie .story .grain) */
+.morphimg::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.07;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:190px 190px}
+@media(max-width:900px){.filmstill{max-width:none}.morphimg{aspect-ratio:4/5}}
+@media(prefers-reduced-motion:reduce){.morphimg img{transition:opacity .4s ease}.morphimg img.show{transform:none}.filmstill{transition:opacity .5s ease}}
+
+/* ===== TITLE-CARD: Idee + Mechanismus als EINE Kapitel-Komposition (Diptychon) =====
+   Cinematic Title-Card: zwei Haelften EINER Szene, an der Naht gefuegt, mit Letterbox-Balken,
+   langsamem Ken-Burns-Push und Licht-Sweep ueber die Naht (Hollywood-Illusion). Der aktive Beat
+   ist hell, der andere gedimmt — beim Scrollen wandert der Spot von links (Idee) nach rechts. */
+.titlecard{--accent:var(--amber);position:fixed;left:50%;bottom:5.5vh;bottom:5.5svh;bottom:5.5dvh;transform:translateX(-50%) translateY(20px) scale(.965);z-index:24;width:min(94vw,640px);pointer-events:none;opacity:0;transition:opacity .7s var(--ease),transform .7s var(--ease);will-change:opacity,transform}
+.titlecard.in{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+.tc-eyebrow{display:flex;align-items:center;gap:.6rem;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.32em;text-transform:uppercase;color:var(--slate);margin-bottom:.8rem;opacity:0;transform:translateY(8px);transition:opacity .6s var(--ease) .15s,transform .6s var(--ease) .15s}
+.titlecard.in .tc-eyebrow{opacity:1;transform:translateY(0)}
+.tc-eyebrow .tc-ek{color:var(--teal);font-weight:600}
+.tc-eyebrow .tc-eln{width:38px;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--teal) 60%,transparent),transparent)}
+.tc-eyebrow .tc-enm{color:var(--cream);letter-spacing:.22em}
+/* Das gefuegte Diptychon: ein Rahmen, zwei Haelften, eine Naht + Cinemascope-Letterbox */
+.tc-diptych{position:relative;display:flex;border-radius:14px;overflow:hidden;background:var(--navy-deep);box-shadow:0 34px 90px rgba(6,16,31,.7),0 0 0 1px rgba(255,255,255,.06),0 0 64px -6px color-mix(in srgb,var(--accent) 50%,transparent),inset 0 0 0 1px rgba(255,255,255,.12);transform:scale(.985);transition:transform 1.1s var(--ease),box-shadow .8s var(--ease)}
+.titlecard.in .tc-diptych{transform:scale(1)}
+.tc-half{position:relative;flex:1 1 50%;aspect-ratio:5/4;overflow:hidden;filter:brightness(.5) saturate(.82) contrast(1.04);opacity:.88;transition:filter .9s var(--ease),opacity .9s var(--ease)}
+.tc-half img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity .8s ease,transform 8s linear;will-change:opacity,transform}
+.tc-half img.show{opacity:1}
+.tc-half.active{filter:brightness(.98) saturate(1.08) contrast(1.07);opacity:1}
+.tc-half.active img.show{transform:scale(1.14)}            /* langsamer Ken-Burns-Push auf der aktiven Haelfte */
+.tc-half.dim{filter:brightness(.34) saturate(.7) contrast(1.02);opacity:.78}
+.tc-half.dim img.show{transform:scale(1.05)}
+/* leuchtende Naht in der Mitte + animierter Licht-Sweep beim Auftauchen */
+.tc-seam{position:absolute;left:50%;top:0;bottom:0;width:1px;transform:translateX(-.5px);z-index:5;background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent),transparent);box-shadow:0 0 14px 1px color-mix(in srgb,var(--accent) 40%,transparent);pointer-events:none}
+.tc-sweep{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;background:linear-gradient(105deg,transparent 38%,color-mix(in srgb,var(--accent) 26%,transparent) 49%,rgba(255,255,255,.32) 50%,color-mix(in srgb,var(--accent) 26%,transparent) 51%,transparent 62%);mix-blend-mode:screen;transform:translateX(-60%)}
+.titlecard.in .tc-sweep{animation:tcsweep 1.5s var(--ease) .2s 1}
+@keyframes tcsweep{0%{opacity:0;transform:translateX(-60%)}18%{opacity:1}82%{opacity:1}100%{opacity:0;transform:translateX(60%)}}
+/* Cinemascope-Letterbox: Balken fahren beim Auftauchen rein */
+.tc-bar{position:absolute;left:0;right:0;height:8%;z-index:6;background:#040a14;pointer-events:none;transition:transform .8s var(--ease)}
+.tc-bar.top{top:0;transform:translateY(-100%)}
+.tc-bar.bot{bottom:0;transform:translateY(100%)}
+.titlecard.in .tc-bar.top,.titlecard.in .tc-bar.bot{transform:translateY(0)}
+/* Vignette + Film-Grain ueber das ganze Diptychon */
+.tc-diptych::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(180deg,rgba(6,16,31,.30) 0%,rgba(6,16,31,.04) 32%,rgba(6,16,31,.06) 60%,rgba(6,16,31,.66) 100%),radial-gradient(ellipse 92% 82% at 50% 44%,transparent 0%,rgba(6,16,31,.5) 100%)}
+.tc-diptych::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.08;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");background-size:190px 190px}
+/* Titel OVER dem Bild eingebrannt (echte Title-Card), unten im Diptychon */
+.tc-caption{position:absolute;left:0;right:0;bottom:0;z-index:7;text-align:center;padding:0 5% 7%;transition:opacity .5s ease}
+.tc-step{display:flex;align-items:center;justify-content:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.28em;text-transform:uppercase;color:#aeb7c7;margin-bottom:.55rem;text-shadow:0 2px 14px rgba(6,16,31,.9)}
+.tc-node{width:6px;height:6px;border-radius:50%;background:rgba(174,183,199,.5);transition:background .5s ease,box-shadow .5s ease}
+.tc-node.on{background:var(--accent);box-shadow:0 0 12px 0 var(--accent)}
+.tc-link{width:28px;height:1px;background:rgba(174,183,199,.4)}
+.tc-steplabel{color:var(--cream);font-weight:500;margin-left:.4rem;text-shadow:0 2px 14px rgba(6,16,31,1)}
+.tc-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.6rem,4.2vw,2.7rem);line-height:1.02;letter-spacing:-.015em;text-shadow:0 6px 36px rgba(6,16,31,.95),0 2px 10px rgba(6,16,31,.9)}
+.tc-title em{font-style:italic;color:var(--magenta)}
+.tc-sub{font-weight:300;color:#eef1f6;margin-top:.55rem;font-size:clamp(.84rem,1.35vw,1rem);line-height:1.5;max-width:440px;margin-left:auto;margin-right:auto;text-shadow:0 2px 18px rgba(6,16,31,1)}
+@media(max-width:700px){
+  .titlecard{width:min(95vw,400px);bottom:7svh;bottom:7dvh}
+  .tc-title{font-size:clamp(1.3rem,6.5vw,1.8rem)}
+  .tc-sub{font-size:.82rem;max-width:none}
+  .tc-half{aspect-ratio:1/1}
+}
+@media(prefers-reduced-motion:reduce){.titlecard{transition:opacity .4s ease}.tc-half img{transition:opacity .4s ease;transform:none!important}.tc-sweep{display:none}.tc-bar{transition:none}}
+
+.scroll-bar{position:fixed;top:0;left:0;height:3px;width:0;z-index:50;background:linear-gradient(90deg,var(--teal),var(--magenta),var(--amber))}
+.cur-dot,.cur-ring{position:fixed;top:0;left:0;z-index:60;pointer-events:none;border-radius:50%;mix-blend-mode:difference;opacity:0;transition:opacity .35s ease}
+body.on .cur-dot,body.on .cur-ring{opacity:1}
+.cur-dot{width:6px;height:6px;background:var(--cream);transform:translate(-50%,-50%);transition:opacity .35s ease,width .35s cubic-bezier(.16,1,.3,1),height .35s cubic-bezier(.16,1,.3,1),background .35s ease}
+.cur-ring{width:34px;height:34px;border:1.5px solid var(--cream);box-sizing:border-box;transform:translate(-50%,-50%);will-change:transform,width,height;transition:opacity .35s ease,width .4s cubic-bezier(.16,1,.3,1),height .4s cubic-bezier(.16,1,.3,1),border-color .4s ease,background-color .4s ease,border-width .4s ease}
+/* Hover: traeger Ring waechst, fuellt sich dezent, blendet weicher; Dot schrumpft fast weg */
+.cur-ring.grow{width:64px;height:64px;border-width:1px;background-color:rgba(253,248,240,.10)}
+.cur-dot.grow{width:3px;height:3px}
+/* Magnetisch verformt: Ring nimmt Akzentfarbe an (per --cur-accent), wird leicht elliptisch via JS-scale */
+.cur-ring.warp{border-color:var(--cur-accent,var(--cream));background-color:color-mix(in srgb,var(--cur-accent,var(--cream)) 12%,transparent)}
+@media(prefers-reduced-motion:reduce){.cur-dot,.cur-ring{transition:opacity .35s ease}.cur-ring.grow,.cur-ring.warp{width:34px;height:34px}}
+@media(pointer:coarse){.cur-dot,.cur-ring{display:none}}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:1.3rem 6vw;font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--slate);mix-blend-mode:difference}
+.topbar b{color:var(--cream)}
+.topbar .live{display:inline-flex;align-items:center;gap:.5rem}
+.topbar .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(26,165,145,.55)}70%{box-shadow:0 0 0 8px rgba(26,165,145,0)}100%{box-shadow:0 0 0 0 rgba(26,165,145,0)}}
+
+/* HERO overlay (fades on scroll) */
+.hero{position:fixed;left:6vw;top:50%;transform:translateY(-50%);z-index:30;max-width:820px;transition:opacity .5s var(--ease)}
+.hero .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.74rem;letter-spacing:.28em;text-transform:uppercase;color:var(--teal);margin-bottom:1.3rem}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.05rem,12.5vw,4.6rem);line-height:.94;letter-spacing:-.03em;overflow-wrap:normal;hyphens:none;word-break:keep-all;text-shadow:0 10px 60px rgba(6,16,31,.7)}
+@media(min-width:1024px){.hero h1{font-size:clamp(4.6rem,8.5vw,9.5rem)}}
+.hero h1 em{font-style:italic;color:var(--teal)}
+.hero .sub{margin-top:1.4rem;font-size:clamp(1rem,1.7vw,1.35rem);font-weight:300;color:#e6eaf1;max-width:560px;line-height:1.5;text-shadow:0 2px 24px rgba(6,16,31,.8)}
+.hero .sub b{font-family:'JetBrains Mono',monospace;color:var(--teal);font-size:.9em;font-weight:500}
+
+/* scene caption (bottom center) */
+.cap{position:fixed;left:0;right:0;bottom:7vh;bottom:7svh;bottom:7dvh;z-index:30;text-align:center;pointer-events:none;transition:opacity .5s var(--ease);padding:0 6vw;padding-bottom:env(safe-area-inset-bottom,0)}
+.cap .idx{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--teal);margin-bottom:.6rem}
+.cap .t{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.6rem,4vw,2.8rem);letter-spacing:-.01em;line-height:1.05;overflow-wrap:anywhere;text-shadow:0 4px 30px rgba(6,16,31,.85)}
+.cap .t em{font-style:italic;color:var(--magenta)}
+.cap .s{font-weight:300;color:#dfe4ee;margin-top:.5rem;font-size:clamp(.9rem,1.5vw,1.05rem);max-width:680px;margin-left:auto;margin-right:auto;line-height:1.5;text-shadow:0 2px 20px rgba(6,16,31,.9)}
+.cap .s code{font-family:'JetBrains Mono',monospace;font-size:.86em;color:var(--teal)}
+
+/* CTA overlay (final) */
+.cta{position:fixed;left:0;right:0;bottom:7vh;bottom:7svh;bottom:7dvh;z-index:30;text-align:center;opacity:0;transition:opacity .6s var(--ease);pointer-events:none;padding:0 6vw;padding-bottom:env(safe-area-inset-bottom,0)}
+.cta.show{opacity:1;pointer-events:auto}
+.cta .eyebrow{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--teal);margin-bottom:.8rem}
+.cta .sub{color:#dfe4ee;font-weight:300;max-width:560px;margin:0 auto;line-height:1.55;font-size:1rem;text-shadow:0 2px 20px rgba(6,16,31,.9)}
+.cta .mag{margin-top:1.8rem;display:inline-block;padding:1.2rem 2.8rem;border-radius:50px;background:var(--magenta);color:#fff;font-family:'JetBrains Mono',monospace;font-size:.86rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 18px 50px rgba(233,75,93,.4);will-change:transform}
+.cta .roles{margin-top:1.6rem;display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+.cta .roles span{font-family:'JetBrains Mono',monospace;font-size:.7rem;border:1px solid var(--teal);color:var(--teal);padding:.4rem .9rem;border-radius:30px}
+
+.scroll-cue{position:fixed;bottom:2.2rem;right:6vw;z-index:30;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--slate);display:flex;align-items:center;gap:.7rem;transition:opacity .5s}
+.scroll-cue .ln{width:1px;height:40px;background:var(--slate);position:relative;overflow:hidden}
+.scroll-cue .ln::after{content:"";position:absolute;top:-40px;left:0;width:100%;height:40px;background:var(--teal);animation:drop 1.9s var(--ease) infinite}
+@keyframes drop{0%{top:-40px}60%,100%{top:40px}}
+
+/* ===== PRELOADER (kein FOUC) ===== */
+.preloader{position:fixed;inset:0;z-index:200;background:var(--navy-deep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.6rem;transition:opacity .9s var(--ease),visibility .9s var(--ease)}
+.preloader.done{opacity:0;visibility:hidden;pointer-events:none}
+.preloader .ring{width:54px;height:54px;border-radius:50%;border:3px solid rgba(142,152,173,.18);border-top-color:var(--teal);border-right-color:var(--magenta);animation:plspin .9s linear infinite}
+@keyframes plspin{to{transform:rotate(360deg)}}
+.preloader .plbarw{width:160px;height:3px;border-radius:3px;background:rgba(142,152,173,.18);overflow:hidden}
+.preloader #plBar{height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--magenta));transition:width .35s var(--ease)}
+.preloader .pllbl{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--slate)}
+
+/* ===== SOUND-TOGGLE ===== */
+.snd{position:fixed;bottom:2.2rem;left:6vw;z-index:40;display:inline-flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:40px;border:1px solid rgba(142,152,173,.35);background:rgba(14,34,68,.55);backdrop-filter:blur(8px);color:var(--slate);font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:color .3s,border-color .3s,background .3s}
+.snd:hover{color:var(--teal);border-color:var(--teal)}
+.snd .ico{width:8px;height:8px;border-radius:50%;background:var(--slate);transition:background .3s}
+.snd.on{color:var(--teal);border-color:var(--teal)}
+.snd.on .ico{background:var(--teal);animation:pulse 2s infinite}
+@media(pointer:coarse){.snd{bottom:calc(1.4rem + env(safe-area-inset-bottom,0));left:1.4rem}}
+
+/* ============================================================
+   RESPONSIVE-LAYER — Mobile UND Desktop sauber. svh/dvh, clamp,
+   einspaltige Scrollytelling-Stacks, Touch. Bestehendes bleibt.
+   ============================================================ */
+#bg,#scene-bg,.vignette{height:100svh;height:100dvh}
+.spacer-a,.spacer-b{height:440svh;height:440dvh}
+.spacer-mid{height:150svh;height:150dvh}
+
+@media(max-width:900px){
+  .hero{left:0;right:0;padding:0 7vw;max-width:none}
+  .hero h1{font-size:clamp(2.05rem,12.5vw,4.6rem);line-height:.94}
+  .hero .sub{font-size:clamp(.95rem,3.6vw,1.15rem);max-width:none}
+  .cap{bottom:9svh;bottom:9dvh;padding:0 7vw}
+  .cap .t{font-size:clamp(1.4rem,6.4vw,2.2rem)}
+  .cap .s{font-size:clamp(.85rem,3.4vw,1rem);max-width:none}
+  .topbar{padding:1rem 6vw;font-size:.6rem;gap:.6rem}
+  .topbar .live{font-size:.58rem}
+  .cta{bottom:9svh;bottom:9dvh;padding:0 7vw}
+  .cta .mag{padding:1rem 1.8rem;font-size:.78rem}
+  .scroll-cue{right:6vw;bottom:1.6rem}
+}
+@media(max-width:480px){
+  .hero h1{font-size:clamp(2.05rem,12.5vw,3.6rem)}
+  .cap .t{font-size:clamp(1.25rem,6.8vw,1.8rem)}
+  .cta .roles span{font-size:.62rem;padding:.35rem .7rem}
+  .topbar span:last-child{display:none}
+}
+@media(max-width:360px){
+  .hero h1{font-size:clamp(1.9rem,12vw,3rem)}
+}
+@media(max-width:900px){
+  .agents{padding:30svh 7vw 12svh;padding:30dvh 7vw 12dvh}
+  .agents-left{position:static;top:auto;margin-bottom:8vh}
+  .agents-left .aActive h3{font-size:clamp(1.8rem,8vw,2.6rem)}
+  .agents-left .aActive p{font-size:1rem;max-width:none}
+  .agents-right{gap:11svh;gap:11dvh;padding:2vh 0 24svh;padding:2vh 0 24dvh}
+  .note{max-width:none;width:100%;padding:1.3rem 1.4rem}
+  .note,.note:nth-child(even){margin-left:0;--rot:0deg}
+  .note h4{font-size:clamp(1.15rem,5.2vw,1.5rem)}
+}
+@media(max-width:900px){
+  .result{padding:18svh 7vw 12svh;padding:18dvh 7vw 12dvh}
+  .result-inner{grid-template-columns:1fr;gap:2vh}
+  .result-right{position:static;top:auto;order:-1;margin-bottom:8vh}
+  .result-right h3{font-size:clamp(1.8rem,8vw,2.6rem)}
+  .result-right p{font-size:1rem;max-width:none}
+  .result-left{gap:11svh;gap:11dvh;padding:2vh 0 24svh;padding:2vh 0 24dvh}
+  .rcard,.rcard:nth-child(even){max-width:none;width:100%;margin-left:0}
+  .rcard h4{font-size:clamp(1.1rem,5vw,1.4rem)}
+}
+@media(pointer:coarse){
+  .snd{padding:.8rem 1.1rem;font-size:.62rem;min-height:44px;-webkit-tap-highlight-color:transparent}
+  .scroll-cue{display:none}
+  a,button{-webkit-tap-highlight-color:transparent}
+  .cta .mag{transition:transform .2s var(--ease)}
+}
+@media(hover:hover){
+  .snd:hover{color:var(--teal);border-color:var(--teal)}
+}
+@media(max-height:480px) and (pointer:coarse){
+  .cap{bottom:5svh;bottom:5dvh}
+  .cap .t{font-size:clamp(1.1rem,5vw,1.6rem)}
+  .hero h1{font-size:clamp(2rem,9vh,3.2rem)}
+  .snd{bottom:1rem}
+}
+
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div class="preloader" id="preloader">
+  <div class="ring"></div>
+  <div class="plbarw"><div id="plBar"></div></div>
+  <div class="pllbl">Studio wird geladen</div>
+</div>
+<div id="scene-bg" aria-hidden="true">
+  <div class="layer" id="bg-hero"></div>
+  <div class="layer" id="bg-data"></div>
+  <div class="layer" id="bg-craft"></div>
+</div>
+<canvas id="bg"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<div class="scroll-bar"></div>
+<div class="cur-dot"></div><div class="cur-ring"></div>
+<div class="topbar"><span><b>AI-Adoption Studio</b> · Alex Heyers</span><span class="live">Live-Build · Vibe Coding 2026</span></div>
+
+<div class="hero" id="hero">
+  <div class="eyebrow">Multi-Agent-System · Hospitality</div>
+  <h1>AI-Adoption<br><em>Studio.</em></h1>
+  <div class="sub">Du redest über deinen Betrieb. Acht Agenten machen daraus einen Fahrplan — Gewerk für Gewerk. <b>Scroll los.</b></div>
+</div>
+
+<figure class="titlecard" id="titleCard" aria-hidden="true">
+  <div class="tc-eyebrow"><span class="tc-ek">Kapitel</span><span class="tc-eln"></span><span class="tc-enm">Der Weg</span></div>
+  <div class="tc-diptych">
+    <div class="tc-half" id="tcHalfA"><img id="tcImgA" alt="" decoding="async"></div>
+    <div class="tc-half" id="tcHalfB"><img id="tcImgB" alt="" decoding="async"></div>
+    <span class="tc-seam"></span>
+    <span class="tc-sweep"></span>
+    <span class="tc-bar top"></span><span class="tc-bar bot"></span>
+    <div class="tc-caption" id="tcCap">
+      <div class="tc-step"><i class="tc-node" data-i="1"></i><i class="tc-link"></i><i class="tc-node" data-i="2"></i><span class="tc-steplabel" id="tcStep"></span></div>
+      <div class="tc-title" id="tcTitle"></div>
+      <div class="tc-sub" id="tcSub"></div>
+    </div>
+  </div>
+</figure>
+
+<div class="cap" id="cap"><div class="idx"></div><div class="t"></div><div class="s"></div></div>
+
+<div class="cta" id="cta">
+  <div class="eyebrow">Diese Seite ist auch eine Bewerbung</div>
+  <div class="sub">Recruiter und Hoteliers gleichermaßen: Wenn dich das anzieht, schreib mir. Antwort meist in 24 Stunden.</div>
+  <a href="mailto:a.heyers@gmail.com" class="mag" data-mag data-hover>a.heyers@gmail.com →</a>
+  <div class="roles"><span>Solutions Engineer</span><span>Implementation Consultant</span><span>Customer Success</span><span>DACH</span></div>
+</div>
+
+<div class="scroll-cue" id="cue"><span class="ln"></span> Scroll</div>
+<button class="snd" id="snd" type="button" aria-label="Ton an/aus"><span class="ico"></span><span id="sndLbl">Ton an</span></button>
+
+<div class="spacer-a">
+  <!-- MOMENT 1 — der Schmerz / das Chaos (frueh, vor "REDEN STATT AUSFUELLEN") -->
+  <div class="story" id="st-paperwork" style="top:130vh" data-img="studio-assets/story-paperwork.jpg" data-par="0.16">
+    <div class="ph"></div><div class="grad"></div><div class="grain"></div>
+    <div class="scap">
+      <span class="k">00 · Die Ausgangslage</span>
+      <div class="h">Das Wissen ist da. <em>Nur nicht nutzbar.</em></div>
+      <div class="d">Schichtübergaben, Tabellen, Bauchgefühl. Jede Abteilung weiß viel — und keiner kommt drumherum, es jemandem zu erzählen.</div>
+    </div>
+  </div>
+  <!-- MOMENT 2 — der Mechanismus / Reden mit dem Tool -->
+  <div class="story right" id="st-voice" style="top:236vh" data-img="studio-assets/story-voice.jpg" data-par="0.20">
+    <div class="ph"></div><div class="grad"></div><div class="grain"></div>
+    <div class="scap">
+      <span class="k">Der Mechanismus</span>
+      <div class="h">Einfach <em>reden.</em></div>
+      <div class="d">Statt Felder auszufüllen, erzählst du. Ein Voice-Agent hört zu — und macht aus dem Gespräch Struktur.</div>
+    </div>
+  </div>
+</div>
+
+<section class="agents" id="agents">
+  <div class="agents-inner">
+    <div class="agents-left">
+      <div class="alabel">03 · Die Pipeline</div>
+      <div class="aActive">
+        <div class="aEyebrow" id="aRole">Bevor jemand redet</div>
+        <p id="aDesc">Er googelt nicht wild herum — er sammelt Lage, Wettbewerb und Saison zum Haus und legt sie als Briefing ab, damit niemand das Gespräch bei null beginnt.</p>
+        <figure class="filmstill" id="aStill" aria-hidden="true">
+          <figcaption class="fcap"><span class="fk">Szene</span><span class="fln"></span><span class="fnm" id="aStillName">Web-Research</span></figcaption>
+          <div class="morphimg" id="aMorph"><img alt="" decoding="async"><img alt="" decoding="async"></div>
+        </figure>
+      </div>
+    </div>
+    <div class="agents-right" id="aRight">
+      <div class="note on" data-i="1" data-accent="var(--teal)" data-img="studio-assets/term-web-research.jpg" data-name="Web-Research" data-role="Bevor jemand redet" data-stat="live" data-detail="Er googelt nicht wild herum — er sammelt Lage, Wettbewerb und Saison zum Haus und legt sie als Briefing ab, damit niemand das Gespräch bei null beginnt."><div class="nn">01</div><h4>Web-Research</h4><span class="tag live">live</span></div>
+      <div class="note" data-i="2" data-accent="var(--teal)" data-img="studio-assets/term-dokumenten-analyst.jpg" data-name="Dokumenten-Analyst" data-role="Was im Papier steckt" data-stat="live" data-detail="Du wirfst ihm den PDF-Stapel hin, den sonst keiner liest. Er zieht Zahlen und Aussagen sauber heraus, sodass danach jeder sieht, was wirklich im Papier steht."><div class="nn">02</div><h4>Dokumenten-Analyst</h4><span class="tag live">live</span></div>
+      <div class="note" data-i="3" data-accent="var(--teal)" data-img="studio-assets/term-prozess-auditor.jpg" data-name="Prozess-Auditor" data-role="Wo Arbeit liegen bleibt" data-stat="live" data-detail="Er geht den Betrieb Station für Station durch und markiert die Stellen, an denen Arbeit doppelt passiert oder liegen bleibt — die unbequemen, aber ehrlichen."><div class="nn">03</div><h4>Prozess-Auditor</h4><span class="tag live">live</span></div>
+      <div class="note" data-i="4" data-accent="var(--amber)" data-img="studio-assets/term-use-case-generator.jpg" data-name="Use-Case-Generator" data-role="Womit man anfängt" data-stat="build" data-detail="Statt einer Wunschliste, die keiner abarbeitet, schlägt er wenige Use-Cases vor, die zum Haus passen — und sagt offen, womit man am besten anfängt."><div class="nn">04</div><h4>Use-Case-Generator</h4><span class="tag build">im Bau</span></div>
+      <div class="note" data-i="5" data-accent="var(--amber)" data-img="studio-assets/term-tool-empfehlung.jpg" data-name="Tool-Empfehlung" data-role="Vor dem Kauf geprüft" data-stat="build" data-detail="Er nennt für jede Stelle ein konkretes Tool und prüft vorher, ob es DSGVO-tauglich ist — damit man nicht erst nach dem Kauf merkt, dass es nicht eingesetzt werden darf."><div class="nn">05</div><h4>Tool-Empfehlung</h4><span class="tag build">im Bau</span></div>
+      <div class="note" data-i="6" data-accent="var(--magenta)" data-img="studio-assets/term-wirtschaftlichkeit.jpg" data-name="Wirtschaftlichkeit" data-role="Aufwand gegen Nutzen" data-stat="plan" data-detail="Er stellt Aufwand und Nutzen pro Vorschlag nüchtern gegenüber, damit am Ende eine Entscheidung steht statt eines Bauchgefühls — auch wenn das Ergebnis 'lohnt sich nicht' heißt."><div class="nn">06</div><h4>Wirtschaftlichkeit</h4><span class="tag plan">geplant</span></div>
+      <div class="note" data-i="7" data-accent="var(--magenta)" data-img="studio-assets/term-compliance-check.jpg" data-name="Compliance-Check" data-role="Schwarz auf weiß" data-stat="plan" data-detail="Er hält fest, welche Daten wohin fließen und was DSGVO und AI-Act dazu sagen — schriftlich, damit es bei Nachfragen kein Schulterzucken gibt."><div class="nn">07</div><h4>Compliance-Check</h4><span class="tag plan">geplant</span></div>
+      <div class="note" data-i="8" data-accent="var(--amber)" data-img="studio-assets/term-reporter.jpg" data-name="Reporter" data-role="Zum Ausdrucken" data-stat="build" data-detail="Am Ende klebt er alles zusammen, was die anderen Agenten gefunden haben, und gibt es so aus, dass man es ausdrucken und in die Runde legen kann — PDF, Excel oder Markdown."><div class="nn">08</div><h4>Reporter</h4><span class="tag build">im Bau</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="spacer-mid"></div>
+
+<section class="result" id="result">
+  <div class="result-inner">
+    <div class="result-left" id="rLeft">
+      <div class="rcard on" data-accent="var(--teal)" data-name="Empfang &amp; Reservierung" data-img="studio-assets/term-empfang.jpg" data-eyebrow="Was morgens Zeit frisst"
+        data-detail="Im Alltag heißt das: Die immer gleichen Reservierungs- und Standardmails kommen schon einsortiert an, sodass die Schicht morgens nicht erst das Postfach sortiert. Entschieden wird weiter am Empfang, nicht im Tool.">
+        <div class="rk">Empfang &amp; Reservierung · 01</div>
+        <h4>Anfragen vorsortieren, nicht ersetzen</h4>
+        <p>Standard-Mails und -Anfragen landen vorstrukturiert beim Team. Der Mensch entscheidet, die Maschine räumt vor.</p>
+        <span class="fmt">hoher Hebel</span>
+      </div>
+      <div class="rcard" data-accent="var(--amber)" data-name="F&amp;B &amp; Küche" data-img="studio-assets/term-fnb.jpg" data-eyebrow="Warum die Reihenfolge zählt"
+        data-detail="Warum erst messen? Weil in der Küche die Bestell- und Einkaufszahlen meist verstreut in Köpfen und Lieferscheinen stecken. Wer hier zu früh ein Tool draufsetzt, automatisiert nur das Durcheinander — also zuerst Zahlen auf den Tisch.">
+        <div class="rk">F&amp;B &amp; Küche · 02</div>
+        <h4>Erst messen, dann automatisieren</h4>
+        <p>Wareneinsatz und Bestellungen sind selten so sauber, wie man denkt. Hier zuerst Klarheit, dann Tools.</p>
+        <span class="fmt">Daten zuerst</span>
+      </div>
+      <div class="rcard" data-accent="var(--teal)" data-name="Housekeeping" data-img="studio-assets/term-housekeeping.jpg" data-eyebrow="Wo man es zuerst spürt"
+        data-detail="Konkret: Zimmerstatus und Schichtzettel laufen heute oft über Zuruf und Whatsapp. Genau das lässt sich an einem Nachmittag entlasten, ohne ein Projekt aufzusetzen — der Bereich, in dem man am schnellsten merkt, dass sich etwas bewegt.">
+        <div class="rk">Housekeeping · 03</div>
+        <h4>Kleiner Anfang, schneller Effekt</h4>
+        <p>Schichtplanung und Statusmeldungen lassen sich ohne großes Projekt entlasten — der ehrlichste Quick Win.</p>
+        <span class="fmt">Quick Win</span>
+      </div>
+      <div class="rcard" data-accent="var(--magenta)" data-name="Revenue &amp; Pricing" data-img="studio-assets/term-revenue.jpg" data-eyebrow="Wo Anbieter zu viel versprechen"
+        data-detail="Hier verkaufen Anbieter gern die großen Versprechen — dynamische Preise, die alles regeln. In der Praxis hängt das Ergebnis an den eigenen Daten und an Erfahrung. Deshalb: erst in einer Saison testen, bevor man ein teures System unterschreibt.">
+        <div class="rk">Revenue &amp; Pricing · 04</div>
+        <h4>Spannend — aber mit Vorsicht</h4>
+        <p>Hier locken die größten Versprechen und die größten Fehlkäufe. Empfehlung: testen im Kleinen, nicht kaufen im Großen.</p>
+        <span class="fmt">mit Vorsicht</span>
+      </div>
+      <div class="rcard" data-accent="var(--amber)" data-name="Marketing &amp; Gäste-Kommunikation" data-img="studio-assets/term-marketing.jpg" data-eyebrow="Was heute schon läuft"
+        data-detail="Praktisch trägt es schon: Posts vorschreiben, wiederkehrende Gästefragen beantworten, Stammgäste gezielt ansprechen. Hier ist die Technik reif genug, dass man heute starten kann — und der Einstieg tut niemandem weh.">
+        <div class="rk">Marketing &amp; Gäste-Kommunikation · 05</div>
+        <h4>Wo KI heute schon trägt</h4>
+        <p>Content, Antworten, Wiederkehr-Ansprache — der Bereich, in dem der Einstieg am leichtesten gelingt.</p>
+        <span class="fmt">reif</span>
+      </div>
+    </div>
+    <div class="result-right">
+      <div class="rlabel">04 · Das Ergebnis</div>
+      <h3 id="rName">Ein Fahrplan <em>pro Gewerk.</em></h3>
+      <p id="rDesc">Kein Foliensatz für die Schublade. Pro Bereich eine ehrliche Empfehlung — was sich lohnt, was wartet, was du sein lassen kannst.</p>
+      <figure class="filmstill" id="rStill" aria-hidden="true">
+        <figcaption class="fcap"><span class="fk">Szene</span><span class="fln"></span><span class="fnm" id="rStillName">Empfang &amp; Reservierung</span></figcaption>
+        <div class="morphimg" id="rMorph"><img alt="" decoding="async"><img alt="" decoding="async"></div>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<div class="spacer-b">
+  <!-- MOMENT 3 — das Ergebnis / Klarheit -->
+  <div class="story" id="st-clarity" style="top:52vh" data-img="studio-assets/story-clarity.jpg" data-par="0.16">
+    <div class="ph"></div><div class="grad"></div><div class="grain"></div>
+    <div class="scap">
+      <span class="k">Das Ergebnis</span>
+      <div class="h">Aus Rauschen wird <em>Reihenfolge.</em></div>
+      <div class="d">Drei Use-Cases, ein Report, ein klarer nächster Schritt. Kein Foliensatz — etwas, mit dem das Haus arbeiten kann.</div>
+    </div>
+  </div>
+  <!-- MOMENT 4 — der Mensch / Hospitality (nahe Portrait) -->
+  <div class="story right" id="st-hospitality" style="top:300vh" data-img="studio-assets/story-hospitality.jpg" data-par="0.20">
+    <div class="ph"></div><div class="grad"></div><div class="grain"></div>
+    <div class="scap">
+      <span class="k">Der Mensch dahinter</span>
+      <div class="h">20 Jahre <em>Gastgeber.</em></div>
+      <div class="d">Bar, Service, Operations — bevor Code dazukam. Diese Nähe zum Betrieb steckt in jedem Agenten.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.__prog=0;window.__nmx=.5;window.__nmy=.5;
+/* ===== Inertia-/Smooth-Scroll: eigener Wheel-Lerp (nur Desktop/Wheel) =====
+   Bewusst KEIN Lenis: das Partikelsystem liest jeden Frame rootEl.scrollTop frisch
+   (Banner-Hold, 360-Grad-Uebergaenge) — die native Scroll-Position MUSS Source of
+   Truth bleiben. Diese Variante nutzt ausschliesslich window.scrollTo() (echtes
+   scrollTop, kein Transform/Wrapper, keine externe CDN) und laesst Touch + Tastatur
+   komplett nativ. So bleibt die Scroll-Kopplung garantiert intakt. */
+(function(){
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const coarse=matchMedia('(pointer:coarse)').matches;
+  if(reduce||coarse)return;                          /* Touch/reduce -> natives Scrollen */
+  let target=window.scrollY, current=window.scrollY, running=false;
+  const EASE=0.12, MULT=1.0;
+  function clamp(v){return Math.max(0,Math.min(v,document.documentElement.scrollHeight-innerHeight));}
+  function tick(){
+    current+=(target-current)*EASE;
+    if(Math.abs(target-current)<0.4){current=target;running=false;window.scrollTo(0,current);return;}
+    window.scrollTo(0,current);                       /* echtes scrollTop -> Partikel liest korrekt */
+    requestAnimationFrame(tick);
+  }
+  addEventListener('wheel',e=>{
+    if(e.ctrlKey)return;                              /* Pinch-Zoom in Ruhe lassen */
+    e.preventDefault();
+    target=clamp(target+e.deltaY*MULT);
+    if(!running){running=true;current=window.scrollY;requestAnimationFrame(tick);}
+  },{passive:false});
+  /* native Scroll (Tastatur, Scrollbar-Drag, Touch) wieder einsyncen */
+  addEventListener('scroll',()=>{ if(!running){target=current=window.scrollY;} },{passive:true});
+})();
+/* ===== PRELOADER-CONTROLLER (kein FOUC, triggert 'studio-ready' fuer das Intro) ===== */
+(function(){
+  const pl=document.getElementById('preloader'),bar=document.getElementById('plBar');
+  if(!pl){window.__studioMark=function(){};return;}
+  const gates={fonts:false,three:false,portrait:false};let fired=false;
+  function pct(){let n=0;for(const k in gates)if(gates[k])n++;return Math.round(n/3*100);}
+  function update(){if(bar)bar.style.width=pct()+'%';}
+  function done(){
+    if(fired)return;fired=true;
+    if(bar)bar.style.width='100%';
+    setTimeout(()=>{
+      pl.classList.add('done');
+      window.dispatchEvent(new Event('studio-ready'));
+      setTimeout(()=>{if(pl&&pl.parentNode)pl.parentNode.removeChild(pl);},950);
+    },220);
+  }
+  window.__studioMark=function(k){if(k in gates&&!gates[k]){gates[k]=true;update();if(gates.fonts&&gates.three&&gates.portrait)done();}};
+  if(document.fonts&&document.fonts.ready){document.fonts.ready.then(()=>window.__studioMark('fonts'));}else{window.__studioMark('fonts');}
+  /* Safety-Net: spaetestens nach 8s zwangs-fertig (z.B. Portrait nicht erreichbar) */
+  setTimeout(()=>{gates.fonts=gates.three=gates.portrait=true;update();done();},8000);
+})();
+const dot=document.querySelector('.cur-dot'),ring=document.querySelector('.cur-ring');
+const __cursorCoarse=matchMedia('(pointer:coarse)').matches;
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+/* Magnet-Ziel: wenn der Cursor ueber einem interaktiven Element schwebt, zieht der
+   Ring zu dessen Zentrum (traege) statt exakt der Maus zu folgen — Lusion-Feel.
+   __magT = Zielpunkt+Box des aktuell gehoverten Elements (oder null). */
+let __magT=null;
+const HOVER_SEL='.note,.rcard,[data-mag],.snd,a,button,[data-hover]';
+addEventListener('mousemove',e=>{
+  document.body.classList.add('on');
+  mx=e.clientX;my=e.clientY;
+  /* three.js-Vertrag: native normierte Maus bleibt unveraendert */
+  window.__nmx=e.clientX/innerWidth;window.__nmy=1-e.clientY/innerHeight;
+  /* Dot folgt weiterhin sofort der echten Maus */
+  dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;
+  if(__cursorCoarse)return;
+  const t=e.target&&e.target.closest&&e.target.closest(HOVER_SEL);
+  if(t){
+    const r=t.getBoundingClientRect();
+    const accent=t.getAttribute('data-accent')||getComputedStyle(t).getPropertyValue('--cur-accent')||'';
+    __magT={
+      cx:r.left+r.width/2, cy:r.top+r.height/2,
+      w:r.width, h:r.height, accent:accent.trim()
+    };
+    ring.classList.add('grow','warp');dot.classList.add('grow');
+    if(__magT.accent)ring.style.setProperty('--cur-accent',__magT.accent);
+  }else{
+    __magT=null;
+    ring.classList.remove('grow','warp');dot.classList.remove('grow');
+    ring.style.removeProperty('--cur-accent');
+  }
+});
+/* Traeger Lerp-Loop: ohne Ziel folgt der Ring der Maus (.16),
+   mit Ziel zieht er staerker zum Element-Zentrum (.22) und nimmt dessen Form an. */
+(function l(){
+  if(__magT){
+    /* magnetisch: 70% Element-Zentrum, 30% Maus — fuehlt sich "angesaugt" an */
+    const gx=__magT.cx*.7+mx*.3, gy=__magT.cy*.7+my*.3;
+    rx+=(gx-rx)*.22; ry+=(gy-ry)*.22;
+    /* dezente Verformung Richtung Element-Seitenverhaeltnis (max ~1.18 elliptisch) */
+    const ar=Math.max(.86,Math.min(1.18,(__magT.w/Math.max(__magT.h,1))**.18));
+    ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%) scale(${ar},${1/ar})`;
+  }else{
+    rx+=(mx-rx)*.16; ry+=(my-ry)*.16;
+    ring.style.transform=`translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+  }
+  requestAnimationFrame(l);
+})();
+/* Sicherheits-Reset, falls die Maus das Fenster verlaesst (kein mouseout-Event auf target) */
+addEventListener('mouseleave',()=>{__magT=null;ring.classList.remove('grow','warp');dot.classList.remove('grow');ring.style.removeProperty('--cur-accent');});
+const sbar=document.querySelector('.scroll-bar'),rootEl=document.documentElement;
+function onScroll(){const max=rootEl.scrollHeight-rootEl.clientHeight;window.__prog=max>0?rootEl.scrollTop/max:0;sbar.style.width=(window.__prog*100)+'%';}
+addEventListener('scroll',onScroll,{passive:true});onScroll();
+document.querySelectorAll('[data-mag]').forEach(b=>{b.style.transition='transform .35s cubic-bezier(.16,1,.3,1)';b.addEventListener('mousemove',e=>{b.style.transition='transform .05s linear';const r=b.getBoundingClientRect();b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.3}px,${(e.clientY-r.top-r.height/2)*.4}px)`});b.addEventListener('mouseleave',()=>{b.style.transition='transform .35s cubic-bezier(.16,1,.3,1)';b.style.transform=''})});
+/* Scrollytelling-Sync: auf Touch (coarse) weiteres Band + flacherer Threshold,
+   sonst hängt die Beschreibung dem Scroll hinterher. Beide Observer nutzen dieselbe Config. */
+const __coarseObs=matchMedia('(pointer:coarse)').matches;
+const OBS=__coarseObs?{threshold:.18,rootMargin:'-22% 0px -42% 0px'}
+                     :{threshold:.55,rootMargin:'-30% 0px -30% 0px'};
+/* ===== Morph-Bild-Crossfade: zwei gestapelte <img>-Ebenen, abwechselnd ein-/ausblenden.
+   Lädt das neue Bild in die gerade unsichtbare Ebene; bei Load tauscht die Opazität. graceful onerror. */
+function makeMorpher(box){
+  if(!box)return function(){};
+  const still=box.closest('.filmstill')||box;
+  const layers=[...box.querySelectorAll('img')];if(layers.length<2)return function(){};
+  let active=-1,curSrc='';
+  layers.forEach(l=>{l.addEventListener('error',()=>{l.classList.remove('show');});});
+  return function(src){
+    if(!src||src===curSrc)return;curSrc=src;
+    const next=(active+1)%2,nextEl=layers[next];
+    const show=()=>{
+      still.classList.add('in');
+      layers.forEach((l,i)=>{if(i!==next){l.classList.remove('show');delete l.dataset.settled;l.style.transform='';}});
+      delete nextEl.dataset.settled;nextEl.style.transform='';   /* startet bei CSS scale(1.05) */
+      nextEl.classList.add('show');
+      active=next;
+      /* nach dem Crossfade darf der Parallax die Szene uebernehmen */
+      clearTimeout(nextEl.__settle);
+      nextEl.__settle=setTimeout(()=>{nextEl.dataset.settled='1';},900);
+    };
+    if(nextEl.getAttribute('src')===src&&nextEl.complete&&nextEl.naturalWidth>0){show();return;}
+    nextEl.classList.remove('show');
+    nextEl.onload=show;
+    nextEl.onerror=function(){nextEl.classList.remove('show');};
+    nextEl.src=src;
+  };
+}
+/* 8-Agenten: mittige Note → linkes Beschreibungsfeld */
+(function(){
+  const notes=[...document.querySelectorAll('#aRight .note')];if(!notes.length)return;
+  const aRole=document.getElementById('aRole'),aDesc=document.getElementById('aDesc');
+  const aStill=document.getElementById('aStill'),aStillName=document.getElementById('aStillName');
+  const morph=makeMorpher(document.getElementById('aMorph'));
+  const o=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting)return;
+    notes.forEach(n=>n.classList.remove('on'));en.target.classList.add('on');
+    const d=en.target.dataset;
+    aRole.textContent=d.role;aDesc.textContent=d.detail;
+    if(d.accent&&aStill)aStill.style.setProperty('--accent',d.accent);
+    if(d.name&&aStillName)aStillName.textContent=d.name;
+    if(d.img)morph(d.img);
+  }),OBS);
+  notes.forEach(n=>o.observe(n));
+})();
+
+/* ===== #result: aktive Karte -> rechte Headline/Beschreibung ===== */
+(function(){
+  const cards=[...document.querySelectorAll('#rLeft .rcard')];if(!cards.length)return;
+  const rName=document.getElementById('rName'),rDesc=document.getElementById('rDesc');
+  const rStill=document.getElementById('rStill'),rStillName=document.getElementById('rStillName');
+  const morph=makeMorpher(document.getElementById('rMorph'));
+  const o=new IntersectionObserver(es=>es.forEach(en=>{if(!en.isIntersecting)return;
+    cards.forEach(c=>c.classList.remove('on'));en.target.classList.add('on');
+    const d=en.target.dataset;
+    if(d.eyebrow&&rName)rName.textContent=d.eyebrow;
+    if(d.detail&&rDesc)rDesc.textContent=d.detail;
+    if(d.accent&&rStill)rStill.style.setProperty('--accent',d.accent);
+    if(d.name&&rStillName)rStillName.textContent=d.name;
+    if(d.img)morph(d.img);
+  }),OBS);
+  cards.forEach(c=>o.observe(c));
+})();
+
+/* ===== SOUND-ENGINE (Web Audio, additive Atmosphaere · Lusion-Stil) =====
+   Erweitert: geschichtetes Ambient-Bett (Drone + Pad + Air) das sich pro Szene
+   verfaerbt/filtert · Hover-Tick ueber Karten/Buttons · weicher Swell synchron
+   zu JEDEM Partikel-Morph · satter CTA-Klick · Filter-Drift nach Scroll-Tempo.
+   Alles synthetisiert, kein File. AudioContext erst bei erster Geste. ===== */
+(function(){
+  const btn=document.getElementById('snd'),lbl=document.getElementById('sndLbl');
+  const AC=window.AudioContext||window.webkitAudioContext;
+  const COARSE=matchMedia('(pointer:coarse)').matches; /* Touch: Hover-Ticks aus */
+  if(!AC){if(btn)btn.style.display='none';window.__audio={scene:function(){},portrait:function(){},whoosh:function(){},swell:function(){},tick:function(){},click:function(){}};return;}
+  let ctx=null,master=null,enabled=false,started=false,lastScene=-1;
+  /* Signal-Busse: ambBus (Ambient-Bett) -> ambFilter -> master ; fxBus (Events) -> master.
+     ambFilter ist das eine Tor, ueber das Szene + Scroll-Tempo die Farbwelt faerben. */
+  let ambBus=null,ambFilter=null,fxBus=null;
+  const PORTRAIT_INDEX=5;
+  /* Pro-Szene Klangfarbe (indexgleich zur KEYS/ACCENT-Logik 0..6):
+     cutoff = Helligkeit des Ambient-Filters, tone = Pad-Grundton (Hz), q = Resonanz. */
+  const SCENE_TONE=[
+    {cut:520,tone:55.00,q:0.7},  /* 0 chaos   — dunkel, breit */
+    {cut:900,tone:65.41,q:0.8},  /* 1 reden    — oeffnet sich */
+    {cut:820,tone:61.74,q:0.8},  /* 2 versteht */
+    {cut:1150,tone:73.42,q:1.0}, /* 3 agenten  — hell, praesent */
+    {cut:1000,tone:69.30,q:0.9}, /* 4 fahrplan */
+    {cut:760,tone:82.41,q:0.7},  /* 5 portrait — warm, ruhig */
+    {cut:1080,tone:73.42,q:0.9}  /* 6 cta      — offen, einladend */
+  ];
+  function ensure(){
+    if(ctx)return;
+    try{
+      ctx=new AC();
+      master=ctx.createGain();master.gain.value=0.0001;master.connect(ctx.destination);
+      ambFilter=ctx.createBiquadFilter();ambFilter.type='lowpass';ambFilter.frequency.value=560;ambFilter.Q.value=0.7;ambFilter.connect(master);
+      ambBus=ctx.createGain();ambBus.gain.value=1.0;ambBus.connect(ambFilter);
+      fxBus=ctx.createGain();fxBus.gain.value=1.0;fxBus.connect(master);
+    }catch(e){ctx=null;}
+  }
+  let droneBuilt=false;
+  let droneGain=null,padOscs=[];
+  function buildDrone(){
+    if(droneBuilt)return;droneBuilt=true;
+    try{
+      droneGain=ctx.createGain();droneGain.gain.value=1.0;droneGain.connect(ambBus);
+      /* LAGE 1 — zwei verstimmte Sinus-Stimmen (Fundament) */
+      [[55,-6],[82.5,5]].forEach(([f,det])=>{
+        const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;o.detune.value=det;
+        const g=ctx.createGain();g.gain.value=0.16;
+        const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=f<70?420:240;
+        o.connect(lp);lp.connect(g);g.connect(droneGain);o.start();
+        const lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=f<70?0.05:0.08;
+        const lg=ctx.createGain();lg.gain.value=0.06;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+      });
+      /* LAGE 2 — Pad: zwei Triangel-Stimmen (Grundton + Quinte), Frequenz wird pro Szene gefaerbt */
+      [[1.0,-4,0.052],[1.5,7,0.038]].forEach(([mult,det,gain])=>{
+        const o=ctx.createOscillator();o.type='triangle';o.frequency.value=55*mult;o.detune.value=det;
+        const g=ctx.createGain();g.gain.value=gain;
+        const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;
+        o.connect(lp);lp.connect(g);g.connect(droneGain);o.start();
+        const lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=0.07+Math.random()*0.04;
+        const lg=ctx.createGain();lg.gain.value=gain*0.4;lfo.connect(lg);lg.connect(g.gain);lfo.start();
+        padOscs.push({osc:o,mult:mult});
+      });
+      /* LAGE 3 — gefiltertes Loop-Noise (Luft) */
+      const nb=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);const nd=nb.getChannelData(0);
+      for(let i=0;i<nd.length;i++)nd[i]=(Math.random()*2-1)*0.5;
+      const ns=ctx.createBufferSource();ns.buffer=nb;ns.loop=true;
+      const nf=ctx.createBiquadFilter();nf.type='lowpass';nf.frequency.value=320;
+      const ng=ctx.createGain();ng.gain.value=0.04;
+      ns.connect(nf);nf.connect(ng);ng.connect(droneGain);ns.start();
+    }catch(e){}
+  }
+  /* Ambient-Bett auf eine Szene faerben: Filter-Cutoff/Q + Pad-Grundton sanft ueberblenden. */
+  function tintScene(i){
+    if(!ctx||!ambFilter)return;
+    const s=SCENE_TONE[Math.max(0,Math.min(SCENE_TONE.length-1,i))];if(!s)return;
+    const t=ctx.currentTime;
+    try{
+      ambFilter.frequency.setTargetAtTime(s.cut,t,1.1);
+      ambFilter.Q.setTargetAtTime(s.q,t,1.1);
+      padOscs.forEach(p=>{p.osc.frequency.setTargetAtTime(s.tone*p.mult,t,1.4);});
+    }catch(e){}
+  }
+  /* (a/c) Whoosh + weicher Swell — an JEDEN Morph gekoppelt. amt 0..1 skaliert Druck/Helligkeit. */
+  function whoosh(amt){
+    if(!ctx||!enabled)return;
+    const A=(amt==null?1:Math.max(0.2,Math.min(1.4,amt)));
+    try{
+      const t=ctx.currentTime,dur=0.9;
+      const nb=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);const nd=nb.getChannelData(0);
+      for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+      const ns=ctx.createBufferSource();ns.buffer=nb;
+      const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.4;
+      bp.frequency.setValueAtTime(280,t);bp.frequency.exponentialRampToValueAtTime(2600*A,t+0.32);bp.frequency.exponentialRampToValueAtTime(420,t+dur);
+      const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.12*A,t+0.12);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      ns.connect(bp);bp.connect(g);g.connect(fxBus);ns.start(t);ns.stop(t+dur);
+      ns.onended=()=>{try{ns.disconnect();bp.disconnect();g.disconnect();}catch(e){}};
+      /* harmonischer Swell unter dem Whoosh: weicher Sinus-Up-Sweep, tonale Anhebung */
+      const o=ctx.createOscillator();o.type='sine';
+      o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(220,t+0.5);
+      const og=ctx.createGain();og.gain.setValueAtTime(0.0001,t);og.gain.exponentialRampToValueAtTime(0.05*A,t+0.18);og.gain.exponentialRampToValueAtTime(0.0001,t+0.85);
+      o.connect(og);og.connect(fxBus);o.start(t);o.stop(t+0.9);
+      o.onended=()=>{try{o.disconnect();og.disconnect();}catch(e){}};
+    }catch(e){}
+  }
+  function swell(amt){whoosh(amt);} /* Alias fuer explizite Morph-Kopplung */
+  function portrait(){
+    if(!ctx||!enabled)return;
+    try{
+      const t0=ctx.currentTime+0.2,freqs=[523.25,659.25,783.99,1046.5];
+      freqs.forEach((f,i)=>{
+        const t=t0+i*0.09;const o=ctx.createOscillator();o.type='sine';o.frequency.value=f;
+        const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.09,t+0.04);g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+        o.connect(g);g.connect(fxBus);o.start(t);o.stop(t+1.7);
+        o.onended=()=>{try{o.disconnect();g.disconnect();}catch(e){}};
+      });
+    }catch(e){}
+  }
+  /* (b) dezenter Hover-Tick — kurzer, hoher, gefilterter Klick. Throttled, leise. */
+  let lastTick=0;
+  function tick(){
+    if(!ctx||!enabled)return;
+    const now=performance.now();if(now-lastTick<55)return;lastTick=now;
+    try{
+      const t=ctx.currentTime;
+      const o=ctx.createOscillator();o.type='triangle';
+      o.frequency.setValueAtTime(2100,t);o.frequency.exponentialRampToValueAtTime(1400,t+0.05);
+      const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.frequency.value=1900;bp.Q.value=2.2;
+      const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.035,t+0.006);g.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
+      o.connect(bp);bp.connect(g);g.connect(fxBus);o.start(t);o.stop(t+0.1);
+      o.onended=()=>{try{o.disconnect();bp.disconnect();g.disconnect();}catch(e){}};
+    }catch(e){}
+  }
+  /* (d) satter CTA-Klick — tiefer Sinus-Thump + heller Bestaetigungs-Ping. */
+  function click(){
+    if(!ctx||!enabled)return;
+    try{
+      const t=ctx.currentTime;
+      /* Thump */
+      const o=ctx.createOscillator();o.type='sine';
+      o.frequency.setValueAtTime(180,t);o.frequency.exponentialRampToValueAtTime(70,t+0.18);
+      const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.13,t+0.012);g.gain.exponentialRampToValueAtTime(0.0001,t+0.34);
+      o.connect(g);g.connect(fxBus);o.start(t);o.stop(t+0.36);
+      o.onended=()=>{try{o.disconnect();g.disconnect();}catch(e){}};
+      /* Ping (Quinte) */
+      const o2=ctx.createOscillator();o2.type='triangle';o2.frequency.setValueAtTime(880,t);o2.frequency.exponentialRampToValueAtTime(1320,t+0.12);
+      const g2=ctx.createGain();g2.gain.setValueAtTime(0.0001,t);g2.gain.exponentialRampToValueAtTime(0.06,t+0.02);g2.gain.exponentialRampToValueAtTime(0.0001,t+0.42);
+      o2.connect(g2);g2.connect(fxBus);o2.start(t);o2.stop(t+0.44);
+      o2.onended=()=>{try{o2.disconnect();g2.disconnect();}catch(e){}};
+    }catch(e){}
+  }
+  function scene(i){
+    tintScene(i);                 /* Farbwelt folgt immer (auch beim ersten Set) */
+    if(i===lastScene)return;
+    const prev=lastScene;lastScene=i;
+    if(prev<0)return; /* kein Whoosh beim allerersten Set/Load */
+    whoosh(1);
+    if(i===PORTRAIT_INDEX)portrait();
+  }
+  function setEnabled(on){
+    enabled=on;if(!ctx)return;
+    try{master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(on?0.16:0.0001,ctx.currentTime,0.25);}catch(e){}
+    if(on&&lastScene>=0)tintScene(lastScene);
+    if(btn)btn.classList.toggle('on',on);if(lbl)lbl.textContent=on?'Ton aus':'Ton an';
+  }
+  function go(){buildDrone();setEnabled(true);}
+  function firstGesture(){
+    if(started)return;started=true;
+    ensure();
+    if(!ctx){return;}
+    try{
+      const r=ctx.resume?ctx.resume():null;
+      if(r&&typeof r.then==='function'){r.then(go).catch(go);}else{go();}
+    }catch(e){go();}
+    ['pointerdown','touchstart','keydown','wheel','scroll'].forEach(ev=>removeEventListener(ev,firstGesture));
+  }
+  ['pointerdown','touchstart','keydown','wheel','scroll'].forEach(ev=>addEventListener(ev,firstGesture,{passive:true}));
+  if(btn)btn.addEventListener('click',e=>{e.stopPropagation();if(!started){firstGesture();return;}const next=!enabled;if(next&&ctx&&ctx.state==='suspended'){try{ctx.resume();}catch(_){}}if(next)buildDrone();setEnabled(next);});
+  addEventListener('visibilitychange',()=>{if(!ctx)return;try{master.gain.setTargetAtTime(document.hidden?0.0001:(enabled?0.16:0.0001),ctx.currentTime,0.2);}catch(e){}});
+
+  /* (b) Hover-Tick verdrahten — Karten, Notes, magnetische Buttons, Toggle. Auf Touch aus. */
+  if(!COARSE){
+    const wire=()=>{document.querySelectorAll('.note,.rcard,[data-mag],.snd,[data-hover]').forEach(el=>{
+      if(el.__sndWired)return;el.__sndWired=1;el.addEventListener('mouseenter',tick,{passive:true});});};
+    wire();
+    /* IntersectionObserver/Morph-Logik baut keine neuen Hover-Targets, aber sicherheitshalber nachverdrahten */
+    addEventListener('studio-ready',wire,{once:true});
+  }
+  /* (d) CTA-Klick — auf den Mailto-Button. Klick bleibt funktional (kein preventDefault). */
+  const ctaMag=document.querySelector('.cta .mag');
+  if(ctaMag)ctaMag.addEventListener('pointerdown',()=>{if(!started){firstGesture();}click();},{passive:true});
+
+  /* (e) Filter-Modulation nach Scroll-Tempo: schnelles Scrollen oeffnet das Ambient-Bett kurz.
+     Liest window.__prog-Delta (Source of Truth bleibt native Scroll-Position, nur lesend). */
+  let lastProg=window.__prog||0,vel=0,rafV=0;
+  function velTick(){
+    rafV=0;
+    if(ctx&&ambFilter&&enabled&&lastScene>=0){
+      const base=SCENE_TONE[Math.max(0,Math.min(SCENE_TONE.length-1,lastScene))];
+      const open=base.cut+Math.min(1,vel*22)*900;   /* bis ~+900Hz bei schnellem Scroll */
+      try{ambFilter.frequency.setTargetAtTime(open,ctx.currentTime,0.12);}catch(e){}
+    }
+    vel*=0.9;
+    if(vel>0.0004)rafV=requestAnimationFrame(velTick);
+  }
+  addEventListener('scroll',()=>{
+    const p=window.__prog||0;vel+=Math.abs(p-lastProg);lastProg=p;
+    if(!rafV)rafV=requestAnimationFrame(velTick);
+  },{passive:true});
+
+  window.__audio={scene:scene,portrait:portrait,whoosh:whoosh,swell:swell,tick:tick,click:click};
+})();
+
+/* ===== FOTO-STORY-MOMENTE: Scroll-Opacity (Crossfade) + Parallax/Ken-Burns =====
+   Reines DOM ueber dem Canvas — beruehrt weder Partikel-Phase, Bloom noch uGlow. */
+(function(){
+  const panels=[...document.querySelectorAll('.story')];
+  if(!panels.length)return;
+  panels.forEach(p=>{const ph=p.querySelector('.ph');if(ph&&p.dataset.img)ph.style.backgroundImage=`url('${p.dataset.img}')`;});
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let ticking=false;
+  function update(){
+    ticking=false;
+    const vh=innerHeight;
+    for(const p of panels){
+      const r=p.getBoundingClientRect();
+      const center=r.top+r.height/2;
+      const dist=Math.abs(center-vh/2)/(vh*0.85);
+      const op=Math.max(0,1-dist*dist)*0.28;          /* weicher Bell-Crossfade */
+      p.style.opacity=op.toFixed(3);
+      if(op>0.001){
+        const ph=p.querySelector('.ph');
+        if(ph&&!reduce){
+          const par=parseFloat(p.dataset.par||'0.16');
+          const drift=(center-vh/2)*par;
+          const zoom=1.08+(op*0.06);
+          ph.style.transform=`translate3d(0,${(-drift).toFixed(1)}px,0) scale(${zoom.toFixed(3)})`;
+        }
+      }
+    }
+  }
+  function onStoryScroll(){if(!ticking){ticking=true;requestAnimationFrame(update);}}
+  addEventListener('scroll',onStoryScroll,{passive:true});
+  addEventListener('resize',onStoryScroll,{passive:true});
+  addEventListener('studio-ready',()=>requestAnimationFrame(update),{once:true});
+  update();
+})();
+
+/* ===== Film-Still Parallax: aktive Szene driftet sanft beim Scrollen ===== */
+(function(){
+  const stills=[...document.querySelectorAll('.filmstill .morphimg')];
+  if(!stills.length)return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  let ticking=false;
+  function update(){
+    ticking=false;
+    const vh=innerHeight;
+    for(const box of stills){
+      const r=box.getBoundingClientRect();
+      if(r.bottom<-80||r.top>vh+80)continue;
+      const center=r.top+r.height/2;
+      const norm=(center-vh/2)/vh;                 /* -0.5 oben … +0.5 unten */
+      const drift=(-norm*16).toFixed(2);           /* dezenter Parallax-Versatz */
+      const img=box.querySelector('img.show');
+      /* nur driften wenn der Eintritts-Crossfade fertig ist (sonst CSS scale(1.05→1) nicht stoeren) */
+      if(img&&img.dataset.settled)img.style.transform=`scale(1.035) translate3d(0,${drift}px,0)`;
+    }
+  }
+  function onS(){if(!ticking){ticking=true;requestAnimationFrame(update);}}
+  addEventListener('scroll',onS,{passive:true});
+  addEventListener('resize',onS,{passive:true});
+  update();
+})();
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
+
+/* ===== GERAETE-TIER: Partikelzahl + Effekte an Mobile/Low-Power koppeln (60fps-Ziel) ===== */
+const __dm = navigator.deviceMemory || 4;            /* GB, fehlt auf iOS -> 4 */
+const __cores = navigator.hardwareConcurrency || 4;
+const __w = Math.min(innerWidth, innerHeight);       /* kuerzeste Kante: Hochformat-fair */
+const __coarse = matchMedia('(pointer:coarse)').matches;
+const __reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+/* Tier 0 = Phone/Low-Power, 1 = Tablet/Mid, 2 = Desktop/High */
+const TIER = (__w<=480 || __dm<=2 || (__coarse && __cores<=4)) ? 0
+           : (__w<=1024 || __dm<=4 || __coarse)               ? 1
+           : 2;
+const N      = TIER===0 ? 34000 : TIER===1 ? 70000 : 120000;
+const PR_CAP = TIER===0 ? 1.5   : TIER===1 ? 1.6   : 1.6;   /* pixelRatio-Cap */
+const BLOOM_HI = TIER===0 ? 0.42 : 0.6;                     /* abstrakte Szenen (chaos) */
+const BLOOM_LO = 0.12;                                      /* Text/Portrait: NIE anfassen */
+const RGB_BASE = TIER===0 ? 0.0006 : 0.0011;               /* Aberration leichter auf Mobile */
+const RGB_SWING= TIER===0 ? 0.0008 : 0.0016;
+const cv=document.getElementById('bg');
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,premultipliedAlpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,PR_CAP));
+renderer.setClearColor(0x06101f,0);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(55,innerWidth/innerHeight,.1,200);
+const C={
+  mag:  new THREE.Color(0xE94B5D), teal: new THREE.Color(0x1AA591),
+  amber:new THREE.Color(0xF2A645), cream:new THREE.Color(0xFBF6EA),
+  blue: new THREE.Color(0x4f7bd6),
+  indigo: new THREE.Color(0x6C4BE9), storm:  new THREE.Color(0xC23AD6),
+  coral:  new THREE.Color(0xFF7A59), peach:  new THREE.Color(0xFFC27A),
+  cyan:   new THREE.Color(0x2DE2E6), electric:new THREE.Color(0x4D8DFF),
+  gold:   new THREE.Color(0xFFC24B), goldhot:new THREE.Color(0xFFE08A),
+  skin:   new THREE.Color(0xE7B695)
+};
+
+function blank(){return {pos:new Float32Array(N*3),col:new Float32Array(N*3)};}
+function mixC(a,b,t){return a.clone().lerp(b,t);}
+
+/* ============================================================
+   FORMEN: JS-Curl-Noise + Volumen-Generatoren (nur abstrakte Szenen).
+   Text-/Portrait-Szenen bleiben flach/frontal (Canvas-Sampling).
+   ============================================================ */
+function _hash3(x,y,z){
+  let h=Math.sin(x*127.1+y*311.7+z*74.7)*43758.5453123;
+  let h2=Math.sin(x*269.5+y*183.3+z*246.1)*43758.5453123;
+  let h3=Math.sin(x*113.5+y*271.9+z*124.6)*43758.5453123;
+  return [(-1+2*(h-Math.floor(h))),(-1+2*(h2-Math.floor(h2))),(-1+2*(h3-Math.floor(h3)))];
+}
+function _vnoise(x,y,z){
+  const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z);
+  const fx=x-ix,fy=y-iy,fz=z-iz;
+  const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy),uz=fz*fz*(3-2*fz);
+  function g(cx,cy,cz,dx,dy,dz){const h=_hash3(ix+cx,iy+cy,iz+cz);return h[0]*dx+h[1]*dy+h[2]*dz;}
+  const x00=g(0,0,0,fx,fy,fz)*(1-ux)+g(1,0,0,fx-1,fy,fz)*ux;
+  const x10=g(0,1,0,fx,fy-1,fz)*(1-ux)+g(1,1,0,fx-1,fy-1,fz)*ux;
+  const x01=g(0,0,1,fx,fy,fz-1)*(1-ux)+g(1,0,1,fx-1,fy,fz-1)*ux;
+  const x11=g(0,1,1,fx,fy-1,fz-1)*(1-ux)+g(1,1,1,fx-1,fy-1,fz-1)*ux;
+  const y0=x00*(1-uy)+x10*uy, y1=x01*(1-uy)+x11*uy;
+  return y0*(1-uz)+y1*uz;
+}
+function _curl(x,y,z){
+  const e=0.6;
+  const x1=_vnoise(x,y+e,z)-_vnoise(x,y-e,z);
+  const x2=_vnoise(x,y,z+e)-_vnoise(x,y,z-e);
+  const y1=_vnoise(x,y,z+e)-_vnoise(x,y,z-e);
+  const y2=_vnoise(x+e,y,z)-_vnoise(x-e,y,z);
+  const z1=_vnoise(x+e,y,z)-_vnoise(x-e,y,z);
+  const z2=_vnoise(x,y+e,z)-_vnoise(x,y-e,z);
+  let vx=x1-x2, vy=y1-y2, vz=z1-z2;
+  const l=Math.hypot(vx,vy,vz)||1; return [vx/l,vy/l,vz/l];
+}
+
+/* chaos (KEY 0): Curl-Noise-Stroemungswolke — fibroese 3D-Nebel-Tendrillen mit Tiefe.
+   Tiefe wird in die Farbe gemappt (Blau-Unterton) -> Teal->Magenta auf Navy. */
+function chaos(){const o=blank();
+  for(let i=0;i<N;i++){
+    const r=4+Math.pow(Math.random(),.5)*3.2,th=Math.random()*6.283,ph=Math.acos(2*Math.random()-1);
+    let x=r*Math.sin(ph)*Math.cos(th), y=r*Math.cos(ph), z=r*Math.sin(ph)*Math.sin(th);
+    const steps=4+Math.floor(Math.random()*5);
+    for(let s=0;s<steps;s++){const c=_curl(x*0.18,y*0.18,z*0.18);x+=c[0]*1.6;y+=c[1]*1.6;z+=c[2]*1.6;}
+    o.pos[i*3]=x;o.pos[i*3+1]=y;o.pos[i*3+2]=z;
+    const depth=Math.min(1,Math.max(0,(z+8)/16));
+    let c=mixC(C.indigo,C.storm,Math.random());
+    c=c.lerp(C.blue,depth*0.30);
+    o.col[i*3]=c.r;o.col[i*3+1]=c.g;o.col[i*3+2]=c.b;
+  }return o;}
+
+/* galaxy (KEY 4): logarithmische 4-Arm-Spirale MIT Volumen — Bulge, Arm-Scatter,
+   nach aussen duenner werdende Scheibe. Warmer Amber-Kern -> Teal/Magenta-Arme, Hoehe blau getoent. */
+function galaxy(){const o=blank();
+  const arms=4;
+  for(let i=0;i<N;i++){
+    const bulge=Math.random()<0.16;
+    let x,y,z,rad;
+    if(bulge){
+      const br=Math.pow(Math.random(),1.5)*1.4,bt=Math.random()*6.283,bp=Math.acos(2*Math.random()-1);
+      x=br*Math.sin(bp)*Math.cos(bt);y=br*Math.cos(bp)*0.6;z=br*Math.sin(bp)*Math.sin(bt);rad=br;
+    }else{
+      const arm=Math.floor(Math.random()*arms);
+      rad=Math.pow(Math.random(),.7)*7;
+      const ang=Math.log(rad+1)*2.2+arm*(6.283/arms)+(Math.random()-.5)*.55;
+      const thick=Math.exp(-rad/4.5)*1.1+0.05;
+      x=Math.cos(ang)*rad+(Math.random()-.5)*0.4;
+      z=Math.sin(ang)*rad+(Math.random()-.5)*0.4;
+      y=(Math.random()-.5)*thick;
+    }
+    o.pos[i*3]=x;o.pos[i*3+1]=y;o.pos[i*3+2]=z;
+    let c;
+    if(rad<1.3){c=mixC(C.amber,C.cream,rad/1.3);}
+    else{c=mixC(C.teal,C.mag,Math.min(1,(rad-1.3)/5.7));}
+    c=c.lerp(C.blue,Math.min(1,Math.abs(y)*0.9)*0.4);
+    o.col[i*3]=c.r;o.col[i*3+1]=c.g;o.col[i*3+2]=c.b;
+  }return o;}
+
+/* stream (Transition): strukturiertes Daten-Gitter (Ordnung/Datenbasis) das sich
+   helikal in einen Stream zieht. Teal-Knoten, Magenta-Stream-Spitzen. */
+function stream(){const o=blank();
+  const side=Math.ceil(Math.cbrt(N));
+  for(let i=0;i<N;i++){
+    const gx=(i%side)/(side-1)-.5;
+    const gy=(Math.floor(i/side)%side)/(side-1)-.5;
+    const gz=(Math.floor(i/(side*side))%side)/(side-1)-.5;
+    const grid=[gx*5.0,gy*5.0,gz*5.0];
+    const t=(i/N)*Math.PI*12,rad=2.4;
+    const flow=[Math.cos(t)*rad,(i/N)*8-4,Math.sin(t)*rad];
+    const pull=Math.pow((i/N),0.8);
+    const x=grid[0]+(flow[0]-grid[0])*pull;
+    const y=grid[1]+(flow[1]-grid[1])*pull;
+    const z=grid[2]+(flow[2]-grid[2])*pull;
+    o.pos[i*3]=x;o.pos[i*3+1]=y;o.pos[i*3+2]=z;
+    const c=mixC(C.teal,C.mag,pull);
+    o.col[i*3]=c.r;o.col[i*3+1]=c.g;o.col[i*3+2]=c.b;
+  }return o;}
+
+function sampleCanvas(draw,opts){
+  const c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=opts.w;c.height=opts.h;draw(ctx,c);
+  const d=ctx.getImageData(0,0,c.width,c.height).data,pts=[];
+  for(let y=0;y<c.height;y+=opts.step)for(let x=0;x<c.width;x+=opts.step){const idx=(y*c.width+x)*4;
+    if(d[idx+3]>40 && (d[idx]+d[idx+1]+d[idx+2])/3>opts.lum){pts.push([(x-c.width/2)/opts.sc,-(y-c.height/2)/opts.sc,d[idx]/255,d[idx+1]/255,d[idx+2]/255]);}}
+  const o=blank();const jit=opts.jit!=null?opts.jit:.04,zjit=opts.zjit!=null?opts.zjit:.4,ex=opts.expose!=null?opts.expose:1.1;
+  for(let i=0;i<N;i++){const s=pts.length?pts[i%pts.length]:[0,0,1,1,1];let r,g,b;
+    if(opts.color){const cc=opts.color(i,s);r=cc.r;g=cc.g;b=cc.b;}else{r=Math.min(1,s[2]*ex);g=Math.min(1,s[3]*ex);b=Math.min(1,s[4]*ex);}
+    o.pos[i*3]=s[0]+(Math.random()-.5)*jit;o.pos[i*3+1]=s[1]+(Math.random()-.5)*jit;o.pos[i*3+2]=(Math.random()-.5)*zjit;
+    o.col[i*3]=r;o.col[i*3+1]=g;o.col[i*3+2]=b;}
+  o.hw=pts.reduce((m,p)=>Math.max(m,Math.abs(p[0])),0); /* Welt-Halbbreite -> Kamera-Fit (responsive) */
+  return o;
+}
+function textShape(txt,maxSize,ca,cb){
+  return sampleCanvas((ctx,c)=>{let fs=maxSize;ctx.textAlign='center';ctx.textBaseline='middle';
+    do{ctx.font=`800 ${fs}px Arial, sans-serif`;fs-=6;}while(ctx.measureText(txt).width>c.width*0.9&&fs>26);
+    ctx.fillStyle='#fff';ctx.fillText(txt,c.width/2,c.height/2);},
+    {w:1900,h:460,step:2,lum:128,sc:54,color:(i,s)=>mixC(ca,cb,(s[1]+3.5)/7)});
+}
+function portraitShape(img){const W=210,H=Math.round(W*img.height/img.width);
+  return sampleCanvas((ctx)=>ctx.drawImage(img,0,0,W,H),{w:W,h:H,step:1,lum:28,sc:22,jit:.01,zjit:.05,expose:.82});}
+
+/* constellation (KEY 4): leuchtendes Gold-Netz — 8 Knoten (= 8 Gewerk-Empfehlungen),
+   Partikel sammeln sich in Knoten + entlang der Speichen zum Zentrum. Gold->Goldhot, Kern cream. */
+function constellation(){
+  const o=blank(); const NODES=8, R=5.2; const nodes=[];
+  for(let n=0;n<NODES;n++){ const a=(n/NODES)*6.283-Math.PI/2;
+    const rr=R*(0.62+0.38*((n*97)%NODES)/NODES);
+    nodes.push([Math.cos(a)*rr, Math.sin(a)*rr*0.74, (Math.random()-.5)*0.5]); }
+  for(let i=0;i<N;i++){ let x,y,z,t;
+    if(Math.random()<0.60){ const nd=nodes[i%NODES];
+      const rr=Math.pow(Math.random(),0.7)*0.85, aa=Math.random()*6.283, bb=Math.acos(2*Math.random()-1);
+      x=nd[0]+Math.sin(bb)*Math.cos(aa)*rr; y=nd[1]+Math.sin(bb)*Math.sin(aa)*rr; z=nd[2]+Math.cos(bb)*rr*0.5; t=0.15;
+    }else{ const nd=nodes[i%NODES], f=Math.random();
+      x=(nd[0])*f+(Math.random()-.5)*0.18; y=(nd[1])*f+(Math.random()-.5)*0.18; z=(nd[2])*f+(Math.random()-.5)*0.18; t=0.65; }
+    o.pos[i*3]=x;o.pos[i*3+1]=y;o.pos[i*3+2]=z;
+    const NC=[C.mag,C.teal,C.amber,C.blue,C.indigo,C.coral,C.cyan,C.gold];let c=NC[i%NODES].clone().lerp(C.cream,t*0.22+Math.random()*0.12);
+    const dHub=Math.hypot(x,y)/R; c=c.lerp(C.cream,Math.max(0,1-dHub)*0.4);
+    o.col[i*3]=c.r;o.col[i*3+1]=c.g;o.col[i*3+2]=c.b; }
+  return o;
+}
+
+/* SCENES: 0 chaos · 1 "REDEN…" · 2 "DU REDEST · ES VERSTEHT" · 3 "8 AGENTEN" · 4 "DEIN FAHRPLAN" · 5 PORTRÄT · 6 "SCHREIB MIR" */
+const KEYS=[chaos(),
+  textShape('REDEN STATT AUSFÜLLEN',150,C.amber,C.goldhot),
+  textShape('AUS WORTEN WIRD STRUKTUR',118,C.amber,C.cream),
+  textShape('8 AGENTEN',300,C.cyan,C.electric),
+  constellation(),
+  null,
+  textShape('SCHREIB MIR',300,C.amber,C.goldhot)];
+const K=KEYS.length;
+const camZ=[15,13,14,13,15,9.5,13];
+/* RESPONSIVE-FIT: pro Szene mit Wort-Headline die Kamera so weit zuruecksetzen,
+   dass das ganze Wort (gemessene Welt-Halbbreite o.hw) bei JEDEM Seitenverhaeltnis
+   mit kleinem Rand sichtbar bleibt — Laptop/Tablet/Handy. Nie naeher als designt. */
+let CZ=camZ.slice();
+const _tanHalf=Math.tan(55*Math.PI/360), TEXT_FILL=0.86; /* Wort fuellt ~86% der Breite */
+function fitCamZ(){
+  const aspect=innerWidth/innerHeight;
+  for(let i=0;i<camZ.length;i++){
+    const hw=(KEYS[i]&&KEYS[i].hw)||0;
+    const zFit=hw?hw/(TEXT_FILL*_tanHalf*aspect):0;
+    CZ[i]=Math.max(camZ[i],zFit);
+  }
+}
+fitCamZ();
+const PI=5;
+
+/* ============================================================
+   FARBE: per-Szene Akzent + Mood-Knoebe, indiziert wie KEYS.
+   ============================================================ */
+/*               0chaos 1reden 2dured 3agent 4fahrp 5portr 6cta */
+const ACCENT=[C.mag, C.amber, C.coral, C.cyan, C.gold, C.skin, C.mag];
+const TWK   =[1.0,   0.35,  0.45,   0.6,    0.42,  0.12,   0.45]; /* Twinkle-Amplitude — Text/Portrait ruhiger */
+const HUEJ  =[0.10,  0.05,  0.06,   0.05,   0.05,  0.012,  0.05]; /* Hue-Jitter — Portrait nahe True-Color */
+const BRIJ  =[0.34,  0.26,  0.26,   0.30,   0.26,  0.16,   0.26]; /* Brightness-Jitter */
+const ACCA  =[0.45,  0.30,  0.34,   0.55,   0.34,  0.10,   0.40]; /* wie stark Akzent in heisse Partikel blutet */
+/* Pro-Szene Groesse/Glow/Bloom + Morph-Drama (Turbulenz/Stagger). Text/Portrait niedriger Bloom -> lesbar. */
+const SIZ =[1.35, 1.05, 1.05, 1.20, 1.25, 0.92, 1.10]; /* Groessen-Mult */
+const GLOW=[1.55, 1.05, 1.05, 1.20, 1.30, 0.95, 1.10]; /* uGlow-Ziel */
+const BLM =[BLOOM_HI, 0.14, 0.14, 0.18, 0.20, 0.12, 0.16]; /* Bloom: Text/Porträt niedrig */
+const TURB=[2.8, 3.8, 2.8, 2.9, 1.8, 2.6];   /* Morph-Drama pro Übergang (Start-seg) */
+const STAG=[0.82, 0.98, 0.82, 0.8, 0.62, 0.78];
+if(TIER===0){ for(let i=0;i<SIZ.length;i++) SIZ[i]*=0.88; }  /* dünne Phones schonen */
+const _accA=new THREE.Color(), _accB=new THREE.Color();
+
+const CAPS=[
+  {i:'00 · Die Ausgangslage',t:'Das Wissen ist <em>da.</em>',s:'Schichtübergaben, Tabellen, Bauchgefühl — jede Abteilung weiß viel, nur nutzbar ist es nicht.'},
+  {i:'Die Idee',t:'Reden statt ausfüllen.',s:'Die einzige Schnittstelle, die jede Abteilung schon kann — vom Empfang bis zur Küche.'},
+  {i:'Der Mechanismus',t:'Zuhören. Mitlesen. <em>Ordnen.</em>',s:'Ein Voice-Agent hört dir zu, ein Analyse-Agent liest deine Unterlagen mit. Aus beidem entsteht im Hintergrund eine saubere Datenbasis — ganz ohne dass du ein Formularfeld triffst.'},
+  {i:'03 · Die Pipeline',t:'8 Agenten. Ein <em>Report.</em>',s:'Research · Dokumente · Prozesse · Use-Cases · Tools · Wirtschaftlichkeit · Compliance · Reporter → <code>PDF · Excel · MD</code>'},
+  {i:'04 · Das Ergebnis',t:'Ein <em>Fahrplan</em> pro Gewerk.',s:'Kein Foliensatz für die Schublade. Pro Bereich eine ehrliche Empfehlung — was sich lohnt, was wartet, was du sein lassen kannst.'},
+  {i:'Der Mensch dahinter',t:'Alex Heyers.',s:'20 Jahre Hospitality, jetzt Vibe Coder. Vater seit 2025. Diese Seite ist gebaut — und sie ist eine Bewerbung.'}
+];
+
+const geo=new THREE.BufferGeometry();
+const aA=new THREE.BufferAttribute(KEYS[0].pos.slice(),3),aB=new THREE.BufferAttribute(KEYS[1].pos.slice(),3);
+const cA=new THREE.BufferAttribute(KEYS[0].col.slice(),3),cB=new THREE.BufferAttribute(KEYS[1].col.slice(),3);
+geo.setAttribute('position',new THREE.BufferAttribute(KEYS[0].pos.slice(),3));
+geo.setAttribute('aA',aA);geo.setAttribute('aB',aB);geo.setAttribute('cA',cA);geo.setAttribute('cB',cB);
+/* Per-Partikel-Attribute: aSeed = raeumliche Welle (Stagger) + Twinkle/Hue/Glow-Phase, aRand = Turbulenz-Variation */
+const seedArr=new Float32Array(N),randArr=new Float32Array(N*3);
+for(let i=0;i<N;i++){
+  seedArr[i]=Math.random();
+  randArr[i*3]=Math.random()*6.283; randArr[i*3+1]=Math.random()*6.283; randArr[i*3+2]=0.5+Math.random();
+}
+const aSeed=new THREE.BufferAttribute(seedArr,1);
+const aRand=new THREE.BufferAttribute(randArr,3);
+geo.setAttribute('aSeed',aSeed);geo.setAttribute('aRand',aRand);
+/* INTRO: per-Partikel Big-Bang-Richtung — leichte Kugel-Streuung um den Kern,
+   damit der Lichtpunkt Volumen hat und nicht zur exakten Singularitaet kollabiert. */
+const bangArr=new Float32Array(N*3);
+for(let i=0;i<N;i++){
+  const u=Math.random()*6.283, v=Math.acos(2*Math.random()-1), r=0.4+Math.random()*0.9;
+  bangArr[i*3]  =Math.sin(v)*Math.cos(u)*r;
+  bangArr[i*3+1]=Math.sin(v)*Math.sin(u)*r;
+  bangArr[i*3+2]=Math.cos(v)*r;
+}
+geo.setAttribute('aBang',new THREE.BufferAttribute(bangArr,3));
+/* aSeed pro Segment aus der Ziel-Geometrie neu ableiten (raeumliche Welle entlang X+Y der Zielform) */
+function reseed(b){const p=b.pos;let mn=1e9,mx=-1e9;
+  for(let i=0;i<N;i++){const k=p[i*3]*0.6+p[i*3+1]*0.4;if(k<mn)mn=k;if(k>mx)mx=k;}
+  const inv=mx>mn?1/(mx-mn):0;
+  for(let i=0;i<N;i++){const k=(p[i*3]*0.6+p[i*3+1]*0.4-mn)*inv;
+    /* 75% raeumliche Welle + 25% Rauschen -> kohaerent aber nicht mechanisch */
+    seedArr[i]=Math.max(0,Math.min(1,k*0.75+Math.random()*0.25));}
+  aSeed.needsUpdate=true;}
+
+const mat=new THREE.ShaderMaterial({
+  uniforms:{
+    uMix:{value:0},
+    uSize:{value:1.25*Math.min(devicePixelRatio,1.6)},
+    uGlow:{value:1.5},
+    uStagger:{value:0.0},   /* Breite des gestaffelten Zeitfensters (0 = uniform, ~0.55 = starke raeumliche Welle) */
+    uTurb:{value:0.0},      /* Turbulenz-Amplitude waehrend des Morphs (0 am Dwell) */
+    uTime:{value:0.0},      /* animiert Curl-Noise-Stroemung + Twinkle */
+    uAccent:{value:new THREE.Color(0x1AA591)}, /* per-Szene Glow-Akzent, in JS gemorpht */
+    uAccAmt:{value:0.5},    /* wie stark der Akzent in heisse Partikel blutet */
+    uTwinkle:{value:1.0},   /* Twinkle-Amplitude (->0 am Text/Portrait-Dwell) */
+    uHueJit:{value:0.06},   /* per-Partikel Hue-Spreizung (->~0 am Portrait) */
+    uBriJit:{value:0.30},   /* per-Partikel Helligkeits-Spreizung */
+    uBang:{value:1.0}       /* INTRO: 1 = alles im Lichtkern, 0 = nahtlos auf aA (Scroll-0-Zustand) */
+  },
+  vertexShader:`
+   attribute vec3 aA;attribute vec3 aB;attribute vec3 cA;attribute vec3 cB;
+   attribute float aSeed;attribute vec3 aRand;attribute vec3 aBang;
+   uniform float uMix;uniform float uSize;uniform float uStagger;uniform float uTurb;uniform float uTime;uniform float uBriJit;
+   uniform float uBang;
+   varying vec3 vCol;varying float vSpd;varying float vSeed;varying float vHot;
+
+   /* --- billiger 3D-Curl-Noise (analytisches Gradient eines glatten Potentials) --- */
+   vec3 hash3(vec3 p){
+     p=vec3(dot(p,vec3(127.1,311.7,74.7)),dot(p,vec3(269.5,183.3,246.1)),dot(p,vec3(113.5,271.9,124.6)));
+     return -1.0+2.0*fract(sin(p)*43758.5453123);
+   }
+   float vnoise(vec3 p){
+     vec3 i=floor(p),f=fract(p);vec3 u=f*f*(3.0-2.0*f);
+     return mix(mix(mix(dot(hash3(i+vec3(0,0,0)),f-vec3(0,0,0)),dot(hash3(i+vec3(1,0,0)),f-vec3(1,0,0)),u.x),
+                    mix(dot(hash3(i+vec3(0,1,0)),f-vec3(0,1,0)),dot(hash3(i+vec3(1,1,0)),f-vec3(1,1,0)),u.x),u.y),
+                mix(mix(dot(hash3(i+vec3(0,0,1)),f-vec3(0,0,1)),dot(hash3(i+vec3(1,0,1)),f-vec3(1,0,1)),u.x),
+                    mix(dot(hash3(i+vec3(0,1,1)),f-vec3(0,1,1)),dot(hash3(i+vec3(1,1,1)),f-vec3(1,1,1)),u.x),u.y),u.z);
+   }
+   vec3 curl(vec3 p){
+     float e=0.35;vec2 d=vec2(e,0.0);
+     float x1=vnoise(p+d.yxy)-vnoise(p-d.yxy);
+     float x2=vnoise(p+d.yyx)-vnoise(p-d.yyx);
+     float y1=vnoise(p+d.yyx)-vnoise(p-d.yyx);
+     float y2=vnoise(p+d.xyy)-vnoise(p-d.xyy);
+     float z1=vnoise(p+d.xyy)-vnoise(p-d.xyy);
+     float z2=vnoise(p+d.yxy)-vnoise(p-d.yxy);
+     return normalize(vec3(x1-x2,y1-y2,z1-z2)+1e-5);
+   }
+
+   void main(){
+     /* 1) GESTAFFELTES TIMING: jedes Partikel hat sein eigenes Zeitfenster.
+        Beim Hinmorphen (uMix steigt) laufen kleine Seeds voraus, beim Zurueck die grossen -> raeumliche Welle.
+        Bei uStagger==0 faellt das auf uniformes uMix zurueck (Dwell = exakt lesbar). */
+     float w=clamp(uStagger,0.0,0.95);
+     float lo=aSeed*w;
+     float local=clamp((uMix-lo)/max(1e-3,1.0-w),0.0,1.0);
+     float t=local*local*(3.0-2.0*local);           /* smoothstep ease pro Partikel */
+
+     vec3 p=mix(aA,aB,t);
+     vec3 col=mix(cA,cB,t);
+
+     /* INTRO BIG-BANG: ueberlagert den normalen Morph. uBang 1->0.
+        core = enger Lichtpunkt nahe Origin; jedes Partikel staggert ueber aSeed
+        und reist entlang aBang nach aussen auf seine aA-Position. */
+     if(uBang>0.0001){
+       float bs=clamp((uBang-aSeed*0.35)/0.65,0.0,1.0);   /* per-Partikel Stagger */
+       float be=bs*bs*(3.0-2.0*bs);                        /* smoothstep */
+       vec3 core=aBang*0.35;                               /* winziger glühender Kern */
+       p=mix(p,core,be);
+       vSeed=aSeed;                                        /* fuer Twinkle weiter gueltig */
+     }
+
+     /* FARBE: per-Partikel Helligkeits-Variation -> nie flach */
+     float bri=1.0+(aSeed-0.5)*2.0*uBriJit;
+     col*=bri;
+     vSeed=aSeed;
+     vHot=clamp(dot(col,vec3(0.299,0.587,0.114)),0.0,1.0);
+     vCol=col;
+
+     /* 2) TURBULENZ-HUELLKURVE: 0 an beiden Enden, Maximum in der Mitte des GLOBALEN Morphs.
+        -> Partikel schwingen aus und sammeln sich wieder; am Dwell (uTurb*env==0) absolut ruhig. */
+     float env=sin(uMix*3.14159265);                /* 0..1..0 ueber den Uebergang */
+     env*=env;                                       /* schaerfer auf die Mitte fokussiert */
+     float amp=uTurb*env;
+
+     /* zusaetzlich pro Partikel: Mitte der eigenen Bewegung am staerksten */
+     float self=sin(local*3.14159265);
+     amp*=mix(0.55,1.0,self);
+
+     vec3 flow=curl(p*0.55+vec3(0.0,uTime*0.18,aRand.x));
+     /* leichte Wirbel-Pulsation pro Partikel -> organisch, nicht gleichfoermig */
+     float puls=0.6+0.4*sin(uTime*1.7+aRand.y);
+     p+=flow*amp*aRand.z*puls;
+
+     /* 3) GROESSEN-/GESCHWINDIGKEITSREAKTION: Partikel in Bewegung leuchten groesser/heisser */
+     float moving=self;                              /* 0 ruhend, 1 mitten in der Eigenbewegung */
+     vSpd=moving*env;
+
+     /* dezentes Groessen-Atmen, damit das Feld nie statisch wirkt (winzig -> Text bleibt scharf) */
+     float breath=0.5+0.5*sin(uTime*1.6+aSeed*6.2831);
+
+     vec4 mv=modelViewMatrix*vec4(p,1.);
+     float sz=uSize*(1.0+vSpd*0.9)*(0.92+0.16*breath);  /* bis +90% waehrend Flug, ~uSize am Dwell */
+     gl_PointSize=sz*(24.0/-mv.z);
+     gl_Position=projectionMatrix*mv;
+   }`,
+  fragmentShader:`
+   varying vec3 vCol;varying float vSpd;varying float vSeed;varying float vHot;
+   uniform float uGlow;uniform float uTime;
+   uniform vec3 uAccent;uniform float uAccAmt;uniform float uTwinkle;uniform float uHueJit;
+   /* billige Hue-Rotation in approximativem Raum (gut genug fuer subtilen Jitter) */
+   vec3 hueShift(vec3 c, float a){
+     const vec3 k=vec3(0.57735);
+     float ca=cos(a), sa=sin(a);
+     return c*ca + cross(k,c)*sa + k*dot(k,c)*(1.0-ca);
+   }
+   void main(){
+     vec2 q=gl_PointCoord-0.5;float d=dot(q,q);
+     if(d>0.25)discard;
+     float a=smoothstep(0.25,0.0,d);
+     float core=smoothstep(0.06,0.0,d);
+     vec3 col=vCol;
+     /* per-Partikel Hue-Jitter — stabil, durch Seed vorzeichenbehaftet */
+     col=hueShift(col,(vSeed-0.5)*uHueJit*6.2831);
+     /* zeitbasiertes Twinkle, Phase pro Partikel -> kein globales Flackern, individuelles Funkeln */
+     float tw=sin(uTime*2.4+vSeed*62.83);
+     col*=1.0+uTwinkle*0.22*tw;
+     /* Akzent-Glow nur auf den hellsten Partikeln -> Highlights poppen, kein globaler Wash */
+     float hot=smoothstep(0.55,0.95,vHot);
+     col=mix(col,uAccent,hot*uAccAmt*0.6);
+     col+=uAccent*core*hot*0.9;                       /* knackiger additiver Funke im Zentrum heisser Punkte */
+     /* fliegende Partikel etwas heisser/heller -> sichtbare Energie im Uebergang, neutral am Dwell */
+     col*=(uGlow+vSpd*0.35);
+     gl_FragColor=vec4(col,a*(1.0-vSpd*0.15));
+   }`,
+  transparent:true,blending:THREE.NormalBlending,depthWrite:false,depthTest:false
+});
+const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;scene.add(pts);
+
+let curSeg=-1;
+function setSeg(k,force){if(k===curSeg&&!force)return;curSeg=k;const a=KEYS[k]||KEYS[0],b=KEYS[Math.min(k+1,K-1)]||a;
+  aA.array.set(a.pos);aA.needsUpdate=true;aB.array.set(b.pos);aB.needsUpdate=true;cA.array.set(a.col);cA.needsUpdate=true;cB.array.set(b.col);cB.needsUpdate=true;
+  reseed(b);}
+setSeg(0,true);
+
+const img=new Image();
+img.onload=()=>{try{KEYS[PI]=portraitShape(img);fitCamZ();if(curSeg>=PI-1)setSeg(curSeg,true);}catch(e){KEYS[PI]=galaxy();}if(window.__studioMark)window.__studioMark('portrait');};
+img.onerror=()=>{KEYS[PI]=galaxy();if(window.__studioMark)window.__studioMark('portrait');};
+img.src='_Content-Pipeline/bilder/alex-heyers-portrait.jpg';
+
+/* HalfFloat-Composer-Target: Bloom rechnet mit 16-Bit-Praezision -> kein 8-Bit-Banding ("graue Streifen") im Glow.
+   RGBA-Format + transparent halten -> #scene-bg scheint hinter den Partikeln durch. */
+const __ctTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{format:THREE.RGBAFormat,type:THREE.HalfFloatType});
+const composer=new EffectComposer(renderer,__ctTarget);
+const renderPass=new RenderPass(scene,cam);renderPass.clearAlpha=0;composer.addPass(renderPass);
+const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.75,.55,.2);composer.addPass(bloom);
+/* FINALER Pass: Chromatic Aberration + Dither. Dither bricht die 8-Bit-Quantisierung beim Ausgeben
+   auf den Canvas auf -> entfernt Rest-Banding ohne sichtbares Rauschen. Uniforms amount/angle bleiben gleich. */
+const RGBDitherShader={
+  uniforms:{tDiffuse:{value:null},amount:{value:RGB_BASE},angle:{value:0.0}},
+  vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+  fragmentShader:`uniform sampler2D tDiffuse;uniform float amount;uniform float angle;varying vec2 vUv;
+    float ign(vec2 p){return fract(52.9829189*fract(dot(p,vec2(0.06711056,0.00583715))));}
+    void main(){
+      vec2 off=amount*vec2(cos(angle),sin(angle));
+      float cr=texture2D(tDiffuse,vUv+off).r;
+      vec4  cg=texture2D(tDiffuse,vUv);
+      float cb=texture2D(tDiffuse,vUv-off).b;
+      vec3 col=vec3(cr,cg.g,cb);
+      /* Triangular-PDF Dither, Amplitude ~1.5/255 */
+      float d=(ign(gl_FragCoord.xy)+ign(gl_FragCoord.xy+11.13)-1.0)/255.0*1.5;
+      col+=d;
+      gl_FragColor=vec4(col,cg.a);
+    }`
+};
+const rgb=new ShaderPass(RGBDitherShader);rgb.uniforms.amount.value=RGB_BASE;rgb.uniforms.angle.value=0;rgb.renderToScreen=true;composer.addPass(rgb);
+function size(){renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();fitCamZ();}
+size();let __rz;addEventListener('resize',()=>{clearTimeout(__rz);__rz=setTimeout(size,120);},{passive:true});
+addEventListener('orientationchange',()=>setTimeout(size,250));
+
+function smoothstep(a,b,t){t=Math.max(0,Math.min(1,(t-a)/(b-a)));return t*t*(3-2*t);}
+function lerp(a,b,t){return a+(b-a)*t;}
+const heroEl=document.getElementById('hero'),capEl=document.getElementById('cap'),ctaEl=document.getElementById('cta'),cue=document.getElementById('cue');
+const capIdx=capEl.querySelector('.idx'),capT=capEl.querySelector('.t'),capS=capEl.querySelector('.s');
+/* Title-Card: Idee + Mechanismus als EIN gefuegtes Diptychon (nur bei nearK 1 / 2) */
+const titleCard=document.getElementById('titleCard');
+const tcHalfA=document.getElementById('tcHalfA'),tcHalfB=document.getElementById('tcHalfB');
+const tcImgA=document.getElementById('tcImgA'),tcImgB=document.getElementById('tcImgB');
+const tcStep=document.getElementById('tcStep'),tcTitle=document.getElementById('tcTitle'),tcSub=document.getElementById('tcSub');
+const tcNodes=titleCard.querySelectorAll('.tc-node');
+const BEATS={
+  /* Card = KAPITEL-Name (Playfair), NICHT die These — die steht schon als Partikelwort.
+     Beat 1 Partikel: "REDEN STATT AUSFÜLLEN" · Beat 2: "AUS WORTEN WIRD STRUKTUR". */
+  1:{step:'01',t:'Die <em>Idee.</em>',        s:'Reden statt ausfüllen: die einzige Schnittstelle, die jede Abteilung schon kann — vom Empfang bis zur Küche.'},
+  2:{step:'02',t:'Der <em>Mechanismus.</em>', s:'Ein Voice-Agent hört dir zu, ein Analyse-Agent liest deine Unterlagen mit — daraus entsteht eine saubere Datenbasis, ganz ohne Formularfeld.'}
+};
+/* beide Haelften EINMALIG laden — sie fuegen sich zur durchgehenden Szene */
+tcImgA.addEventListener('load',()=>tcImgA.classList.add('show'));
+tcImgB.addEventListener('load',()=>tcImgB.classList.add('show'));
+tcImgA.src='studio-assets/scene-idee.jpg';
+tcImgB.src='studio-assets/scene-mechanismus.jpg';
+let tcBeat=-1;
+let shownCap=-1,camX=0,camY=0,banner=0;
+const agentsSec=document.getElementById('agents');
+const resultSec=document.getElementById('result');
+const rootEl=document.documentElement;
+/* Backdrop-Layer (cinematic Hintergruende hinter den Partikeln) */
+const bgHero=document.getElementById('bg-hero'),bgData=document.getElementById('bg-data'),bgCraft=document.getElementById('bg-craft');
+let bgwHero=0,bgwData=0,bgwCraft=0;
+function bgWeight(phase,center){return Math.max(0,1-Math.abs(phase-center)/1.4);}
+
+/* ===== INTRO BIG-BANG STATE ===== */
+let introDone=false, introStart=0, introArmed=false, firstFrameMarked=false;
+const INTRO_MS=3000;
+/* Hero-Overlay erst NACH dem Intro einblenden: bis dahin hart auf 0 halten */
+heroEl.style.opacity='0'; cue.style.opacity='0';
+heroEl.style.transition='opacity .9s ease'; cue.style.transition='opacity .9s ease';
+/* Intro startet erst wenn der Preloader fertig ist (three + Portrait bereit) */
+addEventListener('studio-ready',()=>{introArmed=true;},{once:true});
+
+function loop(){
+  const prog=window.__prog||0;
+
+  /* ===== INTRO: ueberschreibt setSeg/uMix fuer ~3s, danach nahtloser Handoff ===== */
+  if(!introDone){
+    /* warten bis der Preloader 'studio-ready' feuert; bis dahin Feld kollabiert (uBang=1) halten */
+    if(!introArmed){
+      setSeg(0,true);
+      mat.uniforms.uMix.value=0; mat.uniforms.uBang.value=1.0;
+      mat.uniforms.uStagger.value=0; mat.uniforms.uTurb.value=0;
+      composer.render();
+      if(!firstFrameMarked){firstFrameMarked=true;if(window.__studioMark)window.__studioMark('three');}
+      requestAnimationFrame(loop);return;
+    }
+    if(!introStart)introStart=performance.now();
+    const raw=Math.min(1,(performance.now()-introStart)/INTRO_MS);
+    const introT=raw*raw*(3.0-2.0*raw);            /* smoothstep ease 0->1 */
+    setSeg(0,true);                                 /* chaos-Keyframe = Scroll-0-Zustand */
+    mat.uniforms.uMix.value=0;
+    mat.uniforms.uBang.value=1-introT;              /* 1 -> 0: Partikel sammeln sich nach aussen */
+    mat.uniforms.uTime.value+=0.016;
+    /* Mood auf Szene-0 fixieren */
+    mat.uniforms.uStagger.value=0; mat.uniforms.uTurb.value=0;
+    mat.uniforms.uAccent.value.copy(ACCENT[0]);
+    mat.uniforms.uAccAmt.value=ACCA[0]; mat.uniforms.uTwinkle.value=TWK[0];
+    mat.uniforms.uHueJit.value=HUEJ[0]; mat.uniforms.uBriJit.value=BRIJ[0];
+    /* Glow/Bloom als Lichtblitz am Anfang, klingt zum Hero-Wert ab */
+    mat.uniforms.uGlow.value=lerp(2.4,1.5,introT);
+    bloom.strength=lerp(1.6,BLOOM_HI+0.12,introT);
+    /* sanfter Kamera-Dolly: aus der Tiefe auf den Hero-Abstand (camZ[0]=15) */
+    const dollyZ=lerp(camZ[0]+9,camZ[0],introT);
+    const px=(window.__nmx-.5),py=(window.__nmy-.5);
+    cam.position.set(px*1.1*introT,py*0.9*introT,dollyZ);
+    cam.lookAt(0,0,0);
+    pts.position.y=0; pts.scale.setScalar(1);
+    pts.rotation.set(0,0,0);
+    if(raw>=1){
+      introDone=true;
+      mat.uniforms.uBang.value=0;                   /* hart auf 0: ab jetzt exakt aA */
+      heroEl.style.opacity='1'; cue.style.opacity='1';  /* Hero fadet NACH Intro ein */
+    }
+    composer.render();requestAnimationFrame(loop);
+    return;
+  }
+  const st=rootEl.scrollTop, vh=innerHeight, docEnd=Math.max(1,rootEl.scrollHeight-vh);
+  /* Phase aus Scroll-Offsets — ZWEI Banner-Holds:
+     0→3 vor #agents · HALT@3 in #agents · 3→4 dazwischen · HALT@4 in #result · 4→6 danach. */
+  const ar=agentsSec.getBoundingClientRect();
+  const aTop=ar.top+st, aBot=ar.bottom+st;
+  const aHoldStart=Math.max(1,aTop-vh*0.85), aHoldEnd=Math.max(aHoldStart+1,aBot-vh*0.55);
+  const rr=resultSec.getBoundingClientRect();
+  const rTop=rr.top+st, rBot=rr.bottom+st;
+  const rHoldStart=Math.max(aHoldEnd+1,rTop-vh*0.85), rHoldEnd=Math.max(rHoldStart+1,rBot-vh*0.55);
+  let phase;
+  if(st<aHoldStart)        phase=(st/aHoldStart)*3;                                  /* 0 → 3 */
+  else if(st<aHoldEnd)     phase=3;                                                   /* HALT "8 AGENTEN" */
+  else if(st<rHoldStart)   phase=3+((st-aHoldEnd)/Math.max(1,rHoldStart-aHoldEnd));   /* 3 → 4 */
+  else if(st<rHoldEnd)     phase=4;                                                   /* HALT "DEIN FAHRPLAN" */
+  else                     phase=4+((st-rHoldEnd)/Math.max(1,docEnd-rHoldEnd))*2;     /* 4 → 6 (Porträt → SCHREIB MIR) */
+  phase=Math.max(0,Math.min(K-1,phase));
+  const seg=Math.min(K-2,Math.floor(phase)),local=phase-seg;
+  setSeg(seg);
+  const m=smoothstep(.15,.85,local);
+  mat.uniforms.uMix.value=m;
+  const swing=Math.sin(m*Math.PI);
+  const nearK=Math.round(phase);
+  if(window.__audio&&window.__audio.scene) window.__audio.scene(nearK);
+  /* Morph-Swell an die bestehende swing-Kurve koppeln: einmal pro Uebergang am Peak ausloesen */
+  if(window.__audio&&window.__audio.swell){ if(swing>0.86&&!window.__swelled){window.__swelled=1;window.__audio.swell(0.7+swing*0.6);} else if(swing<0.5){window.__swelled=0;} }
+  const atP=(nearK===PI);
+  /* Ziel-Szene dieses Segments: zu/aus PORTRAIT sanfter (weniger Stagger/Turbulenz) -> Gesicht rastet scharf+frontal ein */
+  const toP=(seg+1===PI), fromP=(seg===PI);
+  const calm=(toP||fromP)?0.45:1.0;
+  /* uStagger/uTurb pro-Szene + swing -> am Dwell exakt 0 (Text/Portrait stehen still, lesbar, frontal) */
+  mat.uniforms.uStagger.value=swing*STAG[Math.min(STAG.length-1,seg)]*calm;
+  mat.uniforms.uTurb.value   =swing*TURB[Math.min(TURB.length-1,seg)]*calm;
+  {const ex=Math.sin(m*Math.PI);mat.uniforms.uTurb.value+=ex*1.9*calm;mat.uniforms.uStagger.value+=ex*0.5*calm;}
+  mat.uniforms.uTime.value+=0.016;
+  /* lesbare Szenen: Text (1,2,3,6) + Portrait (5) scharf -> niedriger Bloom, moderater uGlow. */
+  const isReadable=(nearK===1||nearK===2||nearK===3||nearK===4||nearK===5||nearK===6);
+  const nxK=Math.min(K-1,seg+1);
+  /* uSize pro-Szene (sonst statisch): weniger Punkte -> jeder groesser -> strahlt voller */
+  mat.uniforms.uSize.value=lerp(SIZ[seg],SIZ[nxK],m)*(TIER===2?1.25:1.55)*Math.min(devicePixelRatio,PR_CAP);
+  mat.uniforms.uSize.value*=1+swing*0.6;
+  /* uGlow pro-Szene weich nachgezogen */
+  const glowTarget=lerp(GLOW[seg],GLOW[nxK],m);
+  mat.uniforms.uGlow.value+=(glowTarget-mat.uniforms.uGlow.value)*.05;
+  mat.uniforms.uGlow.value+=swing*0.7;
+  /* Bloom pro-Szene-Dwell + Mid-Drama (abstrakte Szenen duerfen mitten im Morph aufstrahlen) */
+  const bloomDwell=lerp(BLM[seg],BLM[nxK],m);
+  const bloomMid=(toP||fromP||isReadable)?bloomDwell:BLOOM_HI;
+  bloom.strength+=(lerp(bloomDwell,bloomMid,swing*0.7)-bloom.strength)*.06;
+
+  /* CHROMATIC ABERRATION: subtil am Dwell, staerker mitten im Szenenwechsel; langsamer Winkel-Drift -> lebendig */
+  rgb.uniforms.amount.value=RGB_BASE+swing*RGB_SWING;
+  rgb.uniforms.angle.value=mat.uniforms.uTime.value*0.05;
+
+  /* CINEMATIC BACKDROPS: Crossfade je nach Phase, weich nachgezogen (Lerp 0.05).
+     hero peakt im Idee-Beat (~0.6), data in der "8 AGENTEN"/Pipeline-Phase (3), craft am Portraet (5). */
+  if(bgHero){
+    const tHero=0, tData=bgWeight(phase,3.0)*0.5*0.28, tCraft=bgWeight(phase,5.0)*0.32;
+    bgwHero +=(tHero -bgwHero )*0.05; bgHero.style.opacity =bgwHero.toFixed(3);
+    bgwData +=(tData -bgwData )*0.05; bgData.style.opacity =bgwData.toFixed(3);
+    bgwCraft+=(tCraft-bgwCraft)*0.05; bgCraft.style.opacity=bgwCraft.toFixed(3);
+  }
+
+  /* FARBE: alle Mood-Knoebe ueber dieselbe seg->seg+1-Grenze morphen wie die Geometrie */
+  const nx=Math.min(K-1,seg+1);
+  _accA.copy(ACCENT[seg]); _accB.copy(ACCENT[nx]);
+  mat.uniforms.uAccent.value.copy(_accA).lerp(_accB,m);
+  mat.uniforms.uAccAmt.value =lerp(ACCA[seg], ACCA[nx], m);
+  mat.uniforms.uTwinkle.value=lerp(TWK[seg],  TWK[nx],  m);
+  mat.uniforms.uHueJit.value =lerp(HUEJ[seg], HUEJ[nx], m);
+  mat.uniforms.uBriJit.value =lerp(BRIJ[seg], BRIJ[nx], m);
+
+  /* Banner: aktive Headline ("8 AGENTEN" bzw. "DEIN FAHRPLAN") während ihrer Sektion nach oben heben + verkleinern */
+  const inAgents=(st>=aHoldStart-vh*0.2 && st<aHoldEnd);
+  const inResult=(st>=rHoldStart-vh*0.2 && st<rHoldEnd);
+  const isHold=(inAgents||inResult);
+  banner+=((isHold?1:0)-banner)*0.08;
+  pts.position.y=banner*4.9;
+  pts.scale.setScalar(1-banner*0.38);
+  const sw=swing*(1-banner);
+  const tz=lerp(CZ[seg],CZ[seg+1],m)-swing*3.4;
+  const tx=sw*5.0*(seg%2?1:-1),ty=sw*1.6;
+  camX+=(tx-camX)*.05;camY+=(ty-camY)*.05;
+  const px=(window.__nmx-.5),py=(window.__nmy-.5);
+  cam.position.set(camX+px*1.1,camY+py*0.9,tz);cam.lookAt(0,0,0);
+  pts.rotation.y=m*6.2831853*(seg%2?-1:1)*(1-banner)+px*0.1*(1-banner);  /* volle 360deg pro Uebergang, am Dwell frontal */
+  pts.rotation.x=py*0.06*(1-banner)+sw*0.15;
+  pts.rotation.z=sw*0.11*(seg%2?1:-1);if(nearK===4)pts.rotation.z-=rootEl.scrollTop*0.0012;
+
+  if(introDone){
+    heroEl.style.opacity=String(Math.max(0,1-prog*20));
+    cue.style.opacity=String(Math.max(0,1-prog*20));
+  }
+  const near=nearK;
+  const atDwell=(local<.24||local>.76);
+  const inChapter=(near===1||near===2);  /* Idee/Mechanismus -> Title-Card traegt den Text */
+  capEl.style.opacity=String(banner<.35&&prog>0.02&&near<6&&atDwell&&!inChapter?1:0);
+  if(near!==shownCap&&CAPS[near]){shownCap=near;capIdx.textContent=CAPS[near].i;capT.innerHTML=CAPS[near].t;capS.innerHTML=CAPS[near].s;}
+  ctaEl.classList.toggle('show',near>=6&&local>.3);
+
+  /* ===== Title-Card: nearK 1 (Idee) / 2 (Mechanismus) als gefuegtes Diptychon, nur am Dwell =====
+     Der Spot wandert von der linken (Idee) zur rechten Haelfte (Mechanismus); Text crossfadet
+     unsichtbar im Morph dazwischen (Karte ist dort ausgeblendet). */
+  if(inChapter && near!==tcBeat){
+    tcBeat=near;
+    const b=BEATS[near];
+    tcStep.textContent=b.step; tcTitle.innerHTML=b.t; tcSub.innerHTML=b.s;
+    tcHalfA.classList.toggle('active',near===1); tcHalfA.classList.toggle('dim',near!==1);
+    tcHalfB.classList.toggle('active',near===2); tcHalfB.classList.toggle('dim',near!==2);
+    tcNodes.forEach(n=>n.classList.toggle('on',+n.dataset.i===near));
+  }
+  const tcVisible=inChapter && banner<.35 && prog>0.02 && atDwell;
+  titleCard.classList.toggle('in', tcVisible);
+
+  composer.render();requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
