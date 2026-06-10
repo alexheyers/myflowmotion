@@ -1,0 +1,16 @@
+[18:06:16] Clip B angelegt: video_6a298b7829988193aa84d29202db3a19038daeccf180bae7
+[18:07:46] Clip C angelegt: video_6a298bd24a848193a26b20b2ffd8ca79010b8eb1ff9ae7c4
+[18:08:02] B: in_progress 99
+[18:08:02] C: queued 0
+[18:08:18] B: in_progress 99
+[18:08:19] C: in_progress 40
+[18:08:34] B: completed 100
+[18:08:36] B geladen: /tmp/reel-clip-B.mp4 (3069KB)
+[18:08:37] C: in_progress 60
+[18:08:52] C: in_progress 0
+[18:09:08] C: in_progress 0
+[18:09:23] C: in_progress 0
+[18:09:39] C: in_progress 99
+[18:09:54] C: completed 100
+[18:10:00] C geladen: /tmp/reel-clip-C.mp4 (3950KB)
+[18:10:06] FERTIG: /Users/alexanderheyers/Documents/Claude/Projects/Vibe Coding Bootcamp/myflowmotion-lusion/assets/reel.mp4 (1263KB)
