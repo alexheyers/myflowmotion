@@ -4,562 +4,246 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MyFlowMotion — Digitale Erlebnisse & KI-Systeme · Alex Heyers</title>
-<meta name="description" content="MyFlowMotion. Digitale Erlebnisse, die aus Ideen Systeme machen. Strategie, Design und KI-Engineering — von der ersten Skizze bis zum laufenden System.">
+<meta name="description" content="MyFlowMotion. Eine Reise durch Systeme: Strategie, Design und KI-Engineering — von der ersten Idee bis zum laufenden System.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='26' fill='%231AA591'/><circle cx='44' cy='22' r='9' fill='%23E94B5D'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Lato:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   TOKENS + RESET — Lusion-Edition: Ivory, Ink-Navy, Teal, Pink
+   LUSION-EDITION v2 — eine Szene, eine Kamerafahrt, sechs Stationen
    ============================================================ */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-
 :root {
-  --ivory:    #F2EFE8;
-  --ivory-2:  #EAE6DC;
-  --ink:      #0E2244;
-  --ink-60:   rgba(14,34,68,.6);
-  --ink-30:   rgba(14,34,68,.3);
-  --ink-12:   rgba(14,34,68,.12);
-  --teal:     #1AA591;
-  --pink:     #E94B5D;
-  --eo: cubic-bezier(.16,1,.3,1);
-  --font-disp: 'Playfair Display', serif;
-  --font-body: 'Lato', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --ivory:#F2EFE8; --ink:#0E2244; --teal:#1AA591; --pink:#E94B5D;
+  --ink-60:rgba(14,34,68,.6); --ink-30:rgba(14,34,68,.3); --ink-12:rgba(14,34,68,.12);
+  --iv-70:rgba(242,239,232,.7); --iv-30:rgba(242,239,232,.3); --iv-14:rgba(242,239,232,.14);
+  --disp:'Playfair Display',serif; --body:'Lato',sans-serif; --mono:'JetBrains Mono',monospace;
 }
-
-html { scrollbar-width: none; }
+html { scrollbar-width:none; }
 html::-webkit-scrollbar { display:none; }
-
-body {
-  background: var(--ivory);
-  color: var(--ink);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
-body.is-locked { overflow: hidden; }
-
-a { color: inherit; text-decoration: none; }
+body { background:var(--ivory); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+body.is-locked { overflow:hidden; }
+a { color:inherit; text-decoration:none; }
 img { display:block; width:100%; height:100%; object-fit:cover; }
 
-/* WebGL canvas ÜBER dem Content (Partikel vorderste Ebene), klick-durchlässig */
-#gl {
-  position: fixed; inset: 0; z-index: 30;
-  pointer-events: none;
-}
+/* Scroll-Raum: die Seite IST 700vh hoch, alles Sichtbare ist fixed */
+.scroll-space { height:700vh; }
+#gl { position:fixed; inset:0; z-index:1; display:block; }
+.stage { position:fixed; inset:0; z-index:5; pointer-events:none; }
+.stage .st { position:absolute; inset:0; opacity:0; visibility:hidden; }
+.stage .st.on { visibility:visible; }
+.stage .st > * { pointer-events:auto; }
 
-/* ============================================================
-   LOADER
-   ============================================================ */
-.loader {
-  position: fixed; inset: 0; z-index: 200;
-  background: var(--ivory);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 1.2rem;
-  transition: opacity .8s var(--eo), visibility .8s;
-}
-.loader.is-done { opacity: 0; visibility: hidden; }
-.loader__word {
-  font-family: var(--font-disp); font-weight: 900;
-  font-size: clamp(1.6rem, 4vw, 2.6rem); letter-spacing: .02em;
-}
-.loader__word em { font-style: italic; color: var(--teal); }
-.loader__pct {
-  font-family: var(--font-mono); font-size: .8rem;
-  color: var(--ink-60); letter-spacing: .2em;
-}
-.loader__bar {
-  width: min(280px, 60vw); height: 1px; background: var(--ink-12);
-  position: relative; overflow: hidden;
-}
-.loader__bar i {
-  position: absolute; inset: 0; background: var(--teal);
-  transform-origin: left; transform: scaleX(0);
-  transition: transform .3s var(--eo);
-}
+/* Fortschritts-Anzeige rechts */
+.prog { position:fixed; right:1.4rem; top:50%; transform:translateY(-50%); z-index:90; display:flex; flex-direction:column; gap:.55rem; }
+.prog i { width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.25; transition:opacity .3s, transform .3s; }
+.prog i.on { opacity:1; transform:scale(1.5); }
 
-/* ============================================================
-   CURSOR
-   ============================================================ */
-.cursor-dot, .cursor-ring {
-  position: fixed; top:0; left:0; pointer-events:none; z-index: 150;
-  border-radius: 50%; will-change: transform;
-}
-.cursor-dot { width:6px; height:6px; background: var(--ink); }
-.cursor-ring {
-  width:34px; height:34px; border:1px solid var(--ink-30);
-  transition: width .3s var(--eo), height .3s var(--eo),
-              border-color .3s, background .3s;
-}
-body.c-hover .cursor-ring { width:58px; height:58px; border-color: var(--teal); }
-body.c-view  .cursor-ring { width:74px; height:74px; background: var(--teal); border-color: transparent; }
-.cursor-label {
-  position: fixed; top:0; left:0; pointer-events:none; z-index:151;
-  transform: translate(-50%,-50%);
-  font-family: var(--font-mono); font-size:.6rem; letter-spacing:.18em;
-  text-transform: uppercase; color: var(--ivory);
-  opacity:0; transition: opacity .2s;
-}
-body.c-view .cursor-label { opacity:1; }
-@media (hover:none) { .cursor-dot,.cursor-ring,.cursor-label { display:none; } }
+/* ============ LOADER ============ */
+.loader { position:fixed; inset:0; z-index:200; background:var(--ivory); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .9s cubic-bezier(.16,1,.3,1), visibility .9s; }
+.loader.is-done { opacity:0; visibility:hidden; }
+.loader__word { font-family:var(--disp); font-weight:900; font-size:clamp(1.6rem,4vw,2.6rem); }
+.loader__word em { font-style:italic; color:var(--teal); }
+.loader__pct { font-family:var(--mono); font-size:.78rem; color:var(--ink-60); letter-spacing:.22em; }
+.loader__bar { width:min(280px,60vw); height:1px; background:var(--ink-12); position:relative; overflow:hidden; }
+.loader__bar i { position:absolute; inset:0; background:var(--teal); transform-origin:left; transform:scaleX(0); transition:transform .25s; }
 
-/* ============================================================
-   NAV
-   ============================================================ */
-.nav {
-  position: fixed; top:0; left:0; right:0; z-index: 100;
-  display:flex; align-items:center; justify-content:space-between;
-  padding: 1.4rem clamp(1.2rem, 4vw, 3.4rem);
-  mix-blend-mode: normal;
-  transition: background .4s, backdrop-filter .4s, padding .4s var(--eo);
-}
-.nav.is-scrolled {
-  background: rgba(242,239,232,.82);
-  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  padding-top: .9rem; padding-bottom: .9rem;
-  border-bottom: 1px solid var(--ink-12);
-}
-.nav__brand {
-  font-family: var(--font-disp); font-weight: 900;
-  font-size: 1.15rem; letter-spacing:.01em;
-}
-.nav__brand em { font-style: italic; color: var(--teal); }
-.nav__links { display:flex; align-items:center; gap: 2rem; }
-.nav__links a {
-  font-family: var(--font-mono); font-size:.72rem;
-  letter-spacing:.16em; text-transform: uppercase;
-  color: var(--ink-60); transition: color .3s;
-  position: relative;
-}
-.nav__links a:hover { color: var(--ink); }
-.nav__links a::after {
-  content:''; position:absolute; left:0; bottom:-5px; height:1px; width:100%;
-  background: var(--teal); transform: scaleX(0); transform-origin: right;
-  transition: transform .4s var(--eo);
-}
-.nav__links a:hover::after { transform: scaleX(1); transform-origin: left; }
-.nav__cta {
-  font-family: var(--font-mono); font-size:.72rem;
-  letter-spacing:.14em; text-transform: uppercase;
-  color: var(--ivory) !important;
-  background: var(--ink); padding:.75rem 1.4rem; border-radius: 50px;
-  transition: background .3s, transform .3s var(--eo);
-}
-.nav__cta:hover { background: var(--teal); transform: translateY(-2px); }
-.nav__cta::after { display:none !important; }
-@media (max-width: 720px) { .nav__links a:not(.nav__cta) { display:none; } }
+/* ============ CURSOR ============ */
+.cursor-dot,.cursor-ring { position:fixed; top:0; left:0; pointer-events:none; z-index:150; border-radius:50%; will-change:transform; }
+.cursor-dot { width:6px; height:6px; background:currentColor; }
+.cursor-ring { width:34px; height:34px; border:1px solid currentColor; opacity:.45; transition:width .3s cubic-bezier(.16,1,.3,1), height .3s cubic-bezier(.16,1,.3,1); }
+body.c-hover .cursor-ring { width:60px; height:60px; }
+@media (hover:none){ .cursor-dot,.cursor-ring{ display:none; } }
 
-/* ============================================================
-   LAYOUT-BASIS
-   ============================================================ */
-.section { position: relative; padding: clamp(5rem, 12vh, 9rem) clamp(1.2rem, 4vw, 3.4rem); }
-.kicker {
-  font-family: var(--font-mono); font-size:.68rem;
-  letter-spacing:.24em; text-transform:uppercase; color: var(--teal);
-  display:flex; align-items:center; gap:.7rem; margin-bottom: 1.6rem;
-}
-.kicker::before { content:''; width:34px; height:1px; background: var(--teal); }
+/* ============ NAV (immer da) ============ */
+.nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:1.3rem clamp(1.2rem,4vw,3.2rem); transition:color .6s; }
+.nav__brand { font-family:var(--disp); font-weight:900; font-size:1.12rem; }
+.nav__brand em { font-style:italic; color:var(--teal); }
+.nav__cta { font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; padding:.7rem 1.35rem; border-radius:50px; border:1px solid currentColor; transition:background .3s,color .3s; }
+.nav__cta:hover { background:var(--teal); border-color:var(--teal); color:#fff; }
 
-/* Zeilen-Reveal */
-.rl { display:block; overflow:hidden; }
-.rl > span {
-  display:block; transform: translateY(112%);
-  transition: transform 1s var(--eo);
-}
-.is-inview .rl > span { transform: translateY(0); }
-.rl:nth-child(2) > span { transition-delay:.08s; }
-.rl:nth-child(3) > span { transition-delay:.16s; }
-.rl:nth-child(4) > span { transition-delay:.24s; }
+/* ============ STATION 0: HERO ============ */
+.st-hero { display:flex; flex-direction:column; justify-content:center; padding:0 clamp(1.2rem,4vw,3.2rem); }
+.st-hero .kicker { font-family:var(--mono); font-size:.68rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:1.6rem; }
+.st-hero h1 { font-family:var(--disp); font-weight:900; font-size:clamp(2.4rem,6.4vw,5.6rem); line-height:1.04; max-width:12ch; }
+.st-hero h1 em { font-style:italic; color:var(--teal); }
+.st-hero p { margin-top:2rem; max-width:40ch; font-weight:300; line-height:1.7; color:var(--ink-60); font-size:clamp(.95rem,1.3vw,1.1rem); }
+.st-hero .hint { position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:.62rem; letter-spacing:.26em; text-transform:uppercase; color:var(--ink-30); }
 
-/* ============================================================
-   HERO
-   ============================================================ */
-.hero {
-  min-height: 100svh;
-  display:flex; flex-direction:column; justify-content:center;
-  padding-top: 7rem;
-}
-.hero__label {
-  font-family: var(--font-mono); font-size:.7rem; letter-spacing:.26em;
-  text-transform: uppercase; color: var(--ink-60); margin-bottom: 2rem;
-}
-.hero__label b { color: var(--pink); font-weight:500; }
-.hero h1 {
-  font-family: var(--font-disp); font-weight: 900;
-  font-size: clamp(2.6rem, 8.2vw, 7.2rem);
-  line-height: 1.02; letter-spacing: -.01em;
-  max-width: 13ch;
-}
-.hero h1 em { font-style: italic; font-weight:500; color: var(--teal); }
-.hero__sub {
-  margin-top: 2.4rem; max-width: 44ch;
-  font-size: clamp(1rem, 1.4vw, 1.2rem); font-weight:300;
-  line-height: 1.7; color: var(--ink-60);
-}
-.hero__scroll {
-  position:absolute; bottom: 2.2rem; left: clamp(1.2rem, 4vw, 3.4rem);
-  display:flex; align-items:center; gap:.8rem;
-  font-family: var(--font-mono); font-size:.62rem;
-  letter-spacing:.22em; text-transform:uppercase; color: var(--ink-30);
-}
-.hero__scroll i {
-  width:1px; height:44px; background: var(--ink-12);
-  position:relative; overflow:hidden; display:block;
-}
-.hero__scroll i::after {
-  content:''; position:absolute; left:0; top:-100%; width:100%; height:100%;
-  background: var(--teal); animation: scrollHint 2.2s var(--eo) infinite;
-}
-@keyframes scrollHint { 0%{top:-100%} 55%{top:0} 100%{top:100%} }
+/* ============ STATION 1: REEL (pink) ============ */
+.st-reel { display:flex; align-items:center; justify-content:center; text-align:center; }
+.st-reel h2 { font-family:var(--disp); font-weight:900; font-style:italic; font-size:clamp(3rem,11vw,9.5rem); color:#fff; letter-spacing:.01em; mix-blend-mode:normal; }
+.st-reel .sub { position:absolute; bottom:14vh; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:rgba(255,255,255,.75); }
 
-/* ============================================================
-   MARQUEE
-   ============================================================ */
-.marquee {
-  border-top:1px solid var(--ink-12); border-bottom:1px solid var(--ink-12);
-  overflow:hidden; padding: 1.1rem 0; white-space: nowrap;
-  background: var(--ivory-2);
-}
-.marquee__track { display:inline-block; animation: mq 28s linear infinite; }
-.marquee span {
-  font-family: var(--font-disp); font-weight:700; font-style: italic;
-  font-size: 1.05rem; letter-spacing:.04em; color: var(--ink-60);
-  margin-right: 3.2rem;
-}
-.marquee span b { color: var(--teal); font-style:normal; }
-@keyframes mq { from { transform: translateX(0);} to { transform: translateX(-50%);} }
+/* ============ STATION 2: PROJEKTE ============ */
+.st-work { padding:0 clamp(1.2rem,4vw,3.2rem); display:flex; flex-direction:column; justify-content:center; }
+.st-work .head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:2.6rem; }
+.st-work h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.6vw,3rem); }
+.st-work h2 em { font-style:italic; color:var(--teal); }
+.st-work .count { font-family:var(--mono); font-size:.68rem; letter-spacing:.2em; color:var(--ink-30); }
+.work-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(.9rem,1.6vw,1.6rem); }
+.card { cursor:pointer; }
+.card__media { position:relative; overflow:hidden; border-radius:6px; aspect-ratio:3/4; background:var(--ink-12); }
+body.gl .card__media img { opacity:0; }
+.card__title { font-family:var(--disp); font-weight:700; font-size:1.05rem; margin-top:.8rem; }
+.card__tags { font-family:var(--mono); font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-30); margin-top:.25rem; }
+@media (max-width:860px){ .work-grid{ grid-template-columns:repeat(2,1fr);} }
 
-/* ============================================================
-   MANIFEST
-   ============================================================ */
-.manifest h2 {
-  font-family: var(--font-disp); font-weight:900;
-  font-size: clamp(2rem, 5vw, 4.2rem); line-height:1.06; max-width: 18ch;
-}
-.manifest h2 em { font-style:italic; color: var(--pink); }
-.manifest__grid {
-  margin-top: 4.5rem;
-  display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1.5rem,3vw,3rem);
-  position: relative;
-}
-.step { position:relative; padding-top: 2.2rem; }
-.step::before {
-  content:''; position:absolute; top:0; left:0; width:100%; height:1px;
-  background: var(--ink-12);
-}
-.step__num {
-  font-family: var(--font-mono); font-size:.7rem; letter-spacing:.2em;
-  color: var(--teal); margin-bottom: 1rem;
-}
-.step h3 { font-family: var(--font-disp); font-size:1.5rem; font-weight:700; margin-bottom:.8rem; }
-.step p { font-weight:300; line-height:1.7; color: var(--ink-60); font-size:.95rem; max-width: 34ch; }
-.manifest__line { margin-top: 4rem; width:100%; height:auto; display:block; }
-.manifest__line path {
-  fill:none; stroke: var(--teal); stroke-width: 1.4;
-}
-@media (max-width: 860px) { .manifest__grid { grid-template-columns: 1fr; } }
+/* ============ STATION 3: VOID/TUNNEL ============ */
+.st-void { display:flex; align-items:center; justify-content:center; text-align:center; }
+.st-void .line { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:90vw; }
+.st-void .line h2 { font-family:var(--disp); font-weight:900; font-size:clamp(2rem,6vw,5rem); color:var(--ivory); line-height:1.1; }
+.st-void .line h2 em { font-style:italic; color:var(--teal); }
+.st-void .line .mono { font-family:var(--mono); font-size:.66rem; letter-spacing:.3em; text-transform:uppercase; color:var(--iv-30); margin-bottom:1.4rem; }
 
-/* ============================================================
-   PROJEKTE
-   ============================================================ */
-.work__head { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; margin-bottom: 4rem; }
-.work__head h2 {
-  font-family: var(--font-disp); font-weight:900;
-  font-size: clamp(2rem, 5vw, 4.2rem); line-height: 1.04;
-}
-.work__head h2 em { font-style:italic; color: var(--teal); }
-.work__count { font-family: var(--font-mono); font-size:.72rem; letter-spacing:.2em; color: var(--ink-30); padding-bottom: .8rem; white-space:nowrap; }
-.work__grid {
-  display:grid; grid-template-columns: repeat(2, 1fr);
-  gap: clamp(2rem, 4vw, 4rem) clamp(1.5rem, 3vw, 3rem);
-}
-.card { cursor: pointer; }
-.card:nth-child(even) { transform: translateY(clamp(1.5rem,4vw,4rem)); }
-.card__media {
-  position: relative; overflow:hidden; border-radius: 6px;
-  aspect-ratio: 4 / 3; background: var(--ivory-2);
-}
-/* Das echte <img> ist Fallback + Quelle; bei aktivem WebGL unsichtbar gemacht */
-.gl .card__media img { opacity: 0; }
-.card__meta { display:flex; align-items:baseline; justify-content:space-between; margin-top: 1.1rem; gap:1rem; }
-.card__title { font-family: var(--font-disp); font-weight:700; font-size: clamp(1.2rem, 1.9vw, 1.7rem); }
-.card__tags { font-family: var(--font-mono); font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color: var(--ink-30); white-space:nowrap; }
-.card__sub { margin-top:.35rem; font-weight:300; font-size:.9rem; color: var(--ink-60); }
-@media (max-width: 860px) {
-  .work__grid { grid-template-columns: 1fr; }
-  .card:nth-child(even) { transform:none; }
-}
+/* ============ STATION 4: LICHT/ABOUT ============ */
+.st-about { display:flex; align-items:center; justify-content:center; }
+.st-about .panel { max-width:680px; text-align:center; padding:0 1.4rem; }
+.st-about h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.7rem,3.6vw,3rem); line-height:1.18; }
+.st-about h2 em { font-style:italic; color:var(--teal); }
+.st-about h2 .hl { color:var(--pink); }
+.st-about p { margin-top:1.6rem; font-weight:300; line-height:1.8; color:var(--ink-60); font-size:.98rem; }
+.st-about .facts { display:flex; justify-content:center; gap:3rem; margin-top:2.2rem; flex-wrap:wrap; }
+.st-about .facts b { font-family:var(--disp); font-size:1.4rem; display:block; }
+.st-about .facts span { font-family:var(--mono); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-30); }
 
-/* ============================================================
-   PROJEKT-DETAIL (Transmorph-Ziel)
-   ============================================================ */
-.detail {
-  position: fixed; inset:0; z-index: 120;
-  display:flex; flex-direction:column; justify-content:flex-end;
-  padding: clamp(1.4rem,4vw,3.4rem);
-  visibility: hidden; pointer-events: none;
-}
-.detail.is-open { visibility: visible; pointer-events: auto; }
-.detail__scrim {
-  position:absolute; inset:0; background: rgba(14,34,68,0);
-  transition: background .6s;
-}
-.detail.is-open .detail__scrim { background: rgba(14,34,68,.28); }
-.detail__panel {
-  position: relative; color: var(--ivory);
-  max-width: 640px;
-  opacity: 0; transform: translateY(24px);
-  transition: opacity .5s var(--eo) .25s, transform .5s var(--eo) .25s;
-}
-.detail.is-open .detail__panel { opacity:1; transform: translateY(0); }
-.detail__tags { font-family: var(--font-mono); font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; opacity:.75; margin-bottom: .9rem; }
-.detail__title { font-family: var(--font-disp); font-weight:900; font-size: clamp(2rem,5vw,3.6rem); line-height:1.05; margin-bottom: 1rem; }
-.detail__text { font-weight:300; line-height:1.7; max-width: 52ch; font-size:.98rem; }
-.detail__close {
-  position:absolute; top: clamp(1.4rem,4vw,3.4rem); right: clamp(1.4rem,4vw,3.4rem);
-  width: 52px; height: 52px; border-radius:50%;
-  border:1px solid rgba(242,239,232,.5); background: transparent;
-  color: var(--ivory); font-family: var(--font-mono); font-size:.9rem;
-  cursor:pointer; transition: background .3s, transform .3s var(--eo);
-  opacity:0;
-}
-.detail.is-open .detail__close { opacity:1; transition: opacity .4s .4s, background .3s, transform .3s var(--eo); }
-.detail__close:hover { background: var(--pink); border-color: var(--pink); transform: rotate(90deg); }
+/* ============ STATION 5: FINALE ============ */
+.st-end { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+.st-end h2 { font-family:var(--disp); font-weight:900; font-size:clamp(2.6rem,8.5vw,7rem); color:var(--ivory); line-height:1.04; }
+.st-end h2 em { font-style:italic; color:var(--teal); }
+.st-end .mail { display:inline-block; margin-top:2.4rem; font-family:var(--mono); font-size:clamp(.85rem,1.5vw,1rem); color:var(--ivory); border-bottom:1px solid var(--teal); padding-bottom:.3rem; transition:color .3s; }
+.st-end .mail:hover { color:var(--pink); border-color:var(--pink); }
+.st-end .foot { position:absolute; bottom:1.6rem; left:0; right:0; display:flex; justify-content:space-between; padding:0 clamp(1.2rem,4vw,3.2rem); font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--iv-30); }
+.st-end .foot b { color:var(--teal); }
 
-/* ============================================================
-   ABOUT
-   ============================================================ */
-.about { background: var(--ink); color: var(--ivory); border-radius: 14px; margin: 0 clamp(.6rem,1.5vw,1.2rem); }
-.about .kicker { color: var(--teal); }
-.about h2 {
-  font-family: var(--font-disp); font-weight: 900;
-  font-size: clamp(1.9rem, 4.6vw, 3.8rem); line-height: 1.12; max-width: 24ch;
-}
-.about h2 em { font-style: italic; color: var(--teal); }
-.about h2 .hl { color: var(--pink); }
-.about__cols { display:grid; grid-template-columns: 1.2fr .8fr; gap: 3rem; margin-top: 3.5rem; }
-.about__cols p { font-weight:300; line-height:1.8; color: rgba(242,239,232,.72); font-size:.98rem; margin-bottom: 1.1rem; }
-.about__facts { display:flex; flex-direction:column; gap: 1.4rem; }
-.fact { border-top:1px solid rgba(242,239,232,.16); padding-top: 1rem; }
-.fact b { font-family: var(--font-disp); font-size: 1.6rem; font-weight: 700; display:block; }
-.fact span { font-family: var(--font-mono); font-size:.64rem; letter-spacing:.18em; text-transform: uppercase; color: rgba(242,239,232,.5); }
-@media (max-width: 860px) { .about__cols { grid-template-columns: 1fr; } }
+/* ============ PROJEKT-DETAIL (Transmorph-Ziel) ============ */
+.detail { position:fixed; inset:0; z-index:120; display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(1.4rem,4vw,3.2rem); visibility:hidden; pointer-events:none; }
+.detail.is-open { visibility:visible; pointer-events:auto; }
+.detail__scrim { position:absolute; inset:0; background:rgba(14,34,68,0); transition:background .6s; }
+.detail.is-open .detail__scrim { background:rgba(14,34,68,.32); }
+.detail__panel { position:relative; color:var(--ivory); max-width:640px; opacity:0; transform:translateY(24px); transition:opacity .5s cubic-bezier(.16,1,.3,1) .25s, transform .5s cubic-bezier(.16,1,.3,1) .25s; }
+.detail.is-open .detail__panel { opacity:1; transform:translateY(0); }
+.detail__tags { font-family:var(--mono); font-size:.64rem; letter-spacing:.2em; text-transform:uppercase; opacity:.75; margin-bottom:.8rem; }
+.detail__title { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,4.6vw,3.2rem); line-height:1.05; margin-bottom:.9rem; }
+.detail__text { font-weight:300; line-height:1.7; max-width:52ch; font-size:.95rem; }
+.detail__close { position:absolute; top:clamp(1.4rem,4vw,3.2rem); right:clamp(1.4rem,4vw,3.2rem); width:50px; height:50px; border-radius:50%; border:1px solid rgba(242,239,232,.5); background:transparent; color:var(--ivory); font-family:var(--mono); font-size:.9rem; cursor:pointer; opacity:0; transition:opacity .4s .4s, background .3s, transform .3s; }
+.detail.is-open .detail__close { opacity:1; }
+.detail__close:hover { background:var(--pink); border-color:var(--pink); transform:rotate(90deg); }
 
-/* ============================================================
-   KONTAKT
-   ============================================================ */
-.contact { text-align:center; padding-top: clamp(6rem,16vh,11rem); padding-bottom: clamp(6rem,16vh,11rem); }
-.contact .kicker { justify-content:center; }
-.contact .kicker::before { display:none; }
-.contact h2 {
-  font-family: var(--font-disp); font-weight:900;
-  font-size: clamp(2.6rem, 9vw, 7.4rem); line-height:1.02;
-}
-.contact h2 em { font-style: italic; color: var(--teal); }
-.contact__mail {
-  display:inline-block; margin-top: 2.6rem;
-  font-family: var(--font-mono); font-size: clamp(.85rem, 1.6vw, 1.05rem);
-  letter-spacing:.06em; color: var(--ink);
-  border-bottom: 1px solid var(--teal); padding-bottom: .35rem;
-  transition: color .3s;
-}
-.contact__mail:hover { color: var(--pink); border-color: var(--pink); }
-
-/* ============================================================
-   FOOTER
-   ============================================================ */
-.footer {
-  display:flex; align-items:center; justify-content:space-between; gap:1rem;
-  padding: 1.6rem clamp(1.2rem,4vw,3.4rem);
-  border-top: 1px solid var(--ink-12);
-  font-family: var(--font-mono); font-size:.64rem; letter-spacing:.14em;
-  text-transform: uppercase; color: var(--ink-30);
-  flex-wrap: wrap;
-}
-.footer b { color: var(--teal); font-weight:500; }
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  #gl { display:none; }
-  .gl .card__media img { opacity:1; }
-  .rl > span { transform:none; transition:none; }
-  .marquee__track { animation:none; }
-}
+/* ============ STATISCHER FALLBACK (kein WebGL2 / reduced motion) ============ */
+body.static .scroll-space { display:none; }
+body.static #gl, body.static .prog, body.static .loader { display:none; }
+body.static .stage { position:static; pointer-events:auto; }
+body.static .stage .st { position:relative; inset:auto; opacity:1 !important; visibility:visible; transform:none !important; min-height:88vh; padding-top:6rem; padding-bottom:3rem; }
+body.static .st-reel { background:var(--pink); }
+body.static .st-void, body.static .st-end { background:var(--ink); }
+body.static .st-void .line { position:static; transform:none; opacity:1 !important; }
+body.static .st-void .line + .line { margin-top:3rem; }
+body.static .card__media img { opacity:1; }
+body.static .st-hero .hint { display:none; }
 </style>
 </head>
 <body>
 
+<div class="scroll-space" aria-hidden="true"></div>
 <canvas id="gl"></canvas>
 
-<!-- LOADER -->
 <div class="loader" id="loader">
   <div class="loader__word">My<em>Flow</em>Motion</div>
   <div class="loader__bar"><i id="loaderBar"></i></div>
   <div class="loader__pct" id="loaderPct">0%</div>
 </div>
 
-<!-- CURSOR -->
 <div class="cursor-dot" id="cDot"></div>
 <div class="cursor-ring" id="cRing"></div>
-<div class="cursor-label" id="cLabel">Ansehen</div>
 
-<!-- NAV -->
 <nav class="nav" id="nav">
-  <a class="nav__brand" href="#top">My<em>Flow</em>Motion</a>
-  <div class="nav__links">
-    <a href="#work">Projekte</a>
-    <a href="#about">Über</a>
-    <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
-  </div>
+  <a class="nav__brand" href="#">My<em>Flow</em>Motion</a>
+  <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
 </nav>
 
-<main id="top">
+<div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
-  <!-- HERO -->
-  <section class="hero section is-inview" id="hero">
-    <div class="hero__label">AI · Automation · Web Experiences — <b>seit 2026 im Flow</b></div>
-    <h1>
-      <span class="rl"><span>Digitale Erlebnisse,</span></span>
-      <span class="rl"><span>die aus Ideen</span></span>
-      <span class="rl"><span><em>Systeme</em> machen.</span></span>
-    </h1>
-    <p class="hero__sub">Strategie, Design und KI-Engineering aus einer Hand — von der ersten Skizze bis zum laufenden System. Agenten, Automationen und Interfaces, die man nicht nur sieht, sondern benutzt.</p>
-    <div class="hero__scroll"><i></i> Scroll, um den Flow zu sehen</div>
+<div class="stage" id="stage">
+
+  <!-- 0 · HERO -->
+  <section class="st st-hero" data-st="0">
+    <div class="kicker">AI · Automation · Web Experiences</div>
+    <h1>Digitale Erlebnisse, die aus Ideen <em>Systeme</em> machen.</h1>
+    <p>Strategie, Design und KI-Engineering aus einer Hand — von der ersten Skizze bis zum laufenden System. Das hier ist keine Seite. Es ist eine Fahrt.</p>
+    <div class="hint">Scroll — die Reise beginnt</div>
   </section>
 
-  <!-- MARQUEE -->
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee__track" id="mqTrack">
-      <span>Aus Worten wird <b>Struktur</b></span><span>Klarheit ist der <b>Skill</b></span><span>Idee → Struktur → <b>System</b></span><span>Aus Worten wird <b>Struktur</b></span><span>Klarheit ist der <b>Skill</b></span><span>Idee → Struktur → <b>System</b></span>
-    </div>
-  </div>
-
-  <!-- MANIFEST -->
-  <section class="manifest section" data-reveal>
-    <div class="kicker">Methode</div>
-    <h2>
-      <span class="rl"><span>Keine Templates.</span></span>
-      <span class="rl"><span>Ein Prozess, der <em>zuhört</em> —</span></span>
-      <span class="rl"><span>und dann baut.</span></span>
-    </h2>
-    <div class="manifest__grid">
-      <div class="step">
-        <div class="step__num">01 / Idee</div>
-        <h3>Zuhören &amp; verdichten</h3>
-        <p>Jedes System beginnt mit einem Gespräch. Was soll passieren, wer nutzt es, was darf es nie tun — bevor eine Zeile entsteht, steht die Absicht.</p>
-      </div>
-      <div class="step">
-        <div class="step__num">02 / Struktur</div>
-        <h3>Aus Worten wird Struktur</h3>
-        <p>Aus dem Gespräch wird Architektur: Datenflüsse, Agenten-Rollen, Schnittstellen. Sichtbar gemacht, bevor gebaut wird — damit nichts im Nebel bleibt.</p>
-      </div>
-      <div class="step">
-        <div class="step__num">03 / System</div>
-        <h3>Live &amp; messbar</h3>
-        <p>Dann wird gebaut: Voice-Agenten, Automationen, 3D-Interfaces. Deployed, getestet, im Alltag — nicht als Demo, sondern als Werkzeug.</p>
-      </div>
-    </div>
-    <svg class="manifest__line" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true">
-      <path id="flowLine" d="M0,100 C150,100 180,20 320,20 S520,100 640,100 S860,20 980,20 S1150,90 1200,60" />
-    </svg>
+  <!-- 1 · REEL -->
+  <section class="st st-reel" data-st="1">
+    <h2>Show, don't tell.</h2>
+    <div class="sub">Sechs Systeme · live gebaut · öffentlich dokumentiert</div>
   </section>
 
-  <!-- PROJEKTE -->
-  <section class="work section" id="work" data-reveal>
-    <div class="work__head">
-      <h2><span class="rl"><span>Ausgewählte</span></span><span class="rl"><span><em>Arbeiten</em></span></span></h2>
-      <div class="work__count">06 — Projekte</div>
+  <!-- 2 · PROJEKTE -->
+  <section class="st st-work" data-st="2">
+    <div class="head">
+      <h2>Ausgewählte <em>Arbeiten</em></h2>
+      <div class="count">04 / 06 — Auswahl</div>
     </div>
-    <div class="work__grid" id="workGrid">
-
-      <article class="card" data-title="AI-Adoption-Studio" data-tags="ai · web · agents"
-        data-text="Ein Multi-Agent-System, das Unternehmen durch die KI-Einführung führt: Voice-Intake, Dokumenten-Analyse, Systemlandkarte. Next.js, FastAPI, Supabase — live gebaut, Schritt für Schritt öffentlich dokumentiert.">
+    <div class="work-grid" id="workGrid">
+      <article class="card" data-title="AI-Adoption-Studio" data-tags="ai · web · agents" data-text="Ein Multi-Agent-System, das Unternehmen durch die KI-Einführung führt: Voice-Intake, Dokumenten-Analyse, Systemlandkarte. Next.js, FastAPI, Supabase — live gebaut und öffentlich dokumentiert.">
         <div class="card__media gl-img"><img src="assets/studio-bg-hero.jpg" alt="AI-Adoption-Studio"></div>
-        <div class="card__meta"><div class="card__title">AI-Adoption-Studio</div><div class="card__tags">ai · web · agents</div></div>
-        <p class="card__sub">Multi-Agent-System für KI-Einführung</p>
+        <div class="card__title">AI-Adoption-Studio</div><div class="card__tags">ai · web · agents</div>
       </article>
-
-      <article class="card" data-title="System-Galaxie" data-tags="3d · dataviz"
-        data-text="Eine begehbare Three.js-Galaxie der eigenen Systemlandschaft: jeder Workflow ein Satellit, jede Verbindung eine Linie. Datengetrieben — die Karte zeichnet sich selbst, wenn das System wächst.">
+      <article class="card" data-title="System-Galaxie" data-tags="3d · dataviz" data-text="Eine begehbare Three.js-Galaxie der eigenen Systemlandschaft: jeder Workflow ein Satellit, jede Verbindung eine Linie. Datengetrieben — die Karte zeichnet sich selbst.">
         <div class="card__media gl-img"><img src="assets/story-clarity.jpg" alt="System-Galaxie"></div>
-        <div class="card__meta"><div class="card__title">System-Galaxie</div><div class="card__tags">3d · dataviz</div></div>
-        <p class="card__sub">Die Systemlandschaft als begehbare 3D-Karte</p>
+        <div class="card__title">System-Galaxie</div><div class="card__tags">3d · dataviz</div>
       </article>
-
-      <article class="card" data-title="Voice-Agent Ada" data-tags="voice · ai"
-        data-text="Ein Sprach-Agent, der Erstgespräche führt: erklärt, fragt nach, fasst zusammen — mit sauberer KI-Deklaration und Consent von der ersten Sekunde. ElevenLabs, eigene Gesprächs-Choreografie.">
+      <article class="card" data-title="Voice-Agent Ada" data-tags="voice · ai" data-text="Ein Sprach-Agent, der Erstgespräche führt: erklärt, fragt nach, fasst zusammen — mit sauberer KI-Deklaration und Consent von der ersten Sekunde.">
         <div class="card__media gl-img"><img src="assets/story-voice.jpg" alt="Voice-Agent Ada"></div>
-        <div class="card__meta"><div class="card__title">Voice-Agent Ada</div><div class="card__tags">voice · ai</div></div>
-        <p class="card__sub">Erstgespräche, die eine Stimme führt</p>
+        <div class="card__title">Voice-Agent Ada</div><div class="card__tags">voice · ai</div>
       </article>
-
-      <article class="card" data-title="Content-Pipeline" data-tags="content · automation"
-        data-text="90 Tage Build-in-Public auf LinkedIn: eigene Bild-Pipeline, Brand-System, Carousel-Generator in Python. Jeder Post ein Artefakt aus echter Arbeit — keine Stock-Optik, keine Platzhalter.">
-        <div class="card__media gl-img"><img src="assets/studio-bg-craft.jpg" alt="Content-Pipeline"></div>
-        <div class="card__meta"><div class="card__title">Content-Pipeline</div><div class="card__tags">content · automation</div></div>
-        <p class="card__sub">90 Tage Build-in-Public, automatisiert</p>
-      </article>
-
-      <article class="card" data-title="Business-Pages" data-tags="web · design"
-        data-text="Landingpages für Selbständige — in Tagen statt Monaten, mit klarer Struktur und Conversion-Fokus. Acht Personas, ein System, echte Kunden.">
-        <div class="card__media gl-img"><img src="assets/scene-idee.jpg" alt="Business-Pages"></div>
-        <div class="card__meta"><div class="card__title">Business-Pages</div><div class="card__tags">web · design</div></div>
-        <p class="card__sub">Landingpages mit System</p>
-      </article>
-
-      <article class="card" data-title="Flow-Automationen" data-tags="automation · integration"
-        data-text="Workflows, die im Hintergrund arbeiten: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines — selbst gehostet, versioniert, überwacht. Boring reliability, spannend verpackt.">
+      <article class="card" data-title="Flow-Automationen" data-tags="automation · integration" data-text="Workflows, die im Hintergrund arbeiten: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines — selbst gehostet, versioniert, überwacht.">
         <div class="card__media gl-img"><img src="assets/studio-bg-data.jpg" alt="Flow-Automationen"></div>
-        <div class="card__meta"><div class="card__title">Flow-Automationen</div><div class="card__tags">automation · integration</div></div>
-        <p class="card__sub">Workflows, die nachts arbeiten</p>
+        <div class="card__title">Flow-Automationen</div><div class="card__tags">automation · integration</div>
       </article>
-
     </div>
   </section>
 
-  <!-- ABOUT -->
-  <section class="about section" id="about" data-reveal>
-    <div class="kicker">Über</div>
-    <h2>
-      <span class="rl"><span>20 Jahre von der Bar</span></span>
-      <span class="rl"><span>zu <em>Bytes</em>. Gastgeber zuerst,</span></span>
-      <span class="rl"><span><span class="hl">Builder</span> aus Überzeugung.</span></span>
-    </h2>
-    <div class="about__cols">
-      <div>
-        <p>MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Zwanzig Jahre Gastronomie und Digital haben eine Sache gelehrt: Es geht nie um das Werkzeug, es geht um den Menschen davor.</p>
-        <p>Deshalb entstehen hier keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Automationen, die dokumentiert sind. Interfaces, die man ohne Handbuch versteht.</p>
-        <p>Gebaut wird im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive. Learning in Public ist keine Marketing-Idee, sondern die Methode.</p>
-      </div>
-      <div class="about__facts">
-        <div class="fact"><b>20+ Jahre</b><span>Gastro → Digital → KI</span></div>
-        <div class="fact"><b>6 Systeme</b><span>live gebaut &amp; dokumentiert</span></div>
-        <div class="fact"><b>100 % öffentlich</b><span>Build-in-Public auf LinkedIn</span></div>
+  <!-- 3 · VOID/TUNNEL (zwei Textzeilen nacheinander) -->
+  <section class="st st-void" data-st="3">
+    <div class="line" data-line="0">
+      <div class="mono">Schritt 1 — Zuhören</div>
+      <h2>Aus Worten wird <em>Struktur</em>.</h2>
+    </div>
+    <div class="line" data-line="1">
+      <div class="mono">Schritt 2 — Verdichten</div>
+      <h2>Klarheit ist der <em>Skill</em>.</h2>
+    </div>
+  </section>
+
+  <!-- 4 · LICHT/ABOUT -->
+  <section class="st st-about" data-st="4">
+    <div class="panel">
+      <h2>20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
+      <p>MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Hier entstehen keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Gebaut im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive.</p>
+      <div class="facts">
+        <div><b>20+ Jahre</b><span>Gastro → Digital → KI</span></div>
+        <div><b>6 Systeme</b><span>live &amp; dokumentiert</span></div>
+        <div><b>100 % öffentlich</b><span>Build-in-Public</span></div>
       </div>
     </div>
   </section>
 
-  <!-- KONTAKT -->
-  <section class="contact section" id="contact" data-reveal>
-    <div class="kicker">Kontakt</div>
-    <h2>
-      <span class="rl"><span>Eine Idee?</span></span>
-      <span class="rl"><span><em>Lass uns reden.</em></span></span>
-    </h2>
-    <a class="contact__mail" href="mailto:a.heyers@gmail.com">a.heyers@gmail.com</a>
+  <!-- 5 · FINALE -->
+  <section class="st st-end" data-st="5">
+    <h2>Eine Idee?<br><em>Lass uns reden.</em></h2>
+    <a class="mail" href="mailto:a.heyers@gmail.com">a.heyers@gmail.com</a>
+    <div class="foot">
+      <div>© 2026 <b>MyFlowMotion</b> · Alex Heyers</div>
+      <div>Eigenbau · Three.js · Blender · Lusion-inspiriert</div>
+    </div>
   </section>
 
-  <footer class="footer">
-    <div>© 2026 <b>MyFlowMotion</b> · Alex Heyers</div>
-    <div>Eigenbau · Three.js · Lusion-inspiriert</div>
-  </footer>
+</div>
 
-</main>
-
-<!-- PROJEKT-DETAIL OVERLAY -->
 <div class="detail" id="detail">
   <div class="detail__scrim" id="detailScrim"></div>
   <button class="detail__close" id="detailClose" aria-label="Schließen">✕</button>
@@ -571,453 +255,777 @@ body.c-view .cursor-label { opacity:1; }
 </div>
 
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js" } }
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+} }
 </script>
 <script type="module">
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 /* ============================================================
-   BASIS + UTILS
+   UTILS + SECOND-ORDER-DYNAMICS (Lusion-Rezept: t3ssel8r-Feder)
    ============================================================ */
-const lerp = (a, b, t) => a + (b - a) * t;
+const lerp = (a,b,t)=>a+(b-a)*t;
+const clamp = (v,a,b)=>Math.min(b,Math.max(a,v));
+const sat = v=>clamp(v,0,1);
+// Fenster-Funktion: 1 innerhalb [a,b], weiche Flanken der Breite f
+const win = (p,a,b,f=.18)=>sat((p-a)/f)*sat((b-p)/f);
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouch = matchMedia('(hover: none)').matches;
 
-let vw = innerWidth, vh = innerHeight, dpr = Math.min(devicePixelRatio, 2);
+class SecondOrder {
+  constructor(f=1.4, z=.9, r=1.6, x0=0){
+    const w = 2*Math.PI*f;
+    this.k1 = z/(Math.PI*f); this.k2 = 1/(w*w); this.k3 = r*z/w;
+    this.x = x0; this.v = 0; this.prevT = x0;
+  }
+  update(dt, target){
+    const td = (target - this.prevT)/Math.max(dt,1e-5); this.prevT = target;
+    const k2s = Math.max(this.k2, dt*dt/2 + dt*this.k1/2, dt*this.k1);
+    this.x += this.v*dt;
+    this.v += (target + this.k3*td - this.x - this.k1*this.v) * dt/k2s;
+    return this.x;
+  }
+}
+
+let vw = innerWidth, vh = innerHeight, dpr = Math.min(devicePixelRatio, 1.8);
 
 /* ============================================================
-   CURSOR
+   FARBDRAMATURGIE — Stationen [P, Hintergrund, Textfarbe hell?]
    ============================================================ */
-const mouse = { x: vw / 2, y: vh / 2, tx: vw / 2, ty: vh / 2, vx: 0, vy: 0 };
-if (!isTouch) {
-  const dot = document.getElementById('cDot');
-  const ring = document.getElementById('cRing');
-  const label = document.getElementById('cLabel');
-  let rx = vw / 2, ry = vh / 2;
-  addEventListener('mousemove', e => { mouse.tx = e.clientX; mouse.ty = e.clientY; });
-  (function cursorLoop() {
-    rx = lerp(rx, mouse.tx, .16); ry = lerp(ry, mouse.ty, .16);
-    dot.style.transform = `translate(${mouse.tx - 3}px,${mouse.ty - 3}px)`;
-    ring.style.transform = `translate(${rx - parseFloat(getComputedStyle(ring).width) / 2}px,${ry - parseFloat(getComputedStyle(ring).height) / 2}px)`;
-    label.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
-    requestAnimationFrame(cursorLoop);
-  })();
-  document.querySelectorAll('a, button').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('c-hover'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('c-hover'));
-  });
-  document.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('mouseenter', () => document.body.classList.add('c-view'));
-    el.addEventListener('mouseleave', () => document.body.classList.remove('c-view'));
+const IVORY = new THREE.Color('#F2EFE8'), PINK = new THREE.Color('#E94B5D'),
+      INK = new THREE.Color('#0B1A35'), DEEP = new THREE.Color('#060D1D'),
+      LIGHT = new THREE.Color('#F8F6F0'), TEAL = new THREE.Color('#1AA591');
+// Keyframes über Gesamtfortschritt P∈[0,6]
+const BG_KEYS = [
+  [0.0, IVORY], [0.75, IVORY], [1.15, PINK], [1.85, PINK],
+  [2.25, IVORY], [2.85, IVORY], [3.25, INK], [3.7, DEEP],
+  [4.05, LIGHT], [4.85, LIGHT], [5.25, INK], [6.0, INK],
+];
+function bgAt(p, out){
+  for (let i=0;i<BG_KEYS.length-1;i++){
+    const [a,ca]=BG_KEYS[i], [b,cb]=BG_KEYS[i+1];
+    if (p>=a && p<=b){ out.copy(ca).lerp(cb, sat((p-a)/Math.max(b-a,1e-4))); return out; }
+  }
+  out.copy(BG_KEYS[BG_KEYS.length-1][1]); return out;
+}
+const darkAt = p => (win(p,1.0,2.0)>0.5) || (win(p,3.0,4.0)>0.5) || (p>4.95);
+
+/* ============================================================
+   SCROLL — nativer Scroll, federgeglättet → P∈[0,6]
+   ============================================================ */
+const STATIONS = 6;
+let progress = 0;
+const scrollSpring = new SecondOrder(1.6, 1.0, 1.2, 0);
+function rawP(){ const h = document.body.scrollHeight - vh; return clamp(scrollY/Math.max(h,1),0,1)*STATIONS; }
+
+/* ============================================================
+   CURSOR + MAUS
+   ============================================================ */
+const mouse = { x:vw/2, y:vh/2, px:vw/2, py:vh/2 };
+addEventListener('mousemove', e => { mouse.x=e.clientX; mouse.y=e.clientY; });
+if (!isTouch){
+  const dot=document.getElementById('cDot'), ring=document.getElementById('cRing');
+  let rx=vw/2, ry=vh/2;
+  (function cl(){ rx=lerp(rx,mouse.x,.16); ry=lerp(ry,mouse.y,.16);
+    dot.style.transform=`translate(${mouse.x-3}px,${mouse.y-3}px)`;
+    ring.style.transform=`translate(${rx-17}px,${ry-17}px)`;
+    requestAnimationFrame(cl); })();
+  document.querySelectorAll('a,button,.card').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('c-hover'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('c-hover'));
   });
 }
 
 /* ============================================================
-   NAV + REVEALS
-   ============================================================ */
-const nav = document.getElementById('nav');
-addEventListener('scroll', () => nav.classList.toggle('is-scrolled', scrollY > 40), { passive: true });
-addEventListener('resize', () => { vw = innerWidth; vh = innerHeight; drawLine(); });
-
-const io = new IntersectionObserver(entries => {
-  entries.forEach(en => { if (en.isIntersecting) en.target.classList.add('is-inview'); });
-}, { threshold: .18 });
-document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
-
-/* Scrollgezeichnete Linie (Manifest) */
-const flowLine = document.getElementById('flowLine');
-const lineLen = flowLine.getTotalLength();
-flowLine.style.strokeDasharray = lineLen;
-flowLine.style.strokeDashoffset = lineLen;
-function drawLine() {
-  const r = flowLine.closest('.manifest').getBoundingClientRect();
-  const p = Math.min(1, Math.max(0, (vh * .85 - r.top) / (r.height * .9)));
-  flowLine.style.strokeDashoffset = lineLen * (1 - p);
-}
-addEventListener('scroll', drawLine, { passive: true });
-
-/* ============================================================
-   WEBGL — Velocity-Feld, Bild-Planes, Hero-Partikel, Transmorph
+   WEBGL-AUFBAU
    ============================================================ */
 const canvas = document.getElementById('gl');
-let gl = null;
-try { gl = canvas.getContext('webgl2', { antialias: true, alpha: true }); } catch (e) { /* noop */ }
+let glctx = null;
+try { glctx = canvas.getContext('webgl2',{ antialias:false, alpha:false }); } catch(e){}
 
-if (gl && !reduced) {
-  document.body.classList.add('gl');
-  const renderer = new THREE.WebGLRenderer({ canvas, context: gl, antialias: true, alpha: true });
-  renderer.setPixelRatio(dpr);
-  renderer.setSize(vw, vh);
-  renderer.autoClear = false;
-
-  /* ---------- Velocity-/Flow-Feld (Ping-Pong-FBO) ---------- */
-  const SIM = 192;
-  const rtOpts = { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false };
-  let rtA = new THREE.WebGLRenderTarget(SIM, SIM, rtOpts);
-  let rtB = new THREE.WebGLRenderTarget(SIM, SIM, rtOpts);
-  const simScene = new THREE.Scene();
-  const simCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const simMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uPrev:   { value: null },
-      uMouse:  { value: new THREE.Vector2(-1, -1) },
-      uVel:    { value: new THREE.Vector2(0, 0) },
-      uAspect: { value: vw / vh },
-    },
-    vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
-    fragmentShader: `
-      uniform sampler2D uPrev; uniform vec2 uMouse; uniform vec2 uVel; uniform float uAspect;
-      varying vec2 vUv;
-      void main(){
-        vec2 prev = texture2D(uPrev, vUv).rg * 0.962;             // Decay
-        vec2 d = (vUv - uMouse) * vec2(uAspect, 1.0);
-        float splat = exp(-dot(d,d) * 220.0);
-        vec2 v = prev + uVel * splat * 1.6;
-        v = clamp(v, -1.0, 1.0);
-        gl_FragColor = vec4(v, 0.0, 1.0);
-      }`,
-  });
-  simScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), simMat));
-
-  /* ---------- Ortho-Szene: DOM-synchronisierte Bild-Planes ---------- */
-  const imgScene = new THREE.Scene();
-  let orthoCam = makeOrtho();
-  function makeOrtho() {
-    const c = new THREE.OrthographicCamera(0, vw, 0, -vh, -100, 100);
-    c.position.z = 10; return c;
-  }
-
-  const planeGeo = new THREE.PlaneGeometry(1, 1, 24, 24);
-  const texLoader = new THREE.TextureLoader();
-  const planes = [];
-
-  const imgFrag = `
-    uniform sampler2D uTex; uniform sampler2D uFlow;
-    uniform vec2 uViewport; uniform vec2 uUvScale; uniform vec2 uUvOffset;
-    uniform float uHover; uniform float uOpen;
-    varying vec2 vUv;
-    void main(){
-      vec2 screenUv = gl_FragCoord.xy / uViewport;
-      vec2 flow = texture2D(uFlow, screenUv).rg;
-      vec2 uv = vUv * uUvScale + uUvOffset;
-      uv += flow * (0.045 + uHover * 0.04) * (1.0 - uOpen);
-      float zoom = 1.0 - uHover * 0.06 - uOpen * 0.04;
-      uv = (uv - 0.5) * zoom + 0.5;
-      float shift = (uHover * 0.006 + length(flow) * 0.01) * (1.0 - uOpen);
-      float r = texture2D(uTex, uv + vec2(shift, 0.0)).r;
-      vec2 gb = texture2D(uTex, uv).gb;
-      gl_FragColor = vec4(r, gb.x, gb.y, 1.0);
-    }`;
-  const imgVert = `
-    uniform float uBend;
-    varying vec2 vUv;
-    void main(){
-      vUv = uv;
-      vec3 p = position;
-      p.y += sin(uv.x * 3.14159) * uBend;
-      p.x += sin(uv.y * 3.14159) * uBend * 0.4;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-    }`;
-
-  document.querySelectorAll('.gl-img').forEach(holder => {
-    const img = holder.querySelector('img');
-    const tex = texLoader.load(img.currentSrc || img.src, t => {
-      fitCover(plane, t);
-    });
-    tex.minFilter = THREE.LinearFilter;
-    const mat = new THREE.ShaderMaterial({
-      uniforms: {
-        uTex: { value: tex }, uFlow: { value: rtA.texture },
-        uViewport: { value: new THREE.Vector2(vw * dpr, vh * dpr) },
-        uUvScale: { value: new THREE.Vector2(1, 1) }, uUvOffset: { value: new THREE.Vector2(0, 0) },
-        uHover: { value: 0 }, uOpen: { value: 0 }, uBend: { value: 0 },
-      },
-      vertexShader: imgVert, fragmentShader: imgFrag,
-    });
-    const plane = new THREE.Mesh(planeGeo, mat);
-    plane.userData = { holder, hover: 0, open: 0, openT: 0, rectFrom: null, tex };
-    imgScene.add(plane);
-    planes.push(plane);
-    const card = holder.closest('.card');
-    if (card && !isTouch) {
-      card.addEventListener('mouseenter', () => plane.userData.hoverTarget = 1);
-      card.addEventListener('mouseleave', () => plane.userData.hoverTarget = 0);
-    }
-  });
-
-  function fitCover(plane, tex) {
-    if (!tex.image) return;
-    const r = plane.userData.holder.getBoundingClientRect();
-    const pa = r.width / Math.max(1, r.height), ia = tex.image.width / tex.image.height;
-    const s = plane.material.uniforms.uUvScale.value, o = plane.material.uniforms.uUvOffset.value;
-    if (pa > ia) { s.set(1, ia / pa); o.set(0, (1 - ia / pa) / 2); }
-    else { s.set(pa / ia, 1); o.set((1 - pa / ia) / 2, 0); }
-  }
-
-  function syncPlane(plane, rectOverride) {
-    const r = rectOverride || plane.userData.holder.getBoundingClientRect();
-    plane.scale.set(Math.max(1, r.width), Math.max(1, r.height), 1);
-    plane.position.set(r.left + r.width / 2, -(r.top + r.height / 2), plane.userData.openT > 0 ? 5 : 0);
-  }
-
-  /* ---------- Transmorph: Karte → Vollbild ---------- */
-  const detail = document.getElementById('detail');
-  let openPlane = null;
-  const easeInOut = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-  document.querySelectorAll('.card').forEach((card, i) => {
-    card.addEventListener('click', () => {
-      const plane = planes[i];
-      if (!plane || openPlane) return;
-      openPlane = plane;
-      plane.userData.rectFrom = plane.userData.holder.getBoundingClientRect();
-      plane.userData.openDir = 1;
+if (!glctx || reduced){
+  document.body.classList.add('static');
+  document.getElementById('loader').classList.add('is-done');
+  /* Detail-Overlay funktioniert auch ohne WebGL */
+  const detailS = document.getElementById('detail');
+  detailS.querySelector('.detail__scrim').style.background = 'rgba(14,34,68,.94)';
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('click',()=>{
       document.getElementById('detailTitle').textContent = card.dataset.title;
       document.getElementById('detailTags').textContent = card.dataset.tags;
       document.getElementById('detailText').textContent = card.dataset.text;
-      detail.classList.add('is-open');
-      document.body.classList.add('is-locked');
+      detailS.classList.add('is-open'); document.body.classList.add('is-locked');
     });
   });
-  function closeDetail() {
-    if (!openPlane) return;
-    openPlane.userData.openDir = -1;
-    detail.classList.remove('is-open');
-    document.body.classList.remove('is-locked');
+  const closeS = ()=>{ detailS.classList.remove('is-open'); document.body.classList.remove('is-locked'); };
+  document.getElementById('detailClose').addEventListener('click',closeS);
+  document.getElementById('detailScrim').addEventListener('click',closeS);
+} else {
+  document.body.classList.add('gl');
+  main(glctx);
+}
+
+function main(glctx){
+const renderer = new THREE.WebGLRenderer({ canvas, context: glctx, antialias:false, alpha:false });
+renderer.setPixelRatio(dpr); renderer.setSize(vw,vh); renderer.autoClear = false;
+
+const scene = new THREE.Scene();
+scene.background = IVORY.clone();
+scene.fog = new THREE.Fog(IVORY.clone(), 30, 90);
+const cam = new THREE.PerspectiveCamera(46, vw/vh, .1, 200);
+cam.position.set(0,0,9);
+const camSpring = { x:new SecondOrder(1.2,.85,1.8), y:new SecondOrder(1.2,.85,1.8) };
+
+/* Ortho-Overlay für DOM-synchronisierte Bild-Planes */
+const ortho = new THREE.Scene();
+const orthoCam = new THREE.OrthographicCamera(0,vw,0,-vh,-100,100); orthoCam.position.z=10;
+
+/* ---------- Lade-Manager ---------- */
+const manager = new THREE.LoadingManager();
+const pctEl = document.getElementById('loaderPct'), barEl = document.getElementById('loaderBar');
+manager.onProgress = (u,l,t)=>{ const p=Math.round(l/t*100); pctEl.textContent=p+'%'; barEl.style.transform=`scaleX(${p/100})`; };
+manager.onLoad = ()=> setTimeout(()=>document.getElementById('loader').classList.add('is-done'), 400);
+const texLoader = new THREE.TextureLoader(manager);
+const gltfLoader = new GLTFLoader(manager);
+
+/* ---------- Prozeduraler Porzellan-Matcap (Canvas, 3 Zonen wie Lusion) ---------- */
+function makeMatcap(){
+  const s=512, c=document.createElement('canvas'); c.width=c.height=s;
+  const x=c.getContext('2d');
+  let g=x.createRadialGradient(s*.38,s*.32,s*.04,s*.5,s*.5,s*.62);
+  g.addColorStop(0,'#ffffff'); g.addColorStop(.25,'#f3f1ec'); g.addColorStop(.62,'#cfd2d6');
+  g.addColorStop(.86,'#8d96a6'); g.addColorStop(1,'#5d6a80');
+  x.fillStyle=g; x.fillRect(0,0,s,s);
+  // Spitzlicht
+  g=x.createRadialGradient(s*.34,s*.26,1,s*.34,s*.26,s*.13);
+  g.addColorStop(0,'rgba(255,255,255,.95)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=g; x.fillRect(0,0,s,s);
+  // Gegenlicht unten-rechts (Teal-Hauch)
+  g=x.createRadialGradient(s*.72,s*.8,1,s*.72,s*.8,s*.3);
+  g.addColorStop(0,'rgba(60,170,155,.35)'); g.addColorStop(1,'rgba(60,170,155,0)');
+  x.fillStyle=g; x.fillRect(0,0,s,s);
+  const t=new THREE.CanvasTexture(c); t.colorSpace=THREE.NoColorSpace; return t;
+}
+const matcap = makeMatcap();
+
+/* ============================================================
+   CLUSTER — Blender-GLBs + CPU-Physik + analytisches Nachbar-Shading
+   (Lusion-Rezept: starre Körper, Weichheit = Kontakt-AO im Shader)
+   ============================================================ */
+const N = 7;
+const bodies = []; // {mesh, pos, vel, quat, angA, radius, color}
+const PALETTE = ['#F2EFE8','#F2EFE8','#1AA591','#0E2244','#F2EFE8','#E94B5D','#F2EFE8'];
+const clusterGroup = new THREE.Group(); scene.add(clusterGroup);
+const clusterAnchor = new THREE.Vector3(2.6, 0, 0);
+
+const clusterVert = `
+  varying vec3 vN; varying vec3 vWP; varying vec3 vVN;
+  void main(){
+    vN = normalize(mat3(modelMatrix) * normal);
+    vVN = normalize(normalMatrix * normal);
+    vec4 wp = modelMatrix * vec4(position,1.0); vWP = wp.xyz;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }`;
+const clusterFrag = `
+  uniform sampler2D uMatcap; uniform vec3 uColor; uniform vec4 uNear[${N-1}];
+  uniform vec3 uNearColor[${N-1}]; uniform vec3 uCamPos; uniform float uFade;
+  varying vec3 vN; varying vec3 vWP; varying vec3 vVN;
+  // iq: sphere occlusion + sphere intersect
+  float sphOcc(vec3 d, float r2, vec3 n){
+    float l = max(length(d), 1e-4);
+    return clamp(1.0 - max(dot(d/l, n), 0.0) * r2/(l*l), 0.0, 1.0);
   }
-  document.getElementById('detailClose').addEventListener('click', closeDetail);
-  document.getElementById('detailScrim').addEventListener('click', closeDetail);
-  addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
-
-  /* ---------- Hero-Partikel: morphende Instanz-Wolke ---------- */
-  const heroScene = new THREE.Scene();
-  const heroCam = new THREE.PerspectiveCamera(50, vw / vh, .1, 100);
-  heroCam.position.z = 9;
-
-  const COUNT = isTouch ? 4500 : 9000;
-  const pos1 = new Float32Array(COUNT * 3), pos2 = new Float32Array(COUNT * 3),
-        pos3 = new Float32Array(COUNT * 3), rand = new Float32Array(COUNT);
-
-  for (let i = 0; i < COUNT; i++) {
-    // Form 1: Fibonacci-Kugel
-    const t = i / COUNT, ga = i * 2.39996;
-    const ry = 1 - 2 * t, rr = Math.sqrt(1 - ry * ry);
-    pos1.set([Math.cos(ga) * rr * 2.3, ry * 2.3, Math.sin(ga) * rr * 2.3], i * 3);
-    // Form 2: Torus-Knoten (p=2,q=3)
-    const u = t * Math.PI * 2 * 2;
-    const rk = Math.cos(3 * u / 2) + 2;
-    pos2.set([
-      rk * Math.cos(u) * .95,
-      rk * Math.sin(u) * .95,
-      Math.sin(3 * u / 2) * 1.1,
-    ], i * 3);
-    // Form 3: Doppel-Helix-Band ("Flow")
-    const h = (t - .5) * 5.6, arm = i % 2 ? 0 : Math.PI;
-    pos3.set([Math.cos(h * 1.7 + arm) * 1.5, h, Math.sin(h * 1.7 + arm) * 1.5], i * 3);
-    rand[i] = Math.random();
+  float sphInter(vec3 ro, vec3 rd, vec3 ce, float ra){
+    vec3 oc = ro - ce; float b = dot(oc, rd);
+    float c = dot(oc,oc) - ra*ra; float h = b*b - c;
+    if (h < 0.0) return -1.0; return -b - sqrt(h);
   }
-  const pGeo = new THREE.BufferGeometry();
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pos1, 3));
-  pGeo.setAttribute('aPos2', new THREE.BufferAttribute(pos2, 3));
-  pGeo.setAttribute('aPos3', new THREE.BufferAttribute(pos3, 3));
-  pGeo.setAttribute('aRand', new THREE.BufferAttribute(rand, 1));
+  void main(){
+    vec3 V = normalize(uCamPos - vWP);
+    vec3 R = reflect(-V, normalize(vN));
+    float ao = 1.0, shadow = 1.0; vec3 gi = vec3(0.0); float reflHit = 0.0; vec3 reflCol = vec3(0.0);
+    vec3 L = normalize(vec3(.5,.8,.4));
+    for (int i=0; i<${N-1}; i++){
+      vec3 d = uNear[i].xyz - vWP; float r = uNear[i].w;
+      float o = sphOcc(d, r*r*0.92, normalize(vN));
+      ao *= o;
+      gi += uNearColor[i] * (1.0-o) * 0.45;
+      // weicher Schatten: Nachbar zwischen Punkt und Licht?
+      float sl = length(cross(d, L)); float along = dot(d, L);
+      if (along > 0.0) shadow *= mix(1.0, smoothstep(r*0.55, r*1.25, sl), 0.85);
+      // Reflexion des Nachbarn
+      float t = sphInter(vWP, R, uNear[i].xyz, r);
+      if (t > 0.02 && reflHit < 0.5){ reflHit = 1.0; reflCol = uNearColor[i]; }
+    }
+    vec2 muv = vVN.xy * 0.5 + 0.5;
+    vec3 mc = texture2D(uMatcap, muv).rgb;
+    vec3 base = uColor * (mc * 0.92 + 0.08);
+    base += gi * (1.0 - ao) * 0.5;
+    float fr = pow(1.0 - abs(dot(normalize(vVN), vec3(0.,0.,1.))), 3.0);
+    base += fr * 0.18;
+    if (reflHit > 0.5) base = mix(base, reflCol * (mc.r*0.8+0.35), 0.22 * (0.3+fr));
+    base *= mix(0.52, 1.0, ao) * mix(0.62, 1.0, shadow);
+    gl_FragColor = vec4(base * uFade + (1.0-uFade)*base, 1.0);
+    gl_FragColor.rgb = pow(gl_FragColor.rgb, vec3(0.96)); // sanfter Lift
+  }`;
 
-  const pMat = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false,
+function clusterMaterial(hex){
+  return new THREE.ShaderMaterial({
     uniforms: {
-      uTime: { value: 0 }, uMorph: { value: 0 }, uFade: { value: 1 },
-      uMouse: { value: new THREE.Vector3(99, 99, 0) },
-      uTeal: { value: new THREE.Color().setStyle('#1AA591', THREE.LinearSRGBColorSpace) },
-      uPink: { value: new THREE.Color().setStyle('#E94B5D', THREE.LinearSRGBColorSpace) },
-      uInk:  { value: new THREE.Color().setStyle('#0E2244', THREE.LinearSRGBColorSpace) },
-      uPx:   { value: dpr },
+      uMatcap:{value:matcap}, uColor:{value:new THREE.Color(hex)},
+      uNear:{value:Array.from({length:N-1},()=>new THREE.Vector4(99,99,99,.001))},
+      uNearColor:{value:Array.from({length:N-1},()=>new THREE.Color('#fff'))},
+      uCamPos:{value:cam.position}, uFade:{value:1},
     },
-    vertexShader: `
-      attribute vec3 aPos2; attribute vec3 aPos3; attribute float aRand;
-      uniform float uTime, uMorph, uPx; uniform vec3 uMouse;
-      varying float vRand; varying float vDepth;
-      void main(){
-        vRand = aRand;
-        float m1 = smoothstep(0.0, 1.0, uMorph);
-        float m2 = smoothstep(1.0, 2.0, uMorph);
-        vec3 p = mix(mix(position, aPos2, m1), aPos3, m2);
-        // organisches Atmen
-        p += 0.12 * vec3(
-          sin(uTime * .9 + aRand * 31.0),
-          cos(uTime * 1.1 + aRand * 47.0),
-          sin(uTime * .7 + aRand * 17.0)
-        ) * (0.4 + aRand);
-        // Maus-Abstoßung
-        vec3 dm = p - uMouse;
-        float dist = length(dm);
-        p += normalize(dm + 0.0001) * exp(-dist * dist * 1.4) * 0.85;
-        vec4 mv = modelViewMatrix * vec4(p, 1.0);
-        vDepth = clamp((-mv.z - 5.0) / 8.0, 0.0, 1.0);
-        gl_PointSize = (2.6 + aRand * 3.2) * uPx * (9.0 / -mv.z);
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: `
-      uniform vec3 uTeal, uPink, uInk; uniform float uFade;
-      varying float vRand; varying float vDepth;
-      void main(){
-        vec2 c = gl_PointCoord - 0.5;
-        float d = length(c);
-        if (d > 0.5) discard;
-        float a = smoothstep(0.5, 0.32, d) * uFade;
-        vec3 col = mix(uTeal, uInk, vDepth * 0.55);
-        col = mix(col, uPink, step(0.93, vRand));
-        gl_FragColor = vec4(col, a * (0.55 + 0.45 * vRand));
-      }`,
+    vertexShader: clusterVert, fragmentShader: clusterFrag,
   });
-  const cloud = new THREE.Points(pGeo, pMat);
-  heroScene.add(cloud);
-  function placeCloud() {
-    const desktop = vw > 860;
-    cloud.position.set(desktop ? 2.6 : 0, desktop ? 0 : 1.6, 0);
-    cloud.scale.setScalar(desktop ? 1 : .62);
-  }
-  placeCloud();
+}
 
-  /* ---------- Render-Loop ---------- */
-  const clock = new THREE.Clock();
-  let lastMx = mouse.tx, lastMy = mouse.ty;
-  const ray = new THREE.Raycaster();
-  const ndc = new THREE.Vector2();
-  const yAxis = new THREE.Vector3(0, 1, 0);
-  let prevT = 0;
-
-  function frame() {
-    const t = clock.getElapsedTime();
-    const dt = Math.min(t - prevT, .05); prevT = t;
-
-    // Mausgeschwindigkeit → Flow-Feld
-    const mvx = (mouse.tx - lastMx) / vw, mvy = (mouse.ty - lastMy) / vh;
-    lastMx = mouse.tx; lastMy = mouse.ty;
-    simMat.uniforms.uPrev.value = rtA.texture;
-    simMat.uniforms.uMouse.value.set(mouse.tx / vw, 1 - mouse.ty / vh);
-    simMat.uniforms.uVel.value.set(
-      lerp(simMat.uniforms.uVel.value.x, mvx * 14, .5),
-      lerp(simMat.uniforms.uVel.value.y, -mvy * 14, .5)
-    );
-    renderer.setRenderTarget(rtB);
-    renderer.clear();
-    renderer.render(simScene, simCam);
-    renderer.setRenderTarget(null);
-    [rtA, rtB] = [rtB, rtA];
-
-    // Bild-Planes synchronisieren
-    planes.forEach(plane => {
-      const u = plane.material.uniforms;
-      u.uFlow.value = rtA.texture;
-      plane.userData.hover = lerp(plane.userData.hover, plane.userData.hoverTarget || 0, .08);
-      u.uHover.value = plane.userData.hover;
-
-      // Transmorph-Fortschritt
-      if (plane.userData.openDir) {
-        plane.userData.openT += plane.userData.openDir * dt * 2.1;
-        if (plane.userData.openT >= 1) { plane.userData.openT = 1; plane.userData.openDir = 0; }
-        if (plane.userData.openT <= 0) { plane.userData.openT = 0; plane.userData.openDir = 0; openPlane = null; }
-      }
-      const ot = easeInOut(Math.min(1, Math.max(0, plane.userData.openT || 0)));
-      u.uOpen.value = ot;
-      u.uBend.value = Math.sin(ot * Math.PI) * .12;
-
-      if (ot > 0 && plane.userData.rectFrom) {
-        const f = plane.userData.openDir < 0
-          ? plane.userData.holder.getBoundingClientRect()
-          : plane.userData.rectFrom;
-        syncPlane(plane, {
-          left: lerp(f.left, 0, ot), top: lerp(f.top, 0, ot),
-          width: lerp(f.width, vw, ot), height: lerp(f.height, vh, ot),
-        });
-      } else {
-        syncPlane(plane);
-      }
+gltfLoader.load('assets/flow-objects.glb', g => {
+  const meshes = {};
+  g.scene.traverse(o => { if (o.isMesh) meshes[o.name] = o; });
+  const kinds = ['flowNode','flowElbow','flowDisc'];
+  for (let i=0;i<N;i++){
+    const src = meshes[kinds[i % 3]] || Object.values(meshes)[0];
+    const geo = src.geometry.clone();
+    geo.computeBoundingSphere();
+    const baseR = geo.boundingSphere.radius;
+    const scale = (0.85 + (i*0.13)%0.5) / baseR;  // Zielradius ~0.85–1.35
+    const mesh = new THREE.Mesh(geo, clusterMaterial(PALETTE[i]));
+    mesh.scale.setScalar(scale);
+    const radius = baseR * scale * 0.82;
+    const a = i/N*Math.PI*2;
+    bodies.push({
+      mesh, radius, color:new THREE.Color(PALETTE[i]),
+      pos:new THREE.Vector3(Math.cos(a)*2.4, Math.sin(a)*2.0, (i%3-1)*1.2),
+      vel:new THREE.Vector3(0,0,0),
+      ang:new THREE.Vector3((Math.random()-.5)*.6,(Math.random()-.5)*.6,(Math.random()-.5)*.6),
     });
-
-    // Hero-Partikel: Morph über Scroll, Fade nach Hero
-    const sp = Math.min(2, scrollY / (vh * .9));
-    pMat.uniforms.uMorph.value = lerp(pMat.uniforms.uMorph.value, sp, .06);
-    pMat.uniforms.uFade.value = lerp(pMat.uniforms.uFade.value, scrollY > vh * 2.2 ? 0 : 1, .08);
-    pMat.uniforms.uTime.value = t;
-    cloud.rotation.y = t * .12;
-    ndc.set((mouse.tx / vw) * 2 - 1, -(mouse.ty / vh) * 2 + 1);
-    ray.setFromCamera(ndc, heroCam);
-    const mp = ray.ray.origin.clone().add(ray.ray.direction.clone().multiplyScalar(9));
-    mp.sub(cloud.position).divideScalar(cloud.scale.x)
-      .applyAxisAngle(yAxis, -cloud.rotation.y);
-    pMat.uniforms.uMouse.value.lerp(mp, .12);
-
-    renderer.clear();
-    if (pMat.uniforms.uFade.value > .01) renderer.render(heroScene, heroCam);
-    renderer.clearDepth();
-    renderer.render(imgScene, orthoCam);
-
-    requestAnimationFrame(frame);
+    clusterGroup.add(mesh);
   }
-  frame();
+});
 
-  /* ---------- Resize ---------- */
-  addEventListener('resize', () => {
-    vw = innerWidth; vh = innerHeight; dpr = Math.min(devicePixelRatio, 2);
-    renderer.setPixelRatio(dpr);
-    pMat.uniforms.uPx.value = dpr;
-    renderer.setSize(vw, vh);
-    orthoCam.left = 0; orthoCam.right = vw; orthoCam.top = 0; orthoCam.bottom = -vh;
-    orthoCam.updateProjectionMatrix();
-    heroCam.aspect = vw / vh; heroCam.updateProjectionMatrix();
-    simMat.uniforms.uAspect.value = vw / vh;
-    planes.forEach(p => { p.material.uniforms.uViewport.value.set(vw * dpr, vh * dpr); fitCover(p, p.userData.tex); });
-    placeCloud();
-    drawLine();
-  });
+const rayc = new THREE.Raycaster(); const ndcV = new THREE.Vector2();
+function physStep(dt){
+  if (!bodies.length) return;
+  dt = Math.min(dt, .033);
+  // Maus-Strahl in Welt
+  ndcV.set((mouse.x/vw)*2-1, -(mouse.y/vh)*2+1);
+  rayc.setFromCamera(ndcV, cam);
+  const ro = rayc.ray.origin, rd = rayc.ray.direction;
+  const mvx = (mouse.x-mouse.px)/vw, mvy=(mouse.y-mouse.py)/vh;
+  const mSpeed = Math.min(Math.hypot(mvx,mvy)*60, 3);
+  mouse.px = mouse.x; mouse.py = mouse.y;
+
+  for (const b of bodies){
+    // Zentripetal zur Anker-Position
+    const toC = b.pos.clone().sub(clusterAnchor);
+    b.vel.addScaledVector(toC, -3.2*dt);
+    // Maus-Pushback (Punkt-Gerade-Abstand)
+    const w = b.pos.clone().sub(ro); const proj = w.dot(rd);
+    const closest = ro.clone().addScaledVector(rd, proj);
+    const dm = b.pos.clone().sub(closest); const dist = dm.length();
+    if (dist < b.radius + 1.1){
+      b.vel.addScaledVector(dm.normalize(), (3.5 + mSpeed*6) * dt * (1.2 - dist/(b.radius+1.1)) * 4.0);
+    }
+    b.vel.multiplyScalar(Math.pow(.16, dt));
+    b.pos.addScaledVector(b.vel, dt);
+  }
+  // Paar-Kollision: Separation + Impuls
+  for (let i=0;i<bodies.length;i++) for (let j=i+1;j<bodies.length;j++){
+    const A=bodies[i], B=bodies[j];
+    const d = B.pos.clone().sub(A.pos); const l = d.length(); const minD = A.radius+B.radius;
+    if (l < minD && l > 1e-5){
+      const n = d.divideScalar(l); const overlap = (minD-l);
+      A.pos.addScaledVector(n,-overlap*.5); B.pos.addScaledVector(n,overlap*.5);
+      const va = A.vel.dot(n), vb = B.vel.dot(n);
+      const rest = .35, ma = (va*(1-rest)+vb*(1+rest))/2, mb = (vb*(1-rest)+va*(1+rest))/2;
+      A.vel.addScaledVector(n, ma-va); B.vel.addScaledVector(n, mb-vb);
+      // Abroll-Drall
+      A.ang.addScaledVector(new THREE.Vector3().crossVectors(n, A.vel), .25*dt*60);
+      B.ang.addScaledVector(new THREE.Vector3().crossVectors(n, B.vel), -.25*dt*60);
+    }
+  }
+  for (const b of bodies){
+    b.mesh.position.copy(b.pos);
+    b.mesh.rotation.x += b.ang.x*dt; b.mesh.rotation.y += b.ang.y*dt; b.mesh.rotation.z += b.ang.z*dt;
+    b.ang.multiplyScalar(Math.pow(.5, dt));
+  }
+  // Nachbar-Uniforms (jeder kennt alle anderen)
+  for (let i=0;i<bodies.length;i++){
+    const u = bodies[i].mesh.material.uniforms;
+    let k=0;
+    for (let j=0;j<bodies.length;j++){
+      if (i===j) continue;
+      u.uNear.value[k].set(bodies[j].pos.x, bodies[j].pos.y, bodies[j].pos.z, bodies[j].radius);
+      u.uNearColor.value[k].copy(bodies[j].color);
+      k++;
+    }
+  }
 }
 
 /* ============================================================
-   LOADER — Bilder vorladen, dann Bühne frei
+   TUNNEL — instanzierte Greeble-Blöcke + Glow-Kerne (Station 3)
    ============================================================ */
-const loader = document.getElementById('loader');
-const pctEl = document.getElementById('loaderPct');
-const barEl = document.getElementById('loaderBar');
-const imgs = [...document.images];
-let done = 0;
-function tick() {
-  done++;
-  const p = Math.round(done / Math.max(1, imgs.length) * 100);
-  pctEl.textContent = p + '%';
-  barEl.style.transform = `scaleX(${p / 100})`;
-  if (done >= imgs.length) setTimeout(() => loader.classList.add('is-done'), 350);
-}
-if (!imgs.length) loader.classList.add('is-done');
-imgs.forEach(im => (im.complete ? tick() : (im.onload = tick, im.onerror = tick)));
-setTimeout(() => loader.classList.add('is-done'), 5000); // Fallback
-
-/* Detail-Overlay Fallback ohne WebGL */
-if (!document.body.classList.contains('gl')) {
-  const detail = document.getElementById('detail');
-  detail.querySelector('.detail__scrim').style.background = 'rgba(14,34,68,.94)';
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      document.getElementById('detailTitle').textContent = card.dataset.title;
-      document.getElementById('detailTags').textContent = card.dataset.tags;
-      document.getElementById('detailText').textContent = card.dataset.text;
-      detail.classList.add('is-open');
-      document.body.classList.add('is-locked');
-    });
+const TUN = 260;
+const tunnelGroup = new THREE.Group(); scene.add(tunnelGroup);
+{
+  const boxGeo = new THREE.BoxGeometry(1,1,1);
+  const tunMat = new THREE.ShaderMaterial({
+    uniforms:{ uFog:{value:scene.fog.color}, uTeal:{value:TEAL} },
+    vertexShader:`
+      varying vec2 vUv; varying float vZ;
+      void main(){ vUv=uv;
+        vec4 mv = modelViewMatrix * instanceMatrix * vec4(position,1.0);
+        vZ = -mv.z; gl_Position = projectionMatrix * mv; }`,
+    fragmentShader:`
+      uniform vec3 uFog; uniform vec3 uTeal;
+      varying vec2 vUv; varying float vZ;
+      void main(){
+        vec2 g = abs(fract(vUv*2.0)-0.5);
+        float edge = smoothstep(0.5,0.46,max(g.x,g.y));
+        vec3 col = mix(uTeal*1.5, vec3(0.02,0.05,0.1), edge);
+        float fog = smoothstep(10.0, 60.0, vZ);
+        gl_FragColor = vec4(mix(col, uFog, fog), 1.0);
+      }`,
   });
-  const close = () => { detail.classList.remove('is-open'); document.body.classList.remove('is-locked'); };
-  document.getElementById('detailClose').addEventListener('click', close);
-  document.getElementById('detailScrim').addEventListener('click', close);
-  addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  const inst = new THREE.InstancedMesh(boxGeo, tunMat, TUN);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+  let si = 0;
+  for (let i=0;i<TUN;i++){
+    const z = -14 - (i/TUN)*22;
+    const ang = (si=si+2.39996), rad = 3.2 + (i*7919 % 100)/100*2.2;
+    p.set(Math.cos(ang)*rad, Math.sin(ang)*rad, z);
+    q.setFromEuler(new THREE.Euler(0,0,ang));
+    const len = .6 + (i*104729 % 100)/100*2.6;
+    s.set(len, .25 + (i*15485863%100)/100*.5, .3 + (i*32452843%100)/100*.6);
+    m.compose(p,q,s); inst.setMatrixAt(i,m);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  tunnelGroup.add(inst);
+  // Glow-Kerne entlang der Achse
+  const glowGeo = new THREE.SphereGeometry(.09, 12, 12);
+  const glowMat = new THREE.MeshBasicMaterial({ color:TEAL });
+  const glows = new THREE.InstancedMesh(glowGeo, glowMat, 60);
+  for (let i=0;i<60;i++){
+    const z = -14 - i/60*22, ang=i*1.7, rad=1.1+(i%5)*.5;
+    m.compose(new THREE.Vector3(Math.cos(ang)*rad, Math.sin(ang)*rad, z), q.identity(), s.set(1,1,1));
+    glows.setMatrixAt(i,m);
+  }
+  glows.instanceMatrix.needsUpdate = true;
+  tunnelGroup.add(glows);
 }
 
-/* Smooth-Anchor */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const el = document.querySelector(a.getAttribute('href'));
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth' }); }
+/* ============================================================
+   STICKER-FINALE — Emoji-Sprites schweben (Station 5)
+   ============================================================ */
+const stickGroup = new THREE.Group(); scene.add(stickGroup);
+{
+  const EMO = ['⚡','🤖','✦','💡','🎛','🧩','♥','▲','✺','✳'];
+  for (let i=0;i<26;i++){
+    const c=document.createElement('canvas'); c.width=c.height=128;
+    const x=c.getContext('2d'); x.font='92px serif'; x.textAlign='center'; x.textBaseline='middle';
+    x.fillText(EMO[i%EMO.length], 64, 70);
+    const t=new THREE.CanvasTexture(c);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({ map:t, transparent:true, opacity:.92 }));
+    const a=i/26*Math.PI*2, r=2.2+(i%7)*.8;
+    sp.position.set(Math.cos(a)*r, Math.sin(a)*r*.7, -78 - (i%5)*1.5);
+    sp.scale.setScalar(.55 + (i%4)*.22);
+    sp.userData={ a, r, sp:.2+(i%5)*.08 };
+    stickGroup.add(sp);
+  }
+  // Ein winkender Flow-Knoten im Zentrum des Finales (aus dem GLB, sobald geladen)
+  const check = setInterval(()=>{
+    if (bodies.length){
+      const hero = bodies[0].mesh.clone();
+      hero.material = clusterMaterial('#F2EFE8');
+      hero.scale.setScalar(.9); hero.position.set(0,-.4,-80);
+      hero.userData.isFinaleHero = true;
+      stickGroup.add(hero); clearInterval(check);
+    }
+  }, 300);
+}
+
+/* ============================================================
+   BILD-PLANES (Projekte, DOM-synchron) + REEL-PLANES + TRANSMORPH
+   ============================================================ */
+const planeGeo = new THREE.PlaneGeometry(1,1,24,24);
+const planes = [];
+const imgVert = `
+  uniform float uBend; varying vec2 vUv;
+  void main(){ vUv=uv; vec3 p=position;
+    p.y += sin(uv.x*3.14159)*uBend; p.x += sin(uv.y*3.14159)*uBend*.4;
+    gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.0); }`;
+const imgFrag = `
+  uniform sampler2D uTex; uniform sampler2D uPaint; uniform vec2 uViewport;
+  uniform vec2 uUvScale; uniform vec2 uUvOffset; uniform float uHover; uniform float uOpen;
+  varying vec2 vUv;
+  void main(){
+    vec2 suv = gl_FragCoord.xy/uViewport;
+    vec2 flow = (texture2D(uPaint, suv).rg - 0.5) * 2.0;
+    vec2 uv = vUv*uUvScale+uUvOffset;
+    uv += flow * (0.05 + uHover*0.05) * (1.0-uOpen);
+    uv = (uv-.5)*(1.0-uHover*.06-uOpen*.04)+.5;
+    float sh = (uHover*.006+length(flow)*.012)*(1.0-uOpen);
+    float r = texture2D(uTex, uv+vec2(sh,0.)).r;
+    vec2 gb = texture2D(uTex, uv).gb;
+    gl_FragColor = vec4(r, gb.x, gb.y, 1.0);
+  }`;
+function makePlane(holder, src){
+  const mat = new THREE.ShaderMaterial({
+    uniforms:{
+      uTex:{value:null}, uPaint:{value:null},
+      uViewport:{value:new THREE.Vector2(vw*dpr,vh*dpr)},
+      uUvScale:{value:new THREE.Vector2(1,1)}, uUvOffset:{value:new THREE.Vector2(0,0)},
+      uHover:{value:0}, uOpen:{value:0}, uBend:{value:0},
+    }, vertexShader:imgVert, fragmentShader:imgFrag,
+  });
+  const tex = texLoader.load(src, t=>{ mat.uniforms.uTex.value=t; fitCover(plane,t); });
+  tex.minFilter = THREE.LinearFilter;
+  const plane = new THREE.Mesh(planeGeo, mat);
+  plane.userData = { holder, hover:0, hoverTarget:0, openT:0, openDir:0, rectFrom:null, tex };
+  ortho.add(plane); planes.push(plane);
+  return plane;
+}
+function fitCover(plane, tex){
+  if (!tex.image) return;
+  const r = plane.userData.holder.getBoundingClientRect();
+  const pa = r.width/Math.max(1,r.height), ia = tex.image.width/tex.image.height;
+  const s = plane.material.uniforms.uUvScale.value, o = plane.material.uniforms.uUvOffset.value;
+  if (pa>ia){ s.set(1, ia/pa); o.set(0,(1-ia/pa)/2); } else { s.set(pa/ia,1); o.set((1-pa/ia)/2,0); }
+}
+function syncPlane(plane, rect){
+  const r = rect || plane.userData.holder.getBoundingClientRect();
+  plane.scale.set(Math.max(1,r.width), Math.max(1,r.height), 1);
+  plane.position.set(r.left+r.width/2, -(r.top+r.height/2), plane.userData.openT>0 ? 5 : 0);
+}
+document.querySelectorAll('.gl-img').forEach(h=>{
+  const img = h.querySelector('img');
+  const plane = makePlane(h, img.currentSrc || img.src);
+  const card = h.closest('.card');
+  if (card && !isTouch){
+    card.addEventListener('mouseenter',()=>plane.userData.hoverTarget=1);
+    card.addEventListener('mouseleave',()=>plane.userData.hoverTarget=0);
+  }
+});
+
+/* Transmorph */
+const detail = document.getElementById('detail');
+let openPlane = null;
+const easeIO = t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+document.querySelectorAll('.card').forEach((card,i)=>{
+  card.addEventListener('click',()=>{
+    const plane = planes[i];
+    if (!plane || openPlane) return;
+    openPlane = plane;
+    plane.userData.rectFrom = plane.userData.holder.getBoundingClientRect();
+    plane.userData.openDir = 1;
+    document.getElementById('detailTitle').textContent = card.dataset.title;
+    document.getElementById('detailTags').textContent = card.dataset.tags;
+    document.getElementById('detailText').textContent = card.dataset.text;
+    detail.classList.add('is-open'); document.body.classList.add('is-locked');
   });
 });
+function closeDetail(){ if(!openPlane) return; openPlane.userData.openDir=-1;
+  detail.classList.remove('is-open'); document.body.classList.remove('is-locked'); }
+document.getElementById('detailClose').addEventListener('click',closeDetail);
+document.getElementById('detailScrim').addEventListener('click',closeDetail);
+addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
+
+/* ============================================================
+   SCREENPAINT — Quarter-Res-Pingpong (Lusion-Rezept e/f)
+   ============================================================ */
+const PW = ()=>Math.max(160, Math.round(vw/4)), PH = ()=>Math.max(90, Math.round(vh/4));
+const paintOpts = { type:THREE.HalfFloatType, minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter, depthBuffer:false };
+let paintA = new THREE.WebGLRenderTarget(PW(),PH(),paintOpts);
+let paintB = new THREE.WebGLRenderTarget(PW(),PH(),paintOpts);
+const fsGeo = new THREE.PlaneGeometry(2,2);
+const fsCam = new THREE.OrthographicCamera(-1,1,1,-1,0,1);
+const paintScene = new THREE.Scene();
+const paintMat = new THREE.ShaderMaterial({
+  uniforms:{
+    uPrev:{value:null}, uFrom:{value:new THREE.Vector2(-9,-9)}, uTo:{value:new THREE.Vector2(-9,-9)},
+    uVel:{value:new THREE.Vector2(0,0)}, uAspect:{value:vw/vh}, uRadius:{value:.085},
+  },
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform sampler2D uPrev; uniform vec2 uFrom; uniform vec2 uTo; uniform vec2 uVel;
+    uniform float uAspect; uniform float uRadius; varying vec2 vUv;
+    float sdSeg(vec2 p, vec2 a, vec2 b){
+      vec2 pa=p-a, ba=b-a; float h=clamp(dot(pa,ba)/max(dot(ba,ba),1e-5),0.,1.);
+      return length(pa-ba*h); }
+    void main(){
+      vec4 prev = texture2D(uPrev, vUv);
+      vec2 v = (prev.xy - 0.5);
+      // Selbst-Advektion: gegen eigene Velocity zurücklesen
+      vec4 adv = texture2D(uPrev, vUv - v*0.012);
+      v = (adv.xy - 0.5) * 0.962;
+      float w = adv.z * 0.945;
+      vec2 p = vUv*vec2(uAspect,1.0);
+      float d = sdSeg(p, uFrom*vec2(uAspect,1.0), uTo*vec2(uAspect,1.0));
+      float stamp = 1.0 - smoothstep(0.0, uRadius, d);
+      v += uVel * stamp * 1.5; w = max(w, stamp);
+      gl_FragColor = vec4(clamp(v+0.5, 0.0, 1.0), w, 1.0);
+    }`,
+});
+paintScene.add(new THREE.Mesh(fsGeo, paintMat));
+/* Paint-Buffer neutral (0.5,0.5,0) initialisieren — sonst Vollbild-Schmieren beim Start */
+const paintInitMat = new THREE.ShaderMaterial({
+  vertexShader:`void main(){ gl_Position=vec4(position,1.0); }`,
+  fragmentShader:`void main(){ gl_FragColor=vec4(0.5,0.5,0.0,1.0); }`,
+});
+const paintInitScene = new THREE.Scene();
+paintInitScene.add(new THREE.Mesh(fsGeo, paintInitMat));
+function initPaint(){
+  renderer.setRenderTarget(paintA); renderer.render(paintInitScene, fsCam);
+  renderer.setRenderTarget(paintB); renderer.render(paintInitScene, fsCam);
+  renderer.setRenderTarget(null);
+}
+initPaint();
+
+/* ============================================================
+   POST-STACK — Szene-RT → Bloom-Mips → Grade(+Paint-Smear) → Screen
+   ============================================================ */
+const sceneRT = new THREE.WebGLRenderTarget(vw*dpr, vh*dpr, { samples: 4 });
+const mip1 = new THREE.WebGLRenderTarget(vw*dpr/2, vh*dpr/2);
+const mip2 = new THREE.WebGLRenderTarget(vw*dpr/4, vh*dpr/4);
+const blurScene = new THREE.Scene();
+const blurMat = new THREE.ShaderMaterial({
+  uniforms:{ uTex:{value:null}, uDir:{value:new THREE.Vector2(1,0)}, uTexel:{value:new THREE.Vector2(1,1)} },
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform sampler2D uTex; uniform vec2 uDir; uniform vec2 uTexel; varying vec2 vUv;
+    void main(){
+      vec4 c = texture2D(uTex, vUv)*0.227;
+      vec2 o1 = uDir*uTexel*1.384, o2 = uDir*uTexel*3.230;
+      c += (texture2D(uTex,vUv+o1)+texture2D(uTex,vUv-o1))*0.316;
+      c += (texture2D(uTex,vUv+o2)+texture2D(uTex,vUv-o2))*0.070;
+      gl_FragColor = c; }`,
+});
+blurScene.add(new THREE.Mesh(fsGeo, blurMat));
+const tmp1 = new THREE.WebGLRenderTarget(vw*dpr/2, vh*dpr/2);
+const tmp2 = new THREE.WebGLRenderTarget(vw*dpr/4, vh*dpr/4);
+
+const gradeScene = new THREE.Scene();
+const gradeMat = new THREE.ShaderMaterial({
+  uniforms:{
+    uTex:{value:null}, uBloom1:{value:null}, uBloom2:{value:null}, uPaint:{value:null},
+    uTime:{value:0}, uVigStr:{value:.55}, uChroma:{value:0}, uBloomAmt:{value:.32},
+    uAspect:{value:vw/vh}, uDark:{value:0},
+  },
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform sampler2D uTex; uniform sampler2D uBloom1; uniform sampler2D uBloom2; uniform sampler2D uPaint;
+    uniform float uTime; uniform float uVigStr; uniform float uChroma; uniform float uBloomAmt;
+    uniform float uAspect; uniform float uDark; varying vec2 vUv;
+    float hash13(vec3 p){ p=fract(p*.1031); p+=dot(p,p.zyx+31.32); return fract((p.x+p.y)*p.z); }
+    void main(){
+      vec4 pd = texture2D(uPaint, vUv);
+      vec2 vel = (pd.xy-0.5)*2.0*pd.z;
+      // 9-Tap-Richtungs-Smear entlang der Paint-Velocity (Lusion-Rezept f)
+      vec2 stepv = vel * 0.012;
+      vec3 col = vec3(0.0); vec2 uv = vUv - stepv*4.0;
+      for (int i=0;i<9;i++){ col += texture2D(uTex, uv).rgb; uv += stepv; }
+      col /= 9.0;
+      // RGB-Shimmer auf der Spur
+      col += sin(vec3(0.0,2.1,4.2) + (vel.x+vel.y)*42.0) * 0.035 * pd.z;
+      // chromatische Vignette (Void-Station)
+      vec2 cd = (vUv-0.5)*vec2(uAspect,1.0);
+      float rr = length(cd);
+      if (uChroma > 0.001){
+        vec2 off = cd * rr * 0.018 * uChroma;
+        col.r = mix(col.r, texture2D(uTex, vUv+off).r, uChroma*.8);
+        col.b = mix(col.b, texture2D(uTex, vUv-off).b, uChroma*.8);
+      }
+      // Bloom
+      col += (texture2D(uBloom1,vUv).rgb*0.6 + texture2D(uBloom2,vUv).rgb*0.9) * uBloomAmt;
+      // Grade: leichte Sättigung+Kontrast
+      float l = dot(col, vec3(.2126,.7152,.0722));
+      col = mix(vec3(l), col, 1.06);
+      col = (col - 0.5)*1.035 + 0.5;
+      // Vignette (auf dunklen Stationen stärker)
+      float vig = smoothstep(0.62, 1.55, rr*1.18);
+      col *= 1.0 - vig*(uVigStr + uDark*0.32);
+      // Grain
+      col += (hash13(vec3(gl_FragCoord.xy, uTime*60.0))-0.5) / 160.0;
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+});
+gradeScene.add(new THREE.Mesh(fsGeo, gradeMat));
+
+/* ============================================================
+   DOM-CHOREOGRAFIE — Stationen ein-/ausblenden über P
+   ============================================================ */
+const sts = [...document.querySelectorAll('.st')];
+const voidLines = [...document.querySelectorAll('.st-void .line')];
+const progDots = [...document.querySelectorAll('.prog i')];
+const navEl = document.getElementById('nav');
+// Sichtfenster pro Station [in, out]
+const WINDOWS = [[ -0.2, 0.9 ], [ 0.95, 1.95 ], [ 2.05, 2.95 ], [ 3.0, 4.0 ], [ 4.05, 4.95 ], [ 5.05, 6.3 ]];
+function domStep(p, detailOpen){
+  for (let i=0;i<sts.length;i++){
+    const [a,b] = WINDOWS[i];
+    let o = win(p, a, b, .22);
+    if (detailOpen && i === 2) o = 0;   // Karten-DOM weg, wenn Transmorph offen
+    const el = sts[i];
+    el.style.opacity = o.toFixed(3);
+    el.classList.toggle('on', o > 0.01);
+    const dy = (1 - o) * 26 * (p > (a+b)/2 ? -1 : 1);
+    el.style.transform = `translateY(${dy.toFixed(1)}px)`;
+  }
+  // Void: zwei Zeilen nacheinander
+  const l0 = win(p, 3.02, 3.48, .14), l1 = win(p, 3.52, 3.98, .14);
+  voidLines[0].style.opacity = l0.toFixed(3);
+  voidLines[1].style.opacity = l1.toFixed(3);
+  voidLines[0].style.transform = `translate(-50%,-50%) scale(${(0.92+l0*.08).toFixed(3)})`;
+  voidLines[1].style.transform = `translate(-50%,-50%) scale(${(0.92+l1*.08).toFixed(3)})`;
+  // Progress-Punkte + Nav-Farbe
+  const idx = clamp(Math.round(p - .45), 0, 5);
+  progDots.forEach((d,i)=>d.classList.toggle('on', i===idx));
+  const dark = darkAt(p);
+  document.body.style.color = dark ? 'var(--ivory)' : 'var(--ink)';
+  navEl.style.color = dark ? 'var(--ivory)' : 'var(--ink)';
+  document.getElementById('prog').style.color = dark ? '#F2EFE8' : '#0E2244';
+}
+
+/* ============================================================
+   RENDER-LOOP
+   ============================================================ */
+const clock = new THREE.Clock();
+let prevT = 0;
+const bgCol = new THREE.Color();
+let pmFrom = new THREE.Vector2(.5,.5);
+
+function frame(){
+  const t = clock.getElapsedTime();
+  const dt = Math.min(t - prevT, .05); prevT = t;
+  progress = scrollSpring.update(dt, rawP());
+  const p = clamp(progress, 0, 6);
+
+  /* Kamera-Fahrt: z=9 (Hero) … einfahren in Tunnel … Finale bei z≈-72 */
+  let cz = 9;
+  if (p > 2.9) cz = 9 - (p-2.9)/1.1 * 47;     // 2.9→4.0: durch den Tunnel bis z=-38
+  if (p > 4.0) cz = -38 - (p-4.0) * 17;       // weiter bis z≈-72 im Finale
+  cam.position.z = cz;
+  cam.position.x = camSpring.x.update(dt, (mouse.x/vw-.5) * .7);
+  cam.position.y = camSpring.y.update(dt, -(mouse.y/vh-.5) * .5);
+  cam.lookAt(cam.position.x*.3, cam.position.y*.3, cz - 10);
+
+  /* Hintergrund + Fog */
+  bgAt(p, bgCol);
+  scene.background.copy(bgCol); scene.fog.color.copy(bgCol);
+  scene.fog.near = p>2.75 ? 6 : 30; scene.fog.far = p>2.75 ? 46 : 90;
+
+  /* Cluster: im Hero rechts, im Reel rauf, ab Projekte geparkt */
+  const cw = win(p, -0.3, 1.9, .4);
+  clusterGroup.visible = cw > 0.01;
+  if (clusterGroup.visible){
+    clusterAnchor.set( vw>860 ? 2.6 - win(p,0.9,1.95,.3)*1.4 : 0, win(p,0.9,1.95,.3)*1.2, 0 );
+    physStep(dt);
+    bodies.forEach(b=>b.mesh.material.uniforms.uFade.value = cw);
+  }
+  /* Tunnel sichtbar im Void-Fenster */
+  tunnelGroup.visible = p > 2.85 && p < 4.35;
+  /* Sticker drehen sich langsam */
+  stickGroup.visible = p > 4.4;
+  if (stickGroup.visible){
+    stickGroup.children.forEach((sp,i)=>{
+      if (sp.userData.isFinaleHero){ sp.rotation.y = t*.5; sp.rotation.x = Math.sin(t*.8)*.18; return; }
+      const u = sp.userData;
+      sp.position.x = Math.cos(u.a + t*u.sp)*u.r;
+      sp.position.y = Math.sin(u.a + t*u.sp)*u.r*.7;
+    });
+  }
+
+  /* Paint-Sim */
+  const pmTo = new THREE.Vector2(mouse.x/vw, 1-mouse.y/vh);
+  paintMat.uniforms.uPrev.value = paintA.texture;
+  paintMat.uniforms.uFrom.value.copy(pmFrom);
+  paintMat.uniforms.uTo.value.copy(pmTo);
+  paintMat.uniforms.uVel.value.set((pmTo.x-pmFrom.x)*22, (pmTo.y-pmFrom.y)*22);
+  pmFrom.copy(pmTo);
+  renderer.setRenderTarget(paintB); renderer.render(paintScene, fsCam);
+  [paintA, paintB] = [paintB, paintA];
+
+  /* Bild-Planes (nur wenn Projekte-Station aktiv oder Transmorph offen) */
+  const workOn = win(p, 1.9, 3.05, .3) > 0.01 || openPlane;
+  planes.forEach(plane=>{
+    plane.visible = !!workOn;
+    if (!plane.visible) return;
+    const u = plane.material.uniforms;
+    u.uPaint.value = paintA.texture;
+    plane.userData.hover = lerp(plane.userData.hover, plane.userData.hoverTarget, .08);
+    u.uHover.value = plane.userData.hover;
+    if (plane.userData.openDir){
+      plane.userData.openT += plane.userData.openDir * dt * 2.1;
+      if (plane.userData.openT>=1){ plane.userData.openT=1; plane.userData.openDir=0; }
+      if (plane.userData.openT<=0){ plane.userData.openT=0; plane.userData.openDir=0; openPlane=null; }
+    }
+    const ot = easeIO(clamp(plane.userData.openT,0,1));
+    u.uOpen.value = ot; u.uBend.value = Math.sin(ot*Math.PI)*.12;
+    if (ot>0 && plane.userData.rectFrom){
+      const f = plane.userData.openDir<0 ? plane.userData.holder.getBoundingClientRect() : plane.userData.rectFrom;
+      syncPlane(plane, { left:lerp(f.left,0,ot), top:lerp(f.top,0,ot), width:lerp(f.width,vw,ot), height:lerp(f.height,vh,ot) });
+    } else syncPlane(plane);
+  });
+
+  /* DOM-Choreografie */
+  domStep(p, !!openPlane);
+
+  /* ---- Passes ---- */
+  renderer.setRenderTarget(sceneRT); renderer.setClearColor(bgCol, 1); renderer.clear();
+  renderer.render(scene, cam);
+  renderer.clearDepth();
+  renderer.render(ortho, orthoCam);
+
+  // Bloom-Mips (2 Stufen, je H+V)
+  blurMat.uniforms.uTex.value = sceneRT.texture;
+  blurMat.uniforms.uTexel.value.set(2/(vw*dpr), 2/(vh*dpr));
+  blurMat.uniforms.uDir.value.set(1,0);
+  renderer.setRenderTarget(tmp1); renderer.render(blurScene, fsCam);
+  blurMat.uniforms.uTex.value = tmp1.texture; blurMat.uniforms.uDir.value.set(0,1);
+  renderer.setRenderTarget(mip1); renderer.render(blurScene, fsCam);
+  blurMat.uniforms.uTex.value = mip1.texture;
+  blurMat.uniforms.uTexel.value.set(4/(vw*dpr), 4/(vh*dpr));
+  blurMat.uniforms.uDir.value.set(1,0);
+  renderer.setRenderTarget(tmp2); renderer.render(blurScene, fsCam);
+  blurMat.uniforms.uTex.value = tmp2.texture; blurMat.uniforms.uDir.value.set(0,1);
+  renderer.setRenderTarget(mip2); renderer.render(blurScene, fsCam);
+
+  // Grade + Smear → Screen
+  gradeMat.uniforms.uTex.value = sceneRT.texture;
+  gradeMat.uniforms.uBloom1.value = mip1.texture;
+  gradeMat.uniforms.uBloom2.value = mip2.texture;
+  gradeMat.uniforms.uPaint.value = paintA.texture;
+  gradeMat.uniforms.uTime.value = t;
+  gradeMat.uniforms.uChroma.value = win(p, 2.95, 4.05, .25);
+  gradeMat.uniforms.uDark.value = darkAt(p) ? 1 : 0;
+  renderer.setRenderTarget(null); renderer.clear();
+  renderer.render(gradeScene, fsCam);
+
+  requestAnimationFrame(frame);
+}
+frame();
+
+/* ---------- Resize ---------- */
+addEventListener('resize', ()=>{
+  vw=innerWidth; vh=innerHeight; dpr=Math.min(devicePixelRatio,1.8);
+  renderer.setPixelRatio(dpr); renderer.setSize(vw,vh);
+  cam.aspect=vw/vh; cam.updateProjectionMatrix();
+  orthoCam.left=0; orthoCam.right=vw; orthoCam.top=0; orthoCam.bottom=-vh; orthoCam.updateProjectionMatrix();
+  sceneRT.setSize(vw*dpr,vh*dpr);
+  tmp1.setSize(vw*dpr/2,vh*dpr/2); mip1.setSize(vw*dpr/2,vh*dpr/2);
+  tmp2.setSize(vw*dpr/4,vh*dpr/4); mip2.setSize(vw*dpr/4,vh*dpr/4);
+  paintA.setSize(PW(),PH()); paintB.setSize(PW(),PH());
+  initPaint();
+  paintMat.uniforms.uAspect.value = vw/vh;
+  gradeMat.uniforms.uAspect.value = vw/vh;
+  planes.forEach(pl=>{ pl.material.uniforms.uViewport.value.set(vw*dpr,vh*dpr); fitCover(pl, pl.userData.tex); });
+});
+} // main()
 </script>
 </body>
 </html>
