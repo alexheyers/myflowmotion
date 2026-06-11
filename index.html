@@ -1632,10 +1632,23 @@ scene.add(agentGroup);
 const planeGeo = new THREE.PlaneGeometry(1,1,24,24);
 const planes = [];
 const imgVert = `
-  uniform float uBend; varying vec2 vUv;
-  void main(){ vUv=uv; vec3 p=position;
-    p.y += sin(uv.x*3.14159)*uBend; p.x += sin(uv.y*3.14159)*uBend*.4;
-    gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.0); }`;
+  uniform float uBend; uniform vec4 uFrom; uniform vec4 uTo; uniform float uMorph;
+  varying vec2 vUv;
+  void main(){ vUv = uv;
+    /* Ecken-Stagger: oben-links führt, unten-rechts zieht nach (Lusion-Rezept) */
+    float pw = 1.0 - (pow(uv.x, 1.5) + pow(1.0 - uv.y, 1.5)) * .5;
+    float ts = smoothstep(pw * .3, .7 + pw * .3, uMorph);
+    vec2 fp = vec2(uFrom.x + (position.x + .5) * uFrom.z, -(uFrom.y + (.5 - position.y) * uFrom.w));
+    vec2 tp = vec2(uTo.x   + (position.x + .5) * uTo.z,   -(uTo.y   + (.5 - position.y) * uTo.w));
+    vec2 pp = mix(fp, tp, ts);
+    /* easeOutBack-Drall um die Bildmitte */
+    float rot = (smoothstep(0.0, 1.0, uMorph) - uMorph) * -.35;
+    vec2 c = mix(uFrom.xy + uFrom.zw * .5, uTo.xy + uTo.zw * .5, uMorph);
+    c = vec2(c.x, -c.y);
+    vec2 d = pp - c;
+    pp = c + vec2(d.x * cos(rot) - d.y * sin(rot), d.x * sin(rot) + d.y * cos(rot));
+    pp.y += sin(uv.x * 3.14159) * uBend * 40.0;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pp, position.z, 1.0); }`;
 const imgFrag = `
   uniform sampler2D uTex; uniform sampler2D uPaint; uniform vec2 uViewport;
   uniform vec2 uUvScale; uniform vec2 uUvOffset; uniform float uHover; uniform float uOpen;
@@ -1658,6 +1671,7 @@ function makePlane(holder, src){
       uViewport:{value:new THREE.Vector2(vw*dpr,vh*dpr)},
       uUvScale:{value:new THREE.Vector2(1,1)}, uUvOffset:{value:new THREE.Vector2(0,0)},
       uHover:{value:0}, uOpen:{value:0}, uBend:{value:0},
+      uFrom:{value:new THREE.Vector4(0,0,1,1)}, uTo:{value:new THREE.Vector4(0,0,1,1)}, uMorph:{value:0},
     }, vertexShader:imgVert, fragmentShader:imgFrag,
   });
   const tex = texLoader.load(src, t=>{ mat.uniforms.uTex.value=t; fitCover(plane,t); });
@@ -1676,8 +1690,21 @@ function fitCover(plane, tex){
 }
 function syncPlane(plane, rect){
   const r = rect || plane.userData.holder.getBoundingClientRect();
-  plane.scale.set(Math.max(1,r.width), Math.max(1,r.height), 1);
-  plane.position.set(r.left+r.width/2, -(r.top+r.height/2), plane.userData.openT>0 ? 5 : 0);
+  const u = plane.material.uniforms;
+  u.uFrom.value.set(r.left, r.top, Math.max(1,r.width), Math.max(1,r.height));
+  u.uTo.value.copy(u.uFrom.value);
+  u.uMorph.value = 0;
+  plane.scale.set(1,1,1);
+  plane.position.set(0, 0, plane.userData.openT>0 ? 5 : 0);
+}
+/* Morph: Karten-Rect → Vollbild, Ecke voraus */
+function morphPlane(plane, fromRect, ot){
+  const u = plane.material.uniforms;
+  u.uFrom.value.set(fromRect.left, fromRect.top, fromRect.width, fromRect.height);
+  u.uTo.value.set(0, 0, vw, vh);
+  u.uMorph.value = ot;
+  plane.scale.set(1,1,1);
+  plane.position.set(0, 0, 5);
 }
 document.querySelectorAll('.gl-img').forEach(h=>{
   const img = h.querySelector('img');
@@ -2208,10 +2235,10 @@ function frame(){
       if (plane.userData.openT<=0){ plane.userData.openT=0; plane.userData.openDir=0; openPlane=null; }
     }
     const ot = easeIO(clamp(plane.userData.openT,0,1));
-    u.uOpen.value = ot; u.uBend.value = Math.sin(ot*Math.PI)*.12;
+    u.uOpen.value = ot; u.uBend.value = Math.sin(ot*Math.PI)*.1;
     if (ot>0 && plane.userData.rectFrom){
       const f = plane.userData.openDir<0 ? plane.userData.holder.getBoundingClientRect() : plane.userData.rectFrom;
-      syncPlane(plane, { left:lerp(f.left,0,ot), top:lerp(f.top,0,ot), width:lerp(f.width,vw,ot), height:lerp(f.height,vh,ot) });
+      morphPlane(plane, f, ot);
     } else syncPlane(plane);
   });
 
