@@ -135,7 +135,9 @@ body.gl .stage-card__media img { opacity:0; }
 .st-agents .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:.9rem; }
 .st-agents h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.8vw,3.2rem); line-height:1.1; max-width:20ch; }
 .st-agents h2 em { font-style:italic; color:var(--teal); }
-.agent-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2.4rem); margin-top:2.4rem; max-width:960px; }
+.agent-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(.9rem,2vw,2rem); margin-top:2rem; max-width:1240px; }
+.st-agents .agents-lead { margin-top:.9rem; max-width:62ch; font-weight:300; line-height:1.6; color:var(--ink-60); font-size:clamp(.82rem,1.05vw,.94rem); }
+.st-agents .agents-lead b { font-weight:400; color:var(--ink); }
 .agent-card { border-top:1px solid var(--ink-12); padding-top:1.1rem; }
 .agent-card__label { font-family:var(--mono); font-size:.64rem; letter-spacing:.22em; text-transform:uppercase; color:var(--teal); }
 .agent-card__title { font-family:var(--disp); font-weight:700; font-size:1.1rem; margin-top:.45rem; }
@@ -571,6 +573,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   <section class="st st-agents" data-st="6">
     <div class="kicker">Wie hier gebaut wird</div>
     <h2><span class="num">8</span> Agenten. <span class="num">1</span> Nacht. <span class="num">2.462</span> <em>Zeilen</em>.</h2>
+    <p class="agents-lead rev" style="--d:.04s"><b>Claude Code</b> ist das Werkzeug, das <b>Agent SDK</b> der programmierbare Unterbau, <b>Managed Agents</b> dasselbe SDK — von Anthropic gehostet, im eigenen Cloud-Container. Genau diese Kette steckt im Studio.</p>
     <div class="agent-grid">
       <article class="agent-card rev" style="--d:.08s">
         <div class="agent-card__label">Voice</div>
@@ -583,6 +586,11 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
         <p class="agent-card__text">Jeder Agent isoliert im eigenen Worktree. Keine Kollisionen, kein Chaos. Am Morgen: Code, der läuft — und ein Showstopper, der nie live ging.</p>
       </article>
       <article class="agent-card rev" style="--d:.36s">
+        <div class="agent-card__label">Maschinenraum</div>
+        <div class="agent-card__title">Outcome statt Befehl</div>
+        <p class="agent-card__text">Ein Cloud-Agent liest, schreibt, testet, committet — mein Rechner bleibt aus. Ein Grader prüft jeden Lauf. Schutzschienen: nur Branch und Pull Request.</p>
+      </article>
+      <article class="agent-card rev" style="--d:.5s">
         <div class="agent-card__label">Build-in-Public</div>
         <div class="agent-card__title">Doku = Content</div>
         <p class="agent-card__text">Jeder Bauschritt öffentlich. Doku und Content sind dasselbe Artefakt. Nicht das fertige Tool zählt — der Weg dorthin.</p>
@@ -604,6 +612,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
       <div class="abk rev" style="--d:0s">In eigener Sache</div>
       <h2 class="rev" style="--d:.05s">20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
       <p class="rev" style="--d:.2s">MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Hier entstehen keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Gebaut im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive.</p>
+      <p class="rev" style="--d:.32s">Warum das trägt: Wer zwanzig Jahre Bars am Laufen hält, denkt in Engpässen — erst verstehen, wo es klemmt, dann bauen. Das Werkzeug ist neu, die Herangehensweise nicht. Ich baue die Brücke zwischen Tech und Gast — als Mensch, der beide Sprachen spricht.</p>
       <div class="sig" aria-hidden="true"></div>
       <div class="facts">
         <div class="rev" style="--d:.55s"><b>5 Bars</b><span>eröffnet — Kneipe bis VIP</span></div>
