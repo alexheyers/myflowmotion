@@ -157,13 +157,17 @@ body.gl .card__media img { opacity:0; }
 .st-pitch .pitch-note { margin-top:2rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-30); }
 
 /* ============ STATION 6: STUDIO (3 Stufen) ============ */
-.st-studio { padding:5.6rem clamp(1.2rem,4vw,3.2rem) 1.5rem; display:flex; flex-direction:column; justify-content:center; }
+.st-studio { padding:5.2rem clamp(1.2rem,4vw,3.2rem) 1.4rem; display:flex; flex-direction:column; justify-content:center; align-items:center; }
+.studio-inner { width:min(1460px, 100%); margin:0 auto; }
+.studio-head { display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(2rem,5vw,5.5rem); align-items:end; }
+.studio-head__r { padding-bottom:.3rem; }
+@media (max-width:1000px){ .studio-head { grid-template-columns:1fr; gap:.9rem; } }
 .st-studio .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:.9rem; }
 .st-studio h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.8vw,3.2rem); line-height:1.08; max-width:18ch; }
 .st-studio h2 em { font-style:italic; color:var(--teal); }
-.st-studio .lead { margin-top:.7rem; max-width:58ch; font-weight:300; line-height:1.6; color:var(--ink-60); font-size:clamp(.85rem,1.1vw,.98rem); }
-.stage-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2.6rem); margin-top:1.8rem; max-width:1240px; }
-.stage-card__media { position:relative; overflow:hidden; border-radius:6px; aspect-ratio:4/4.6; max-height:26vh; background:var(--ink-12); }
+.st-studio .lead { margin-top:0; max-width:52ch; font-weight:300; line-height:1.65; color:var(--ink-60); font-size:clamp(.85rem,1.05vw,.98rem); }
+.stage-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1.2rem,2.6vw,3rem); margin-top:clamp(1.6rem,3vh,2.6rem); }
+.stage-card__media { position:relative; overflow:hidden; border-radius:8px; aspect-ratio:16/10.5; max-height:34vh; background:var(--ink-12); width:100%; }
 .stage-card__text { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 body.gl .stage-card__media img { opacity:0; }
 .stage-card__num { font-family:var(--mono); font-size:.64rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-30); margin-top:.85rem; }
@@ -634,10 +638,17 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
 
   <!-- 4 · STUDIO (3 Stufen) -->
   <section class="st st-studio" data-st="4">
-    <div class="kicker">Das Studio · Drei Stufen</div>
-    <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
-    <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument; pro Abteilung eine ehrliche Empfehlung. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
-    <p class="studio-proof rev" style="--d:.5s" aria-label="105 Fragen, 7 Agenten, 1 Pfad"><span><b>105</b>Fragen</span><i aria-hidden="true"></i><span><b>7</b>Agenten</span><i aria-hidden="true"></i><span><b class="pk">1</b>Pfad</span></p>
+    <div class="studio-inner">
+    <div class="studio-head">
+      <div class="studio-head__l">
+        <div class="kicker">Das Studio · Drei Stufen</div>
+        <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
+      </div>
+      <div class="studio-head__r">
+        <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument; pro Abteilung eine ehrliche Empfehlung. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
+        <p class="studio-proof rev" style="--d:.5s" aria-label="105 Fragen, 7 Agenten, 1 Pfad"><span><b>105</b>Fragen</span><i aria-hidden="true"></i><span><b>7</b>Agenten</span><i aria-hidden="true"></i><span><b class="pk">1</b>Pfad</span></p>
+      </div>
+    </div>
     <div class="stage-grid">
       <article class="stage-card rev" style="--d:.08s">
         <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-verstehen.jpg" alt="Stufe 1 — Verstehen"></div>
@@ -657,6 +668,7 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
         <div class="stage-card__title">n8n schaltet scharf.</div>
         <p class="stage-card__text">Aus dem Design wird Workflow-JSON — generiert, validiert, deployt. Kein Report. Ein laufendes System.</p>
       </article>
+    </div>
     </div>
   </section>
 
@@ -1500,11 +1512,13 @@ function fmHelix(){      // Tunnel: Doppelhelix entlang der Achse
   }
   return a;
 }
-function fmArc(cz){      // Studio: weiter Bogen über den Stelen
+function fmArc(cz){      // Studio: zurückhaltender Rand-Staub — der Inhalt regiert
   const a = [];
   for (let i = 0; i < SWARM_N; i++){
-    const t = i/SWARM_N, x = (t-.5)*11;
-    a.push({ x, y: 2.6 - x*x*.07 + ((i*7919)%100)/300, z: cz - 5 - (i%5)*.4, s: .22 + (i%4)*.06 });
+    const side = i % 2 ? 1 : -1;
+    const vis = i % 5 === 0;   // nur jedes fünfte Teil sichtbar
+    a.push({ x: side * (7.5 + (i % 4) * 1.6), y: (((i*7919)%100)/100 - .35) * 4.2,
+      z: cz - 11 - (i % 6), s: vis ? .09 + (i%3)*.03 : .001 });
   }
   return a;
 }
@@ -1591,13 +1605,14 @@ function swarmStep(p, t){
   const A = SWARM_KEYS[k], B = SWARM_KEYS[Math.min(k+1, SWARM_KEYS.length-1)];
   let mt = B.p === A.p ? 0 : clamp((p - A.p) / (B.p - A.p), 0, 1);
   mt = mt*mt*(3-2*mt);   // smoothstep — träger Start, weiches Andocken
+  const xs = Math.max(1, (vw/vh) / 1.78);   // Ultrawide-Guard: seitliche Formationen wandern proportional raus
   for (let ki = 0; ki < 3; ki++){
     const im = swarmIMs[ki], baseR = im.userData.baseR;
     for (let i = 0; i < 40; i++){
       const gi = ki*40 + i;
       const a = A.f[gi], b = B.f[gi];
       const wob = Math.sin(t*.7 + gi*1.7)*.14;
-      const x = a.x + (b.x-a.x)*mt + wob;
+      const x = (a.x + (b.x-a.x)*mt) * xs + wob;
       const y = a.y + (b.y-a.y)*mt + Math.cos(t*.6 + gi)*.12;
       const z = a.z + (b.z-a.z)*mt;
       const sc = (a.s + (b.s-a.s)*mt) / baseR;
