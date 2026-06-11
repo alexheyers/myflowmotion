@@ -36,6 +36,11 @@ img { display:block; width:100%; height:100%; object-fit:cover; }
 .stage .st.on { visibility:visible; }
 .stage .st > * { pointer-events:auto; }
 
+/* Kapitel-HUD unten links — die Journey hat Stationen */
+.chapter { position:fixed; left:clamp(1.2rem,4vw,3.2rem); bottom:1.6rem; z-index:90; font-family:var(--mono); font-size:.62rem; letter-spacing:.22em; text-transform:uppercase; color:currentColor; opacity:.55; }
+.chapter b { font-weight:400; color:var(--teal); }
+body.static .chapter { display:none; }
+
 /* Fortschritts-Anzeige rechts */
 .prog { position:fixed; right:1.4rem; top:50%; transform:translateY(-50%); z-index:90; display:flex; flex-direction:column; gap:.55rem; }
 .prog i { width:5px; height:5px; border-radius:50%; background:currentColor; opacity:.25; transition:opacity .3s, transform .3s; }
@@ -45,6 +50,7 @@ img { display:block; width:100%; height:100%; object-fit:cover; }
 .st .rev { opacity:0; transform:translateY(26px); transition:opacity .75s var(--ezl) var(--d,0s), transform .75s var(--ezl) var(--d,0s); }
 .st.live .rev { opacity:1; transform:none; }
 body.static .st .rev { opacity:1; transform:none; }
+body.gl .st-reel h2, body.gl .st-spark .spark-big, body.gl .st-end h2 { opacity:0 !important; visibility:hidden; }
 
 /* ============ LOADER ============ */
 .loader { position:fixed; inset:0; z-index:200; background:var(--ivory); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .9s cubic-bezier(.16,1,.3,1), visibility .9s; }
@@ -107,7 +113,7 @@ body.gl .card__media img { opacity:0; }
 .st-spark { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 1.4rem; }
 .st-spark .spark-cap { font-family:var(--mono); font-size:.64rem; letter-spacing:.28em; text-transform:uppercase; color:var(--iv-30); margin-bottom:1.6rem; }
 .st-spark h2 { font-family:var(--disp); font-weight:500; font-style:italic; font-size:clamp(1.3rem,2.6vw,2.1rem); color:var(--iv-70); }
-.st-spark .spark-big { font-family:var(--disp); font-weight:900; font-size:clamp(3.4rem,11vw,9rem); line-height:1; color:var(--ivory); margin-top:1.2rem; }
+.st-spark .spark-big { font-family:var(--disp); font-weight:900; font-size:clamp(3.4rem,11vw,9rem); line-height:1; color:var(--ivory); margin-top:1.2rem; min-height:1em; }
 .st-spark .spark-big em { font-style:italic; color:var(--pink); }
 .st-spark .spark-sub { margin-top:1.6rem; font-weight:300; line-height:1.7; color:var(--iv-70); font-size:clamp(.9rem,1.2vw,1.05rem); max-width:44ch; }
 .st-spark .spark-note { margin-top:2rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--teal); border:1px solid rgba(26,165,145,.35); padding:.7rem 1.3rem; border-radius:40px; }
@@ -556,6 +562,7 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
   <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
 </nav>
 
+<div class="chapter" id="chapter"><b id="chapNum">01</b> / 12 · <span id="chapName">Hero</span></div>
 <div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <div class="stage" id="stage">
@@ -1537,7 +1544,7 @@ function fmBurst(cz){    // Finale: Feier-Explosion
   for (let i = 0; i < SWARM_N; i++){
     const u = ((i*7919)%100)/50-1, v = ((i*104729)%100)/100*Math.PI*2, r = 2.6 + ((i*15485863)%100)/100*2.6;
     const sq = Math.sqrt(Math.max(0, 1-u*u));
-    a.push({ x: Math.cos(v)*sq*r, y: u*r*.75, z: cz - 7 + Math.sin(v)*sq*r*.5, s: .2 + (i%4)*.07 });
+    a.push({ x: Math.cos(v)*sq*r*1.15, y: u*r*.8, z: cz - 9.5 + Math.sin(v)*sq*r*.5, s: .2 + (i%4)*.07 });
   }
   return a;
 }
@@ -1723,8 +1730,8 @@ function placeReel(plane, o, cx, cy, w){
 }
 function syncReel(p){
   // Station 1: großes Cinema-Reel
-  const w1 = Math.min(vw*.74, 1240);
-  const on1 = placeReel(reelPlane, win(p, 1.02, 1.92, .2), vw/2, vh*.40, w1);
+  const w1 = Math.min(vw*.64, 1080);
+  const on1 = placeReel(reelPlane, win(p, 1.02, 1.92, .2), vw/2, vh*.36, w1);
   // Station 7 (About): die Lady taucht wieder auf — kleines Fenster unten rechts
   const w2 = Math.min(vw*.26, 430);
   const on2 = placeReel(reelPlane2, win(p, 10.08, 10.92, .2)*.96,
@@ -1756,6 +1763,71 @@ function closeDetail(){
 document.getElementById('detailClose').addEventListener('click',closeDetail);
 document.getElementById('detailScrim').addEventListener('click',closeDetail);
 addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
+
+/* ============================================================
+   GL-TYPOGRAFIE — Schlüssel-Headlines leben IN der Szene:
+   Paint-Smear, Bloom und Chromatik wirken direkt auf die Buchstaben
+   ============================================================ */
+const typoPlanes = [];
+function makeTypoPlane(segLines, wWorld){
+  const W = 2048, H = 760;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  x.textBaseline = 'middle';
+  let y0 = H/2 - (segLines.length-1)*150;
+  for (const segs of segLines){
+    let total = 0;
+    for (const sg of segs){ x.font = sg.f; total += x.measureText(sg.t).width; }
+    let cx = W/2 - total/2;
+    x.textAlign = 'left';
+    for (const sg of segs){
+      x.font = sg.f; x.fillStyle = sg.c;
+      x.fillText(sg.t, cx, y0);
+      cx += x.measureText(sg.t).width;
+    }
+    y0 += 300;
+  }
+  const tex = new THREE.CanvasTexture(c); tex.anisotropy = 8;
+  const mat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, depthTest: false,
+    uniforms: { uTex:{value:tex}, uReveal:{value:0}, uTime:{value:0} },
+    vertexShader: `varying vec2 vUv; uniform float uTime; uniform float uReveal;
+      void main(){ vUv = uv; vec3 p = position;
+        p.y += sin(uv.x*6.283 + uTime*.9) * .12 * (1.-uReveal);
+        p.x += sin(uv.y*4.0 + uTime*.7) * .06 * (1.-uReveal);
+        gl_Position = projectionMatrix*modelViewMatrix*vec4(p,1.); }`,
+    fragmentShader: `varying vec2 vUv; uniform sampler2D uTex; uniform float uReveal;
+      float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+      void main(){
+        vec4 t = texture2D(uTex, vUv);
+        float n = h(floor(vUv*vec2(110., 34.)));
+        float a = t.a * smoothstep(n - .16, n + .04, uReveal*1.18);
+        if (a < .004) discard;
+        gl_FragColor = vec4(t.rgb, a);
+      }`});
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(wWorld, wWorld*H/W), mat);
+  m.frustumCulled = false; m.renderOrder = 6;
+  scene.add(m); typoPlanes.push(m);
+  return m;
+}
+document.fonts.ready.then(() => {
+  const PF = (px, ital) => `${ital?'italic ':''}900 ${px}px "Playfair Display", serif`;
+  const tpReel = makeTypoPlane([[{ t: "Show, don't tell.", f: PF(190, true), c: '#ffffff' }]], 11);
+  tpReel.position.set(0, -1.7, 1.6);
+  tpReel.userData.win = [1.04, 1.94, .18];
+  const tpSpark = makeTypoPlane([[
+    { t: 'Ich ', f: PF(210), c: '#F2EFE8' },
+    { t: 'nicht', f: PF(210, true), c: '#E94B5D' },
+    { t: '.', f: PF(210), c: '#F2EFE8' },
+  ]], 9.5);
+  tpSpark.position.set(0, -.45, -73.6);
+  tpSpark.userData.win = [7.04, 7.96, .18];
+  const tpEnd = makeTypoPlane([
+    [{ t: 'Eine Idee?', f: PF(170), c: '#F2EFE8' }],
+    [{ t: 'Lass uns reden.', f: PF(170, true), c: '#E94B5D' }],
+  ], 10);
+  tpEnd.position.set(0, .55, -94.6);
+  tpEnd.userData.win = [11.06, 12.3, .2];
+});
 
 /* ============================================================
    HINTERGRUND-PLATES — subtile Video-Loops in der Szene
@@ -1921,6 +1993,9 @@ const sts = [...document.querySelectorAll('.st')];
 const voidLines = [...document.querySelectorAll('.st-void .line')];
 const progDots = [...document.querySelectorAll('.prog i')];
 const galStatEls = [...document.querySelectorAll('.st-galaxie .stats b')];
+const chapNumEl = document.getElementById('chapNum'), chapNameEl = document.getElementById('chapName');
+const CHAP_NAMES = ['Hero','Reel','Arbeiten','Klarheit','Studio','Galaxie','Agenten','Tag 1','86 Tage','Die Brücke','Der Mensch','Finale'];
+let chapIdx = -1;
 const navEl = document.getElementById('nav');
 // Sichtfenster pro Station [in, out]
 const WINDOWS = [
@@ -1937,7 +2012,7 @@ const WINDOWS = [
   [ 9.99, 10.97 ],  // 10 About
   [ 10.99, 12.3 ],  // 11 Finale
 ];
-function domStep(p, detailOpen){
+function domStep(p, detailOpen, pv = 0){
   for (let i=0;i<sts.length;i++){
     const [a,b] = WINDOWS[i];
     // Lusion: Show träge (.24), Hide doppelt so schnell (.12) — Stationen überlappen kurz
@@ -1950,7 +2025,8 @@ function domStep(p, detailOpen){
     const leaving = p > (a+b)/2;
     const dy = (1 - o) * 26 * (leaving ? -1 : 1);
     const sc = leaving ? 1 - (1 - o) * .018 : 1;
-    el.style.transform = `translateY(${dy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
+    // Velocity-Jelly: Text lehnt sich physisch gegen die Scroll-Richtung (Lusion-Gefühl)
+    el.style.transform = `translateY(${dy.toFixed(1)}px) scale(${sc.toFixed(4)}) skewY(${(pv * -1.15).toFixed(2)}deg)`;
   }
   // Void: drei Zeilen nacheinander (Origin → Struktur → Klarheit)
   const vws = [[3.02, 3.46], [3.50, 3.96]];
@@ -1968,6 +2044,11 @@ function domStep(p, detailOpen){
   }
   // Progress-Punkte + Nav-Farbe
   const idx = clamp(Math.round(p - .45), 0, 11);
+  if (idx !== chapIdx){
+    chapIdx = idx;
+    chapNumEl.textContent = String(idx + 1).padStart(2, '0');
+    chapNameEl.textContent = CHAP_NAMES[idx];
+  }
   progDots.forEach((d,i)=>d.classList.toggle('on', i===idx));
   const dark = darkAt(p);
   document.body.style.color = dark ? 'var(--ivory)' : 'var(--ink)';
@@ -1989,6 +2070,8 @@ function frame(){
   progress += (rawP() - progress) * (1 - Math.exp(-13.5 * dt));
   const p = clamp(progress, 0, STATIONS);   // an STATIONS gekoppelt — nie wieder der Klemmen-Bug
   window.__p = p;
+  const pv = clamp((p - pPrev) / Math.max(dt, .001), -2.5, 2.5);
+  sStr = Math.min(1, sStr + Math.abs(p - pPrev) * 2); sStr *= Math.exp(-10 * dt); pPrev = p;
 
   /* Kamera-Fahrt: z=9 (Hero) … Tunnel … Studio … durch die Galaxie … Finale bei z≈-88 */
   let cz = 9;
@@ -2111,7 +2194,7 @@ function frame(){
   });
 
   /* DOM-Choreografie */
-  domStep(p, !!openPlane);
+  domStep(p, !!openPlane, pv);
 
   /* ---- Passes ---- */
   renderer.setRenderTarget(sceneRT); renderer.setClearColor(bgCol, 1); renderer.clear();
@@ -2139,7 +2222,14 @@ function frame(){
   gradeMat.uniforms.uBloom2.value = mip2.texture;
   gradeMat.uniforms.uPaint.value = paintA.texture;
   gradeMat.uniforms.uTime.value = t;
-  sStr = Math.min(1, sStr + Math.abs(p - pPrev) * 2); sStr *= Math.exp(-10 * dt); pPrev = p;
+  /* GL-Typo: Noise-Dissolve an die Stationsfenster gekoppelt */
+  for (let ti = 0; ti < typoPlanes.length; ti++){
+    const tp = typoPlanes[ti], wnd = tp.userData.win;
+    const o = win(p, wnd[0], wnd[1], wnd[2]);
+    tp.visible = o > .005;
+    tp.material.uniforms.uReveal.value = o;
+    tp.material.uniforms.uTime.value = t;
+  }
   gradeMat.uniforms.uChroma.value = win(p, 2.95, 4.05, .25) + win(p, 5.0, 6.1, .3)*.35 + win(p, 10.9, 11.7, .25)*.6 + sStr*.25;
   // Lusion-Blenden: Überbelichtung beim Stimmungswechsel statt Crossfade
   const blend = win(p, 3.9, 4.2, .1) * 1.1 + win(p, 5.92, 6.22, .1) * .9 + win(p, 10.95, 11.25, .1) * .9;
