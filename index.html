@@ -29,7 +29,7 @@ a { color:inherit; text-decoration:none; }
 img { display:block; width:100%; height:100%; object-fit:cover; }
 
 /* Scroll-Raum: die Seite IST 1050vh hoch, alles Sichtbare ist fixed */
-.scroll-space { height:1400vh; }
+.scroll-space { height:1000vh; }
 #gl { position:fixed; inset:0; z-index:1; display:block; }
 .stage { position:fixed; inset:0; z-index:5; pointer-events:none; }
 .stage .st { position:absolute; inset:0; opacity:0; visibility:hidden; }
@@ -42,7 +42,7 @@ img { display:block; width:100%; height:100%; object-fit:cover; }
 .prog i.on { opacity:1; transform:scale(1.5); }
 
 /* ============ REVEAL-SYSTEM (Choreografie pro Station) ============ */
-.st .rev { opacity:0; transform:translateY(26px); transition:opacity 1s var(--ezl) var(--d,0s), transform 1s var(--ezl) var(--d,0s); }
+.st .rev { opacity:0; transform:translateY(26px); transition:opacity .75s var(--ezl) var(--d,0s), transform .75s var(--ezl) var(--d,0s); }
 .st.live .rev { opacity:1; transform:none; }
 body.static .st .rev { opacity:1; transform:none; }
 
@@ -1755,18 +1755,18 @@ const galStatEls = [...document.querySelectorAll('.st-galaxie .stats b')];
 const navEl = document.getElementById('nav');
 // Sichtfenster pro Station [in, out]
 const WINDOWS = [
-  [ -0.35, 0.9 ],   // 0 Hero
-  [ 0.95, 1.95 ],   // 1 Reel
-  [ 2.05, 2.95 ],   // 2 Projekte
-  [ 3.0, 4.0 ],     // 3 Void/Tunnel
-  [ 4.05, 4.95 ],   // 4 Studio
-  [ 5.05, 5.95 ],   // 5 Galaxie
-  [ 6.05, 6.95 ],   // 6 Agenten
-  [ 7.05, 7.95 ],   // 7 Spark (Twist)
-  [ 8.05, 8.95 ],   // 8 Reise
-  [ 9.05, 9.95 ],   // 9 Pitch
-  [ 10.05, 10.95 ], // 10 About
-  [ 11.05, 12.3 ],  // 11 Finale
+  [ -0.35, 1.0 ],   // 0 Hero
+  [ 0.9, 2.0 ],     // 1 Reel
+  [ 1.95, 3.05 ],   // 2 Projekte
+  [ 2.95, 4.05 ],   // 3 Void/Tunnel
+  [ 3.95, 5.05 ],   // 4 Studio
+  [ 4.95, 6.05 ],   // 5 Galaxie
+  [ 5.95, 7.0 ],    // 6 Agenten
+  [ 6.95, 8.0 ],    // 7 Spark (Twist)
+  [ 7.95, 9.05 ],   // 8 Reise
+  [ 8.95, 10.05 ],  // 9 Pitch
+  [ 9.95, 11.0 ],   // 10 About
+  [ 10.95, 12.3 ],  // 11 Finale
 ];
 function domStep(p, detailOpen){
   for (let i=0;i<sts.length;i++){
@@ -1777,7 +1777,7 @@ function domStep(p, detailOpen){
     const el = sts[i];
     el.style.opacity = o.toFixed(3);
     el.classList.toggle('on', o > 0.01);
-    el.classList.toggle('live', o > 0.35);
+    el.classList.toggle('live', o > 0.22);
     const leaving = p > (a+b)/2;
     const dy = (1 - o) * 26 * (leaving ? -1 : 1);
     const sc = leaving ? 1 - (1 - o) * .018 : 1;
@@ -1817,7 +1817,7 @@ let pmFrom = new THREE.Vector2(.5,.5);
 function frame(){
   const t = clock.getElapsedTime();
   const dt = Math.min(t - prevT, .05); prevT = t;
-  progress += (rawP() - progress) * (1 - Math.exp(-12 * dt));
+  progress += (rawP() - progress) * (1 - Math.exp(-13.5 * dt));
   const p = clamp(progress, 0, STATIONS);   // an STATIONS gekoppelt — nie wieder der Klemmen-Bug
   window.__p = p;
 
