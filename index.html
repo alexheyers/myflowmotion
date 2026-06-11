@@ -284,6 +284,158 @@ body.static .agent-card--night::before{background:var(--teal);}
 .st-end .mail:hover .mail__arr{transform:translateX(.5em);color:var(--pink)}
 .st-end .foot{bottom:2.6rem;row-gap:.7rem;flex-wrap:wrap}
 @media (max-width:640px){.st-end .foot{flex-direction:column;align-items:center;gap:.45rem;text-align:center}}
+
+/* === Next-Level: st-hero === */
+.st-hero :is(.kicker,p,.hero-sig,.hint){opacity:0}
+.st-hero h1 .hln{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em}
+.st-hero h1 .hln__in{display:inline-block;transform:translateY(115%)}
+.st-hero .hero-sig{margin-top:1.5rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.16em}
+.st-hero .hero-sig em{font-style:normal;color:var(--ink-30)}
+.st-hero.live .kicker{animation:heroFade .9s .45s ease-out both}
+.st-hero.live .hln__in{animation:heroLine 1.1s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(.58s + var(--l)*.11s)}
+.st-hero.live p{animation:heroFade 1s 1.15s ease-out both}
+.st-hero.live .hero-sig{animation:heroFade 1s 1.35s ease-out both}
+.st-hero.live .hint{animation:heroFade 1.2s 1.7s ease both}
+@keyframes heroLine{from{transform:translateY(115%)}to{transform:none}}
+@keyframes heroFade{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.st-hero .hint{display:flex;flex-direction:column;align-items:center;gap:.65rem}
+.st-hero .hint__line{width:1px;height:46px;background:var(--ink-12);position:relative;overflow:hidden}
+.st-hero .hint__line::after{content:"";position:absolute;left:0;top:-55%;width:1px;height:55%;background:var(--teal);animation:heroDrop 1.8s cubic-bezier(.65,0,.35,1) infinite}
+@keyframes heroDrop{to{top:115%}}
+body.static .st-hero :is(.kicker,p,.hero-sig){opacity:1}
+body.static .st-hero .hln__in{transform:none}
+@media (prefers-reduced-motion:reduce){.st-hero *,.st-hero *::after{animation:none!important}.st-hero :is(.kicker,p,.hero-sig,.hint){opacity:1}.st-hero .hln__in{transform:none}}
+
+/* === Next-Level: Station 1 · Reel (.st-reel) === */
+.st-reel .hud{position:absolute;bottom:14vh;display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.st-reel .hud--bl{left:clamp(1.2rem,4vw,3.2rem)}
+.st-reel .hud--br{right:clamp(1.2rem,4vw,3.2rem);color:rgba(255,255,255,.5)}
+.st-reel .hud__dot{width:7px;height:7px;border-radius:50%;background:#fff;flex:none}
+.st-reel .hud__type{display:block;overflow:hidden;white-space:nowrap;width:0;border-right:1px solid rgba(255,255,255,.9);padding-right:.18em}
+.st-reel.live .hud__dot{animation:reelRec 1.4s steps(2,jump-none) .6s infinite}
+.st-reel.live .hud__type{animation:reelType 1.9s steps(41,end) .6s forwards,reelCaret 1.1s step-end 2.5s infinite}
+body.static .st-reel .hud__type{width:auto;border-right:0}
+@keyframes reelType{to{width:calc(41ch + 3.2em)}}
+@keyframes reelCaret{50%{border-color:transparent}}
+@keyframes reelRec{50%{opacity:.2}}
+.st-reel h2 .wd{display:inline-block;white-space:nowrap}
+.st-reel h2 i{font-style:inherit;display:inline-block;opacity:0;transform:translateY(.5em) rotate(5deg)}
+.st-reel.live h2 i,body.static .st-reel h2 i{animation:reelCh .9s cubic-bezier(.16,1,.3,1) calc(var(--i)*.045s + .2s) both}
+@keyframes reelCh{to{opacity:1;transform:none}}
+@media (max-width:860px){.st-reel .hud--br{display:none}.st-reel .hud{font-size:.56rem}}
+@media (prefers-reduced-motion:reduce){.st-reel h2 i{opacity:1;transform:none;animation:none!important}.st-reel.live .hud__type,body.static .st-reel .hud__type{width:auto;border-right:0;animation:none!important}}
+
+/* === Next-Level: st-work === */
+/* === ST2 v2: Live-Badge + Tag-Stagger === */
+.st-work .card[data-live] .card__media::after{content:"live";position:absolute;top:.7rem;right:.7rem;z-index:2;font-family:var(--mono);font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ivory);background:radial-gradient(circle at .55rem 50%,var(--teal) 0 2px,transparent 2.8px) no-repeat rgba(14,34,68,.6);padding:.34rem .66rem .3rem 1.05rem;border-radius:40px;opacity:0;transform:translateY(4px);transition:opacity .6s cubic-bezier(.16,1,.3,1) .9s,transform .6s cubic-bezier(.16,1,.3,1) .9s}
+.st-work.live .card[data-live] .card__media::after{opacity:1;transform:none;animation:wkLive 2.6s ease-out 1.8s infinite}
+@keyframes wkLive{0%{box-shadow:0 0 0 0 rgba(26,165,145,.4)}70%,100%{box-shadow:0 0 0 8px rgba(26,165,145,0)}}
+.st-work.live .card__tags{animation:wkTag .9s cubic-bezier(.16,1,.3,1) both}
+.st-work.live .card:nth-child(1) .card__tags{animation-delay:.45s}
+.st-work.live .card:nth-child(2) .card__tags{animation-delay:.58s}
+.st-work.live .card:nth-child(3) .card__tags{animation-delay:.71s}
+.st-work.live .card:nth-child(4) .card__tags{animation-delay:.84s}
+@keyframes wkTag{from{opacity:0;transform:translateY(7px);letter-spacing:.34em}to{opacity:1;transform:none;letter-spacing:.16em}}
+body.static .st-work .card[data-live] .card__media::after{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.st-work.live .card__tags,.st-work.live .card[data-live] .card__media::after{animation:none}}
+
+/* === Next-Level: Station 3 — Void Zeile 1 (.st-void .line[data-line === */
+/* === ST3 · Zeile 1 — „Struktur" setzt sich aus Buchstaben zusammen === */
+.st-void .vd-asm{display:inline-block;white-space:nowrap}
+.st-void .vd-asm span{display:inline-block;will-change:transform,filter}
+.st-void.live .vd-asm span{animation:vdAsm 1.15s calc(.4s + var(--i)*.08s) cubic-bezier(.16,1,.3,1) both}
+@keyframes vdAsm{0%{opacity:0;filter:blur(7px);transform:translate(var(--dx),var(--dy)) rotate(var(--dr)) scale(1.12)}55%{opacity:1}100%{opacity:1;filter:blur(0);transform:translate(0,0) rotate(0) scale(1)}}
+.st-void .vd-sub{margin-top:1.35rem;font-family:var(--mono);font-size:clamp(.6rem,.82vw,.72rem);letter-spacing:.32em;padding-left:.32em;text-transform:uppercase;color:var(--iv-30)}
+.st-void .vd-sub b{font-weight:400;color:var(--teal)}
+.st-void.live .line[data-line="0"] .mono{animation:vdKick 1s .1s ease both}
+.st-void.live .vd-sub{animation:vdKick 1.2s 1.5s ease both}
+@keyframes vdKick{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.st-void.live .vd-asm span,.st-void.live .vd-sub,.st-void.live .line[data-line="0"] .mono{animation:none}}
+
+/* === Next-Level: Station 4 — Studio (.st-studio) === */
+/* St4 Studio: Beweis-Zeile + Stelen-Aufrichten */
+.st-studio .studio-proof{margin-top:1.15rem;display:flex;align-items:baseline;gap:.85rem;flex-wrap:wrap;font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-30)}
+.st-studio .studio-proof b{font-family:var(--disp);font-weight:900;font-size:1.15rem;letter-spacing:0;color:var(--teal);margin-right:.4rem}
+.st-studio .studio-proof b.pk{color:var(--pink)}
+.st-studio .studio-proof i{align-self:center;width:1.4rem;height:1px;background:var(--ink-12);transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.16,1,.3,1) 1s}
+.st-studio .studio-proof i:last-of-type{transition-delay:1.2s}
+.st-studio.live .studio-proof i,body.static .studio-proof i{transform:scaleX(1)}
+.st-studio .stage-grid{perspective:1100px}
+.st-studio .stage-card__media{transform-origin:50% 100%}
+.st-studio.live .stage-card:nth-child(1) .stage-card__media{animation:stuRise .95s cubic-bezier(.16,1,.3,1) .12s backwards}
+.st-studio.live .stage-card:nth-child(2) .stage-card__media{animation:stuRise .95s cubic-bezier(.16,1,.3,1) .3s backwards}
+.st-studio.live .stage-card:nth-child(3) .stage-card__media{animation:stuRise .95s cubic-bezier(.16,1,.3,1) .48s backwards}
+@keyframes stuRise{from{transform:rotateX(16deg) translateY(20px)}to{transform:rotateX(0) translateY(0)}}
+body.static .st-studio .stage-card__media{animation:none}
+@media (prefers-reduced-motion:reduce){.st-studio.live .stage-card__media{animation:none}}
+
+/* === Next-Level: Station 5 Galaxie (.st-galaxie) === */
+/* ST5: to_galaxy-Code-Chip + Zitat in der Sub-Zeile */
+.st-galaxie .sub .gal-fn{font-family:var(--mono);font-size:.84em;color:var(--teal);background:rgba(26,165,145,.09);border:1px solid rgba(26,165,145,.3);border-radius:4px;padding:.08em .45em;white-space:nowrap}
+.st-galaxie .sub .gal-q{font-style:italic;color:var(--ivory)}
+/* ST5: Scanline/Glitch-Aufblitzen von „selbst" beim Live-Werden */
+.st-galaxie h2 em{position:relative;display:inline-block}
+.st-galaxie.live h2 em{animation:galGlitch 1.1s steps(1,end) .45s both}
+.st-galaxie.live h2 em::after{content:"";position:absolute;left:-.06em;right:-.06em;top:0;height:2px;background:linear-gradient(90deg,transparent,rgba(242,239,232,.95),transparent);mix-blend-mode:screen;opacity:0;pointer-events:none;animation:galScan 1.1s linear .45s both}
+@keyframes galScan{0%{opacity:0;transform:translateY(0)}12%{opacity:.9}55%{opacity:.5}100%{opacity:0;transform:translateY(1.04em)}}
+@keyframes galGlitch{0%,100%{transform:none;text-shadow:none;opacity:1}8%{transform:translateX(-.035em) skewX(-6deg);text-shadow:.05em 0 var(--pink),-.05em 0 rgba(26,165,145,.85)}12%{transform:translateX(.03em);text-shadow:none}22%{opacity:.35}26%{opacity:1}46%{transform:translate(.025em,-.02em);text-shadow:-.045em 0 var(--pink),.045em 0 rgba(26,165,145,.85)}52%{transform:none;text-shadow:none}}
+@media (prefers-reduced-motion:reduce){.st-galaxie.live h2 em,.st-galaxie.live h2 em::after{animation:none!important}}
+
+/* === Next-Level: st-agents === */
+/* ST6: Headline-Zahlen rollen hoch (steps, kein JS) */
+.st-agents h2 .num{display:inline-block;}
+.st-agents.live h2 .num{animation:numRoll .9s steps(8,end) .15s both;}
+.st-agents.live h2 .num:nth-of-type(2){animation-delay:.32s;}
+.st-agents.live h2 .num:nth-of-type(3){animation-delay:.5s;}
+@keyframes numRoll{0%{opacity:0;transform:translateY(.55em) scale(.94);filter:blur(6px);}55%{opacity:1;filter:blur(2px);}85%{transform:translateY(-.05em) scale(1.05);filter:blur(0);}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}}
+body.static .st-agents h2 .num{animation:none;}
+/* ST6: Fußzeile — was die Nacht hinterließ */
+.st-agents .agent-foot{margin-top:2.3rem;max-width:960px;width:100%;border-top:1px solid var(--ink-12);padding-top:.9rem;display:flex;flex-wrap:wrap;column-gap:1.7rem;row-gap:.45rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-60);}
+.st-agents .agent-foot span{position:relative;white-space:nowrap;}
+.st-agents .agent-foot span:first-child{color:var(--teal);}
+.st-agents .agent-foot span+span::before{content:"·";position:absolute;left:-1.05rem;color:var(--ink-30);}
+@media (max-width:640px){.st-agents .agent-foot{column-gap:1.2rem;font-size:.58rem;}.st-agents .agent-foot span+span::before{left:-.8rem;}}
+@media (prefers-reduced-motion:reduce){.st-agents.live h2 .num{animation:none;}}
+
+/* === Next-Level: Station 7 · About (.st-about) === */
+/* St7 · About — Brief-Rahmen, Siegel, Kicker */
+@property --abSweep{syntax:'<percentage>';inherits:false;initial-value:0%;}
+.st-about .panel{position:relative;--abY:-2.1rem;--abX:-2.6rem;}
+.st-about .panel::before{content:"";position:absolute;inset:var(--abY) var(--abX);border:1px solid rgba(14,34,68,.18);border-radius:2px;pointer-events:none;-webkit-mask:conic-gradient(#000 var(--abSweep,100%),transparent 0);mask:conic-gradient(#000 var(--abSweep,100%),transparent 0);}
+.st-about.live .panel::before{animation:abDraw 1.6s cubic-bezier(.65,0,.15,1) .3s both;}
+@keyframes abDraw{to{--abSweep:100%}}
+.st-about .panel::after{content:"";position:absolute;top:var(--abY);left:50%;width:7px;height:7px;transform:translate(-50%,-50%) rotate(45deg);background:#E94B5D;opacity:0;transition:opacity .5s ease 1.8s;}
+.st-about.live .panel::after,body.static .st-about .panel::after{opacity:.9;}
+body.static .st-about .panel::before{-webkit-mask:none;mask:none;}
+.st-about .abk{font-family:var(--mono);font-size:.6rem;letter-spacing:.32em;text-transform:uppercase;color:var(--teal);margin-bottom:1.2rem;}
+@media(min-width:1000px){.st-about .panel{margin-right:9vw;}}
+@media(max-width:640px){.st-about .panel{--abY:-1.1rem;--abX:-.4rem;}}
+
+/* === Next-Level: Station 8 Finale (.st-end) === */
+/* === Station 8 Finale — Beweiszeile + Glow + Magnetic === */
+.st-end .end-proof{display:inline-flex;align-items:center;gap:.65em;font-family:var(--mono);font-size:clamp(.62rem,1.1vw,.76rem);letter-spacing:.24em;text-transform:uppercase;color:var(--iv-30);margin-bottom:1.7rem}
+.st-end .end-proof b{color:var(--teal);font-weight:400}
+.st-end .end-proof__dot{flex:none;width:7px;height:7px;border-radius:50%;background:var(--teal)}
+.st-end.live .end-proof__dot{animation:endDot 2.4s ease-out .9s infinite}
+@keyframes endDot{0%{box-shadow:0 0 0 0 rgba(26,165,145,.55)}70%{box-shadow:0 0 0 11px rgba(26,165,145,0)}100%{box-shadow:0 0 0 0 rgba(26,165,145,0)}}
+.st-end.live h2{animation:endGlow 2.3s cubic-bezier(.16,1,.3,1) .4s both}
+@keyframes endGlow{0%{text-shadow:0 0 0 rgba(242,239,232,0)}38%{text-shadow:0 0 36px rgba(242,239,232,.42),0 0 90px rgba(26,165,145,.28)}100%{text-shadow:0 0 16px rgba(242,239,232,.12)}}
+.st-end .mail{transform:scale(1);transition:color .35s,border-color .35s,transform .5s cubic-bezier(.16,1,.3,1)}
+.st-end .mail:hover{transform:scale(1.07)}
+.st-end .mail:active{transform:scale(1.02)}
+@media (prefers-reduced-motion:reduce){.st-end.live h2,.st-end.live .end-proof__dot{animation:none}.st-end .mail:hover{transform:none}}
+
+/* === Next-Level: continuity === */
+/* === Continuity-Director: globaler Feinschliff === */
+:root{--ease:cubic-bezier(.16,1,.3,1)}
+::selection{background:var(--teal);color:var(--ivory)}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:2px}
+.st-end .mail:focus-visible,.detail__close:focus-visible{outline-color:var(--pink)}
+/* Film-Korn — ein Korn über der ganzen Fahrt, CSS-only */
+body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:none;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23g)'/></svg>") repeat;background-size:160px 160px;opacity:.05;mix-blend-mode:overlay;animation:cdGrain 1.4s steps(2) infinite}
+@keyframes cdGrain{0%{transform:translate3d(0,0,0)}25%{transform:translate3d(-3%,2%,0)}50%{transform:translate3d(2%,-4%,0)}75%{transform:translate3d(-2%,-3%,0)}100%{transform:translate3d(3%,3%,0)}}
+@media (prefers-reduced-motion:reduce){body::after{animation:none}}
 </style>
 </head>
 <body>
@@ -311,16 +463,19 @@ body.static .agent-card--night::before{background:var(--teal);}
 
   <!-- 0 · HERO -->
   <section class="st st-hero" data-st="0">
-    <div class="kicker">AI · Automation · Web Experiences</div>
-    <h1>Digitale Erlebnisse, die aus Ideen <em>Systeme</em> machen.</h1>
+    <div class="kicker">Studio für AI · Automation · Web Experiences</div>
+    <h1><span class="hln" style="--l:0"><span class="hln__in">Digitale</span></span><span class="hln" style="--l:1"><span class="hln__in">Erlebnisse, die</span></span><span class="hln" style="--l:2"><span class="hln__in">aus Ideen</span></span><span class="hln" style="--l:3"><span class="hln__in"><em>Systeme</em> machen.</span></span></h1>
     <p>Strategie, Design und KI-Engineering aus einer Hand — von der ersten Skizze bis zum laufenden System. Das hier ist keine Seite. Es ist eine Fahrt.</p>
-    <div class="hint">Scroll — die Reise beginnt</div>
+    <div class="hero-sig">»Ich bau das.« <em>— Alex Heyers, MyFlowMotion</em></div>
+    <div class="hint"><span class="hint__line" aria-hidden="true"></span><span>Scroll — die Reise beginnt</span></div>
   </section>
 
   <!-- 1 · REEL -->
   <section class="st st-reel" data-st="1">
-    <h2>Show, don't tell.</h2>
-    <div class="sub">Sechs Systeme · live gebaut · öffentlich dokumentiert</div>
+    <div class="hud hud--bl rev" style="--d:.4s"><span class="hud__dot"></span><span class="hud__type">Reel · 21 Sek · generiert, nicht gestockt</span></div>
+    <div class="hud hud--br rev" style="--d:.9s">16:9 · WebGL-Textur · Loop</div>
+    <h2 aria-label="Show, don't tell."><span aria-hidden="true"><span class="wd"><i style="--i:0">S</i><i style="--i:1">h</i><i style="--i:2">o</i><i style="--i:3">w</i><i style="--i:4">,</i></span> <span class="wd"><i style="--i:5">d</i><i style="--i:6">o</i><i style="--i:7">n</i><i style="--i:8">'</i><i style="--i:9">t</i></span> <span class="wd"><i style="--i:10">t</i><i style="--i:11">e</i><i style="--i:12">l</i><i style="--i:13">l</i><i style="--i:14">.</i></span></span></h2>
+    <div class="sub">Sechs Systeme · vier davon hier klickbar · öffentlich dokumentiert</div>
   </section>
 
   <!-- 2 · PROJEKTE -->
@@ -330,19 +485,19 @@ body.static .agent-card--night::before{background:var(--teal);}
       <div class="count">04 / 06 — Auswahl · <em>Klick öffnet die Live-Demo</em></div>
     </div>
     <div class="work-grid" id="workGrid">
-      <article class="card rev" style="--d:.05s" data-title="AI-Adoption-Studio" data-tags="ai · web · agents" data-live="live/studio.html" data-hint="Live-Prototyp — scrollen &amp; klicken" data-facts="3 Stufen|Verstehen → Bauen;7|Analyse-Agenten;105|Fragen im Pool" data-text="Ein Multi-Agent-System, das Unternehmen durch die KI-Einführung führt: Voice-Intake, Dokumenten-Analyse, Systemlandkarte. Next.js, FastAPI, Supabase — live gebaut und öffentlich dokumentiert.">
+      <article class="card rev" style="--d:.05s" data-title="AI-Adoption-Studio" data-tags="ai · web · agents" data-live="live/studio.html" data-hint="Live-Prototyp — scrollen &amp; klicken" data-facts="3 Stufen|Verstehen → Designen → Bauen;7|Analyse-Agenten;105|Fragen im Pool" data-text="Die meisten Beratungs-Tools enden beim Report. Das Studio versteht ein Unternehmen erst — geführter Daten-Upload, Web-Research, Voice-Interview — und schickt dann sieben Agenten los: Process-Auditor, Use-Case-Generator, Tool-Recommender, ROI-Calculator, Compliance-Checker, Roadmap-Generator, Reporter. Heraus kommen typisierte Ergebnisse plus Pitch-Deck, ROI-Excel und PDF. Stufe 2 entwirft daraus die Ziel-Systemlandschaft, Stufe 3 baut sie. Next.js, FastAPI, Supabase — öffentlich dokumentiert.">
         <div class="card__media gl-img"><img src="assets/card-studio.jpg" alt="AI-Adoption-Studio"></div>
         <div class="card__title">AI-Adoption-Studio</div><div class="card__tags">ai · web · agents</div>
       </article>
-      <article class="card rev" style="--d:.15s" data-title="System-Galaxie" data-tags="3d · dataviz" data-live="live/galaxie.html" data-hint="Echte Systemkarte — ziehen, zoomen, klicken" data-facts="119|Knoten;100|Verbindungen;48|n8n-Workflows" data-text="Eine begehbare Three.js-Galaxie der eigenen Systemlandschaft: jeder Workflow ein Satellit, jede Verbindung eine Linie. Datengetrieben — die Karte zeichnet sich selbst.">
+      <article class="card rev" style="--d:.15s" data-title="System-Galaxie" data-tags="3d · dataviz" data-live="live/galaxie.html" data-hint="Echte Systemkarte — ziehen, zoomen, klicken" data-facts="8|Spiralarm-Cluster;48|Workflow-Satelliten;64|Puls-Sprites" data-text="Keine Deko — eine echte Karte. Jedes System eine Glas-Bubble in acht Spiralarmen um den Claude-Code-Hub, 48 n8n-Workflows kreisen als Satelliten im Drei-Ring-Orbit, auf jeder Verbindung wandern Puls-Sprites. Datengetrieben aus dem realen Inventar — die Karte zeichnet sich selbst. Three.js, bewusst hell: Papier statt Weltall.">
         <div class="card__media gl-img"><img src="assets/card-galaxie.jpg" alt="System-Galaxie"></div>
         <div class="card__title">System-Galaxie</div><div class="card__tags">3d · dataviz</div>
       </article>
-      <article class="card rev" style="--d:.25s" data-title="Voice-Agent Ada" data-tags="voice · ai" data-live="live/studio.html#st-voice" data-hint="Live-Sektion aus dem Studio-Prototyp" data-facts="105|Fragen im Pool;10–15|pro Gespräch;Sek. 1|KI-Deklaration" data-text="Ein Sprach-Agent, der Erstgespräche führt: erklärt, fragt nach, fasst zusammen — mit sauberer KI-Deklaration und Consent von der ersten Sekunde.">
+      <article class="card rev" style="--d:.25s" data-title="Voice-Agent Ada" data-tags="voice · ai" data-live="live/studio.html#st-voice" data-hint="Live-Sektion aus dem Studio-Prototyp" data-facts="105|Fragen im Pool;10–15|pro Gespräch;15 Min|Gesprächs-Cap" data-text="Kein Formular, ein Gespräch: Ada kennt aus dem Pre-Call-Briefing schon Namen und Pain Points und wählt hypothesengetrieben 10–15 Fragen aus einem Pool von 105 — statt linear abzuhaken. KI-Deklaration und Consent ab Sekunde 1, Unterbrechen ausdrücklich erlaubt, 15-Minuten-Cap. Jedes Transkript wird gespeichert und füttert die Analyse. ElevenLabs Conversational AI, angebunden ans Studio.">
         <div class="card__media gl-img"><img src="assets/card-ada.jpg" alt="Voice-Agent Ada"></div>
         <div class="card__title">Voice-Agent Ada</div><div class="card__tags">voice · ai</div>
       </article>
-      <article class="card rev" style="--d:.35s" data-title="Flow-Automationen" data-tags="automation · integration" data-live="live/studio.html#agents" data-hint="8-Agenten-Pipeline — live im Prototyp" data-facts="48|Workflows;35|aktiv;8|Agenten-Pipeline" data-text="Workflows, die im Hintergrund arbeiten: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines — selbst gehostet, versioniert, überwacht.">
+      <article class="card rev" style="--d:.35s" data-title="Flow-Automationen" data-tags="automation · integration" data-live="live/studio.html#agents" data-hint="8-Agenten-Pipeline — live im Prototyp" data-facts="48|Workflows;35|aktiv;525|n8n-Nodes per MCP" data-text="48 Workflows laufen self-hosted auf dem eigenen Server, 35 davon aktiv: E-Mail-Strecken, Daten-Synchronisation, Agenten-Pipelines. n8n ist der Orchestrierungs-Hub — per MCP mit 525-Node-Abdeckung wird Workflow-JSON generiert, lokal validiert und per REST deployt. Härtetest bestanden: Acht isolierte Agenten bauten in einer Nacht parallel 2.462 Zeilen Code — und fanden dabei den Showstopper-Bug vor dem Deploy.">
         <div class="card__media gl-img"><img src="assets/card-flows.jpg" alt="Flow-Automationen"></div>
         <div class="card__title">Flow-Automationen</div><div class="card__tags">automation · integration</div>
       </article>
@@ -353,7 +508,8 @@ body.static .agent-card--night::before{background:var(--teal);}
   <section class="st st-void" data-st="3">
     <div class="line" data-line="0">
       <div class="mono">Schritt 1 — Zuhören</div>
-      <h2>Aus Worten wird <em>Struktur</em>.</h2>
+      <h2>Aus Worten wird <em class="vd-asm" aria-label="Struktur"><span aria-hidden="true" style="--i:0;--dx:-.55em;--dy:-.4em;--dr:-14deg">S</span><span aria-hidden="true" style="--i:1;--dx:.4em;--dy:.5em;--dr:9deg">t</span><span aria-hidden="true" style="--i:2;--dx:-.3em;--dy:.45em;--dr:-7deg">r</span><span aria-hidden="true" style="--i:3;--dx:.6em;--dy:-.35em;--dr:12deg">u</span><span aria-hidden="true" style="--i:4;--dx:-.5em;--dy:.3em;--dr:-10deg">k</span><span aria-hidden="true" style="--i:5;--dx:.35em;--dy:-.5em;--dr:8deg">t</span><span aria-hidden="true" style="--i:6;--dx:-.4em;--dy:-.3em;--dr:-6deg">u</span><span aria-hidden="true" style="--i:7;--dx:.5em;--dy:.4em;--dr:11deg">r</span></em>.</h2>
+      <div class="vd-sub"><b>105</b> Fragen im Pool · <b>10–15</b> pro Gespräch · <b>Sieben</b> Agenten ordnen</div>
     </div>
     <div class="line" data-line="1">
       <div class="mono">Schritt 2 — Verdichten</div>
@@ -366,6 +522,7 @@ body.static .agent-card--night::before{background:var(--teal);}
     <div class="kicker">Das Studio · Drei Stufen</div>
     <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
     <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
+    <p class="studio-proof rev" style="--d:.5s" aria-label="105 Fragen, 7 Agenten, 1 Pfad"><span><b>105</b>Fragen</span><i aria-hidden="true"></i><span><b>7</b>Agenten</span><i aria-hidden="true"></i><span><b class="pk">1</b>Pfad</span></p>
     <div class="stage-grid">
       <article class="stage-card rev" style="--d:.08s">
         <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-verstehen.jpg" alt="Stufe 1 — Verstehen"></div>
@@ -392,7 +549,7 @@ body.static .agent-card--night::before{background:var(--teal);}
   <section class="st st-galaxie" data-st="5">
     <div class="kicker">Das System, live</div>
     <h2>Die Systemkarte zeichnet sich <em>selbst</em>.</h2>
-    <p class="sub">Keine Illustration. Jeder Knoten ein System, jede Linie eine Verbindung — aus Live-Daten. Der Unterschied zwischen einer Präsentation und einem System, das Präsentationen baut.</p>
+    <p class="sub rev" style="--d:.08s">Keine Illustration: <code class="gal-fn">to_galaxy(landscape)</code> zeichnet jeden Knoten, jede Linie direkt aus den Daten — die Karte ist Code, nicht Folie. Nicht eine Präsentation bauen. <em class="gal-q">Ein System bauen, das Präsentationen baut.</em></p>
     <div class="stats">
       <div class="rev" style="--d:.1s"><b data-count="70" id="galStatN">70</b><span>Bausteine</span></div>
       <div class="rev" style="--d:.25s"><b data-count="90" id="galStatE">90</b><span>Verbindungen</span></div>
@@ -422,17 +579,26 @@ body.static .agent-card--night::before{background:var(--teal);}
         <p class="agent-card__text">Jeder Bauschritt öffentlich. Doku und Content sind dasselbe Artefakt. Nicht das fertige Tool zählt — der Weg dorthin.</p>
       </article>
     </div>
+    <div class="agent-foot rev" style="--d:.52s" aria-label="Was die Nacht hinterließ">
+      <span>09.06. · eine Nacht</span>
+      <span>DSGVO- &amp; EU-AI-Act-Checker</span>
+      <span>Roadmap-Generator</span>
+      <span>PPTX- &amp; Excel-Export</span>
+      <span>111-Punkte-Deploy-Checkliste</span>
+      <span>Tests</span>
+    </div>
   </section>
 
   <!-- 7 · LICHT/ABOUT -->
   <section class="st st-about" data-st="7">
     <div class="panel">
+      <div class="abk rev" style="--d:0s">In eigener Sache</div>
       <h2 class="rev" style="--d:.05s">20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
       <p class="rev" style="--d:.2s">MyFlowMotion ist das Studio von Alex Heyers — Vibe Coder, Solopreneur, Vater. Hier entstehen keine Tech-Demos, sondern Systeme mit Haltung: KI-Agenten, die sich vorstellen, bevor sie loslegen. Gebaut im Terminal, mit Claude Code — jeden Schritt öffentlich, Fehler inklusive.</p>
       <div class="sig" aria-hidden="true"></div>
       <div class="facts">
-        <div class="rev" style="--d:.55s"><b>20+ Jahre</b><span>Gastro → Digital → KI</span></div>
-        <div class="rev" style="--d:.68s"><b>6 Systeme</b><span>live &amp; dokumentiert</span></div>
+        <div class="rev" style="--d:.55s"><b>5 Bars</b><span>eröffnet — Kneipe bis VIP</span></div>
+        <div class="rev" style="--d:.68s"><b>Malta → Nordkap</b><span>20 Jahre Gastgeber</span></div>
         <div class="rev" style="--d:.81s"><b>100 % öffentlich</b><span>Build-in-Public</span></div>
       </div>
     </div>
@@ -440,7 +606,8 @@ body.static .agent-card--night::before{background:var(--teal);}
 
   <!-- 8 · FINALE -->
   <section class="st st-end" data-st="8">
-    <h2 class="rev">Eine Idee?<br><em>Lass uns reden.</em></h2>
+    <p class="end-proof rev"><span class="end-proof__dot" aria-hidden="true"></span>9 Stationen · <b>1 Szene</b> · alles live gebaut</p>
+    <h2 class="rev" style="--d:.12s">Eine Idee?<br><em>Lass uns reden.</em></h2>
     <a class="mail rev" style="--d:.25s" href="mailto:a.heyers@gmail.com"><span class="mail__txt">a.heyers@gmail.com</span><span class="mail__arr" aria-hidden="true">→</span></a>
     <div class="foot rev" style="--d:.45s">
       <div>© 2026 <b>MyFlowMotion</b> · Alex Heyers</div>
