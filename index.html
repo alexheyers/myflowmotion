@@ -18,6 +18,7 @@
   --ivory:#F2EFE8; --ink:#0E2244; --teal:#1AA591; --pink:#E94B5D;
   --ink-60:rgba(14,34,68,.74); --ink-30:rgba(14,34,68,.42); --ink-12:rgba(14,34,68,.12);
   --iv-70:rgba(242,239,232,.84); --iv-30:rgba(242,239,232,.44); --iv-14:rgba(242,239,232,.14);
+  --ezl:cubic-bezier(.35,0,0,1);
   --disp:'Playfair Display',serif; --body:'Lato',sans-serif; --mono:'JetBrains Mono',monospace;
 }
 html { scrollbar-width:none; }
@@ -41,7 +42,7 @@ img { display:block; width:100%; height:100%; object-fit:cover; }
 .prog i.on { opacity:1; transform:scale(1.5); }
 
 /* ============ REVEAL-SYSTEM (Choreografie pro Station) ============ */
-.st .rev { opacity:0; transform:translateY(26px); transition:opacity .85s cubic-bezier(.16,1,.3,1) var(--d,0s), transform .85s cubic-bezier(.16,1,.3,1) var(--d,0s); }
+.st .rev { opacity:0; transform:translateY(26px); transition:opacity 1s var(--ezl) var(--d,0s), transform 1s var(--ezl) var(--d,0s); }
 .st.live .rev { opacity:1; transform:none; }
 body.static .st .rev { opacity:1; transform:none; }
 
@@ -160,6 +161,8 @@ body.gl .stage-card__media img { opacity:0; }
 .st-end .mail:hover { color:var(--pink); border-color:var(--pink); }
 .st-end .foot { position:absolute; bottom:1.6rem; left:0; right:0; display:flex; justify-content:space-between; padding:0 clamp(1.2rem,4vw,3.2rem); font-family:var(--mono); font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:var(--iv-30); }
 .st-end .foot b { color:var(--teal); }
+.st-end .end-pitch { margin-top:1.6rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--iv-30); }
+.st-end .end-pitch b { color:var(--ivory); font-weight:400; }
 
 /* ============ PROJEKT-DETAIL (lebendige Unterseite) ============ */
 .detail { position:fixed; inset:0; z-index:120; display:flex; flex-direction:column; padding:clamp(1.2rem,3vw,2.6rem); padding-top:clamp(4.6rem,7vh,6rem); visibility:hidden; pointer-events:none; }
@@ -505,8 +508,13 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
     </div>
   </section>
 
-  <!-- 3 · VOID/TUNNEL (zwei Textzeilen nacheinander) -->
+  <!-- 3 · VOID/TUNNEL (drei Textzeilen nacheinander) -->
   <section class="st st-void" data-st="3">
+    <div class="line" data-line="origin">
+      <div class="mono">Tag 1 · Die Vorstellungsrunde</div>
+      <h2>„Wer kann coden?" — <em>Ich nicht.</em></h2>
+      <div class="vd-sub">86 Tage später: <b>Ich bau das.</b></div>
+    </div>
     <div class="line" data-line="0">
       <div class="mono">Schritt 1 — Zuhören</div>
       <h2>Aus Worten wird <em class="vd-asm" aria-label="Struktur"><span aria-hidden="true" style="--i:0;--dx:-.55em;--dy:-.4em;--dr:-14deg">S</span><span aria-hidden="true" style="--i:1;--dx:.4em;--dy:.5em;--dr:9deg">t</span><span aria-hidden="true" style="--i:2;--dx:-.3em;--dy:.45em;--dr:-7deg">r</span><span aria-hidden="true" style="--i:3;--dx:.6em;--dy:-.35em;--dr:12deg">u</span><span aria-hidden="true" style="--i:4;--dx:-.5em;--dy:.3em;--dr:-10deg">k</span><span aria-hidden="true" style="--i:5;--dx:.35em;--dy:-.5em;--dr:8deg">t</span><span aria-hidden="true" style="--i:6;--dx:-.4em;--dy:-.3em;--dr:-6deg">u</span><span aria-hidden="true" style="--i:7;--dx:.5em;--dy:.4em;--dr:11deg">r</span></em>.</h2>
@@ -522,7 +530,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   <section class="st st-studio" data-st="4">
     <div class="kicker">Das Studio · Drei Stufen</div>
     <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
-    <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
+    <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument; pro Abteilung eine ehrliche Empfehlung. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
     <p class="studio-proof rev" style="--d:.5s" aria-label="105 Fragen, 7 Agenten, 1 Pfad"><span><b>105</b>Fragen</span><i aria-hidden="true"></i><span><b>7</b>Agenten</span><i aria-hidden="true"></i><span><b class="pk">1</b>Pfad</span></p>
     <div class="stage-grid">
       <article class="stage-card rev" style="--d:.08s">
@@ -1109,6 +1117,8 @@ galaxyGroup.position.set(0, -2.6, -56);   // unter der Kamerabahn — wir fliege
 galaxyGroup.rotation.x = .55;
 scene.add(galaxyGroup);
 let galPulses = [], galSat = null, galCurves = [], galCount = { n:0, e:0 };
+let galDust = null, galLabels = [];
+const galLblV = new THREE.Vector3();   // Scratch fürs Label-Fading — keine Frame-Allokationen
 {
   const S = .085;
   const CLUSTERS = {
@@ -1228,8 +1238,9 @@ let galPulses = [], galSat = null, galCurves = [], galCount = { n:0, e:0 };
   }
   const dGeo = new THREE.BufferGeometry();
   dGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-  galaxyGroup.add(new THREE.Points(dGeo, new THREE.PointsMaterial({ color:'#7E8BA0', size:.035,
-    transparent:true, opacity:.55, depthWrite:false })));
+  galDust = new THREE.Points(dGeo, new THREE.PointsMaterial({ color:'#7E8BA0', size:.035,
+    transparent:true, opacity:.55, depthWrite:false }));
+  galaxyGroup.add(galDust);
   // Cluster-Labels (Mono, dezent) — erst zeichnen, wenn der Webfont da ist
   document.fonts.ready.then(()=>{
     for (const [cl, c] of Object.entries(CLUSTERS)){
@@ -1242,7 +1253,7 @@ let galPulses = [], galSat = null, galCurves = [], galCount = { n:0, e:0 };
         transparent:true, opacity:.8, depthWrite:false }));
       sp.position.set(c[0]*S, c[1]*S + 1.7, c[2]*S);
       sp.scale.set(2.1, .39, 1);
-      galaxyGroup.add(sp);
+      galaxyGroup.add(sp); galLabels.push(sp);
     }
   });
   // Stats im DOM mit echten Zahlen versorgen
@@ -1430,6 +1441,42 @@ document.getElementById('detailScrim').addEventListener('click',closeDetail);
 addEventListener('keydown',e=>{ if(e.key==='Escape') closeDetail(); });
 
 /* ============================================================
+   HINTERGRUND-PLATES — subtile Video-Loops in der Szene
+   (Galaxie: Teal-Bokeh-Tiefe · Finale: Navy-Ink-Atmosphäre)
+   ============================================================ */
+function makeBgPlate(src, z, w, hh){
+  const v = document.createElement('video');
+  v.src = src; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'metadata';
+  const tex = new THREE.VideoTexture(v);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const mesh = new THREE.Mesh(
+    new THREE.PlaneGeometry(w, hh),
+    new THREE.MeshBasicMaterial({ map:tex, transparent:true, opacity:0,
+      blending:THREE.AdditiveBlending, depthWrite:false, fog:false })
+  );
+  mesh.position.set(0, 0, z);
+  mesh.visible = false;
+  scene.add(mesh);
+  return { v, mesh, playing:false, pending:false };
+}
+const bgGal = makeBgPlate('assets/bg-galaxie.mp4', -72, 42, 24);
+const bgEnd = makeBgPlate('assets/bg-finale.mp4', -101, 44, 26);
+function syncBgPlate(bp, o, maxOp){
+  bp.mesh.visible = o > .01;
+  if (!bp.mesh.visible){
+    if (bp.playing){ bp.v.pause(); bp.playing = false; }
+    return;
+  }
+  bp.mesh.material.opacity = o * maxOp;
+  if (!bp.playing && !bp.pending){
+    bp.pending = true;
+    const pr = bp.v.play();
+    if (pr) pr.then(()=>{ bp.playing = true; bp.pending = false; }).catch(()=>{ bp.pending = false; });
+    else bp.pending = false;
+  }
+}
+
+/* ============================================================
    SCREENPAINT — Quarter-Res-Pingpong (Lusion-Rezept e/f)
    ============================================================ */
 const PW = ()=>Math.max(160, Math.round(vw/4)), PH = ()=>Math.max(90, Math.round(vh/4));
@@ -1573,21 +1620,25 @@ const WINDOWS = [
 function domStep(p, detailOpen){
   for (let i=0;i<sts.length;i++){
     const [a,b] = WINDOWS[i];
-    let o = win(p, a, b, .22);
+    // Lusion: Show träge (.24), Hide doppelt so schnell (.12) — Stationen überlappen kurz
+    let o = sat((p-a)/.24) * sat((b-p)/.12);
     if (detailOpen && i === 2) o = 0;   // Karten-DOM weg, wenn Transmorph offen
     const el = sts[i];
     el.style.opacity = o.toFixed(3);
     el.classList.toggle('on', o > 0.01);
     el.classList.toggle('live', o > 0.35);
-    const dy = (1 - o) * 26 * (p > (a+b)/2 ? -1 : 1);
-    el.style.transform = `translateY(${dy.toFixed(1)}px)`;
+    const leaving = p > (a+b)/2;
+    const dy = (1 - o) * 26 * (leaving ? -1 : 1);
+    const sc = leaving ? 1 - (1 - o) * .018 : 1;
+    el.style.transform = `translateY(${dy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
   }
-  // Void: zwei Zeilen nacheinander
-  const l0 = win(p, 3.02, 3.48, .14), l1 = win(p, 3.52, 3.98, .14);
-  voidLines[0].style.opacity = l0.toFixed(3);
-  voidLines[1].style.opacity = l1.toFixed(3);
-  voidLines[0].style.transform = `translate(-50%,-50%) scale(${(0.92+l0*.08).toFixed(3)})`;
-  voidLines[1].style.transform = `translate(-50%,-50%) scale(${(0.92+l1*.08).toFixed(3)})`;
+  // Void: drei Zeilen nacheinander (Origin → Struktur → Klarheit)
+  const vws = [[3.02, 3.32], [3.36, 3.66], [3.70, 3.98]];
+  for (let v = 0; v < voidLines.length && v < 3; v++){
+    const lo = win(p, vws[v][0], vws[v][1], .12);
+    voidLines[v].style.opacity = lo.toFixed(3);
+    voidLines[v].style.transform = `translate(-50%,-50%) scale(${(0.92+lo*.08).toFixed(3)})`;
+  }
   // Galaxie-Stats zählen scrollgebunden hoch
   if (p > 4.8 && p < 6.2){
     const cu = sat((p - 5.05) / .45);
@@ -1608,14 +1659,14 @@ function domStep(p, detailOpen){
    RENDER-LOOP
    ============================================================ */
 const clock = new THREE.Clock();
-let prevT = 0;
+let prevT = 0, sStr = 0, pPrev = 0;
 const bgCol = new THREE.Color();
 let pmFrom = new THREE.Vector2(.5,.5);
 
 function frame(){
   const t = clock.getElapsedTime();
   const dt = Math.min(t - prevT, .05); prevT = t;
-  progress = scrollSpring.update(dt, rawP());
+  progress += (rawP() - progress) * (1 - Math.exp(-12 * dt));
   const p = clamp(progress, 0, 9);
   window.__p = p;
 
@@ -1649,17 +1700,35 @@ function frame(){
   /* Galaxie: Drehung, Pulse auf den Kanten, Satelliten-Orbits */
   galaxyGroup.visible = p > 4.97 && p < 6.2;
   if (galaxyGroup.visible){
-    const gs = .55 + win(p, 4.97, 6.2, .3) * .45;   // wächst herein statt zu poppen
+    const gw = win(p, 4.97, 6.2, .3);               // Fenster-Intensität (Kamera-Nähe)
+    const gp = clamp(p - 5.0, 0, 1);                // Fahrt-Fortschritt durch die Galaxie
+    const gs = .55 + gw * .45;                      // wächst herein statt zu poppen
     galaxyGroup.scale.setScalar(gs);
-    galaxyGroup.rotation.y = t * .055;
+    /* (a) Scroll-Kipp: erst Draufsicht von oben, dann kippt der Blick in die Scheibe */
+    galaxyGroup.rotation.x = 1.08 - gp * .72;
+    galaxyGroup.rotation.y = t * .055 + gp * .9;
+    /* (b) Nähe-Glühen: Knoten-Material hellt emissive-artig auf (children[0] = nodesIM) */
+    galaxyGroup.children[0].material.color.setScalar(.72 + gw * .4 + Math.sin(t * 2.6) * .06 * gw);
+    /* (c) Staub driftet gegenläufig zur Scheiben-Drehung — Parallax-Tiefe */
+    if (galDust) galDust.rotation.y = -t * .12 - gp * .55;
+    /* (d) Cluster-Labels faden distanzabhängig zur Kamera (8 Sprites, 1×/Frame) */
+    for (let i = 0; i < galLabels.length; i++){
+      const ls = galLabels[i];
+      ls.getWorldPosition(galLblV);
+      const d = galLblV.distanceTo(cam.position);
+      ls.material.opacity = clamp((d - 1.4) * .65, 0, 1) * clamp((15 - d) * .2, 0, 1) * (.3 + .7 * gw);
+    }
     for (const sp of galPulses){
       const u = sp.userData;
-      u.t = (u.t + u.sp * dt) % 1;
+      u.t = (u.t + u.sp * (.55 + gw * 2.1) * dt) % 1;   // Pulse beschleunigen bei Kamera-Nähe
       galCurves[u.c].getPoint(u.t, sp.position);
+      sp.material.opacity = .35 + gw * .6;
     }
     if (galSat) galSat.children.forEach(sm=>{
       const u = sm.userData;
-      sm.position.set(Math.cos(u.a + t*u.sp)*u.r, Math.sin((u.a + t*u.sp)*1.7)*.09, Math.sin(u.a + t*u.sp)*u.r);
+      u.b = (u.b || 0) + dt * u.sp * gw * 1.6;          // Tempo-Boost akkumuliert — kein Sprung
+      const ph = u.a + t * u.sp * .6 + u.b;
+      sm.position.set(Math.cos(ph)*u.r, Math.sin(ph*1.7)*.09, Math.sin(ph)*u.r);
     });
   }
   /* Agenten-Orbit */
@@ -1700,8 +1769,10 @@ function frame(){
   renderer.setRenderTarget(paintB); renderer.render(paintScene, fsCam);
   [paintA, paintB] = [paintB, paintA];
 
-  /* Reel-Videotextur (Station 1) */
+  /* Reel-Videotextur (Station 1) + Hintergrund-Plates (Galaxie/Finale) */
   syncReel(p);
+  syncBgPlate(bgGal, win(p, 5.0, 6.0, .25), .32);
+  syncBgPlate(bgEnd, win(p, 8.05, 9.0, .3), .28);
 
   /* Bild-Planes (sichtbar im Fenster ihrer Station oder bei offenem Transmorph) */
   planes.forEach(plane=>{
@@ -1753,8 +1824,11 @@ function frame(){
   gradeMat.uniforms.uBloom2.value = mip2.texture;
   gradeMat.uniforms.uPaint.value = paintA.texture;
   gradeMat.uniforms.uTime.value = t;
-  gradeMat.uniforms.uChroma.value = win(p, 2.95, 4.05, .25) + win(p, 5.0, 6.1, .3)*.35 + win(p, 7.9, 8.7, .25)*.6;
-  gradeMat.uniforms.uBloomAmt.value = (darkAt(p) ? .36 : .13) + win(p, 4.9, 6.1, .3)*.3;
+  sStr = Math.min(1, sStr + Math.abs(p - pPrev) * 2); sStr *= Math.exp(-10 * dt); pPrev = p;
+  gradeMat.uniforms.uChroma.value = win(p, 2.95, 4.05, .25) + win(p, 5.0, 6.1, .3)*.35 + win(p, 7.9, 8.7, .25)*.6 + sStr*.25;
+  // Lusion-Blenden: Überbelichtung beim Stimmungswechsel statt Crossfade
+  const blend = win(p, 3.9, 4.2, .1) * 1.1 + win(p, 7.95, 8.25, .1) * .9;
+  gradeMat.uniforms.uBloomAmt.value = (darkAt(p) ? .36 : .13) + win(p, 4.9, 6.1, .3)*.3 + blend;
   gradeMat.uniforms.uDark.value = darkAt(p) ? 1 : 0;
   renderer.setRenderTarget(null); renderer.clear();
   renderer.render(gradeScene, fsCam);
