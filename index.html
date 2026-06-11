@@ -80,6 +80,11 @@ body.c-hover .cursor-ring { width:60px; height:60px; }
 .nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:1.3rem clamp(1.2rem,4vw,3.2rem); transition:color .6s; }
 .nav__brand { font-family:var(--disp); font-weight:900; font-size:1.12rem; }
 .nav__brand em { font-style:italic; color:var(--teal); }
+.nav__right { display:flex; align-items:center; gap:.7rem; }
+.nav__snd { font-family:var(--mono); font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; padding:.55rem .9rem; border-radius:50px; border:1px solid transparent; background:transparent; color:currentColor; opacity:.55; cursor:pointer; transition:opacity .3s, border-color .3s; }
+.nav__snd:hover { opacity:1; border-color:currentColor; }
+.nav__snd[aria-pressed="false"] { text-decoration:line-through; }
+body.static .nav__snd { display:none; }
 .nav__cta { font-family:var(--mono); font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; padding:.7rem 1.35rem; border-radius:50px; border:1px solid currentColor; transition:background .3s,color .3s; }
 .nav__cta:hover { background:var(--teal); border-color:var(--teal); color:#fff; }
 
@@ -572,7 +577,10 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
 
 <nav class="nav" id="nav">
   <a class="nav__brand" href="#">My<em>Flow</em>Motion</a>
-  <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
+  <div class="nav__right">
+    <button class="nav__snd" id="sndBtn" aria-pressed="true" title="Ton an/aus">Ton&nbsp;·&nbsp;an</button>
+    <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
+  </div>
 </nav>
 
 <div class="chapter" id="chapter"><b id="chapNum">01</b> / 12 · <span id="chapName">Hero</span></div>
@@ -911,7 +919,7 @@ if (!isTouch){
     ring.style.transform=`translate(${rx-17}px,${ry-17}px)`;
     requestAnimationFrame(cl); })();
   document.querySelectorAll('a,button,.card').forEach(el=>{
-    el.addEventListener('mouseenter',()=>document.body.classList.add('c-hover'));
+    el.addEventListener('mouseenter',()=>{ document.body.classList.add('c-hover'); Sound.tick(); });
     el.addEventListener('mouseleave',()=>document.body.classList.remove('c-hover'));
   });
 }
@@ -949,6 +957,80 @@ if (galCta) galCta.addEventListener('click', e => {
   fillDetail(galCta);
   document.getElementById('detail').classList.add('is-open');
   document.body.classList.add('is-locked');
+});
+
+/* ============================================================
+   SOUND-LAYER — komplett synthetisiert (WebAudio, keine Assets)
+   ============================================================ */
+const Sound = (() => {
+  let ctx = null, master = null, noise = null, pad = null, padGain = null;
+  let armed = false, muted = false;
+  function ensure(){
+    if (ctx) return true;
+    try {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain(); master.gain.value = .5; master.connect(ctx.destination);
+      const len = ctx.sampleRate * 1.2, buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      noise = buf;
+    } catch(e){ return false; }
+    return true;
+  }
+  function on(){ return armed && !muted && ensure(); }
+  return {
+    arm(){ if (armed) return; armed = true; ensure(); if (ctx && ctx.state === 'suspended') ctx.resume(); },
+    setMuted(m){ muted = m; if (padGain && ctx) padGain.gain.setTargetAtTime(m ? 0 : this._padLvl || 0, ctx.currentTime, .2); },
+    whoosh(dark){
+      if (!on()) return;
+      const t0 = ctx.currentTime, dur = .5;
+      const src = ctx.createBufferSource(); src.buffer = noise;
+      const f = ctx.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.1;
+      f.frequency.setValueAtTime(dark ? 240 : 460, t0);
+      f.frequency.exponentialRampToValueAtTime(dark ? 90 : 170, t0 + dur);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t0);
+      g.gain.linearRampToValueAtTime(.16, t0 + .05);
+      g.gain.exponentialRampToValueAtTime(.001, t0 + dur);
+      src.connect(f); f.connect(g); g.connect(master);
+      src.start(t0); src.stop(t0 + dur);
+    },
+    tick(){
+      if (!on()) return;
+      const t0 = ctx.currentTime;
+      const o = ctx.createOscillator(); o.type = 'sine';
+      o.frequency.setValueAtTime(1750, t0);
+      o.frequency.exponentialRampToValueAtTime(1150, t0 + .05);
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(.05, t0);
+      g.gain.exponentialRampToValueAtTime(.0008, t0 + .07);
+      o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + .08);
+    },
+    padLevel(x){
+      this._padLvl = x * .1;
+      if (!on()){ if (padGain) padGain.gain.value = 0; return; }
+      if (!pad){
+        pad = [ctx.createOscillator(), ctx.createOscillator()];
+        pad[0].frequency.value = 108; pad[1].frequency.value = 108.8;
+        pad[0].type = pad[1].type = 'sine';
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320;
+        padGain = ctx.createGain(); padGain.gain.value = 0;
+        pad.forEach(o => { o.connect(lp); o.start(); });
+        lp.connect(padGain); padGain.connect(master);
+      }
+      padGain.gain.setTargetAtTime(this._padLvl, ctx.currentTime, .35);
+    },
+  };
+})();
+['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(ev =>
+  addEventListener(ev, () => Sound.arm(), { once: true, passive: true }));
+const sndBtn = document.getElementById('sndBtn');
+if (sndBtn) sndBtn.addEventListener('click', () => {
+  const nowMuted = sndBtn.getAttribute('aria-pressed') === 'true';
+  sndBtn.setAttribute('aria-pressed', String(!nowMuted));
+  sndBtn.innerHTML = nowMuted ? 'Ton&nbsp;·&nbsp;aus' : 'Ton&nbsp;·&nbsp;an';
+  Sound.setMuted(nowMuted);
+  Sound.arm();
 });
 
 const canvas = document.getElementById('gl');
@@ -2109,6 +2191,7 @@ function domStep(p, detailOpen, pv = 0){
   // Progress-Punkte + Nav-Farbe
   const idx = clamp(Math.round(p - .45), 0, 11);
   if (idx !== chapIdx){
+    if (chapIdx >= 0) Sound.whoosh(darkAt(p));
     chapIdx = idx;
     chapNumEl.textContent = String(idx + 1).padStart(2, '0');
     chapNameEl.textContent = CHAP_NAMES[idx];
@@ -2166,6 +2249,7 @@ function frame(){
   tunnel2.visible = p > 10.82 && p < 11.78;
   /* Galaxie: Drehung, Pulse auf den Kanten, Satelliten-Orbits */
   galaxyGroup.visible = p > 4.97 && p < 6.2;
+  if (!galaxyGroup.visible) Sound.padLevel(0);
   if (galaxyGroup.visible){
     const gw = win(p, 4.97, 6.2, .3);               // Fenster-Intensität (Kamera-Nähe)
     const gp = clamp(p - 5.0, 0, 1);                // Fahrt-Fortschritt durch die Galaxie
@@ -2176,6 +2260,7 @@ function frame(){
     galaxyGroup.rotation.y = t * .055 + gp * .9;
     /* (b) Nähe-Glühen: Knoten-Material hellt emissive-artig auf (children[0] = nodesIM) */
     galaxyGroup.children[0].material.color.setScalar(.72 + gw * .4 + Math.sin(t * 2.6) * .06 * gw);
+    Sound.padLevel(gw);
     /* Boot-Sequenz: die Kanten zeichnen sich beim Ankommen selbst */
     if (galEdges) galEdges.geometry.setDrawRange(0, Math.floor(galEdges.userData.total * clamp(gp * 1.6 + .04, 0, 1)));
     /* (c) Staub driftet gegenläufig zur Scheiben-Drehung — Parallax-Tiefe */
