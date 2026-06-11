@@ -29,7 +29,7 @@ a { color:inherit; text-decoration:none; }
 img { display:block; width:100%; height:100%; object-fit:cover; }
 
 /* Scroll-Raum: die Seite IST 1050vh hoch, alles Sichtbare ist fixed */
-.scroll-space { height:1050vh; }
+.scroll-space { height:1400vh; }
 #gl { position:fixed; inset:0; z-index:1; display:block; }
 .stage { position:fixed; inset:0; z-index:5; pointer-events:none; }
 .stage .st { position:absolute; inset:0; opacity:0; visibility:hidden; }
@@ -103,7 +103,46 @@ body.gl .card__media img { opacity:0; }
 .st-void .line h2 em { font-style:italic; color:var(--teal); }
 .st-void .line .mono { font-family:var(--mono); font-size:.66rem; letter-spacing:.3em; text-transform:uppercase; color:var(--iv-30); margin-bottom:1.4rem; }
 
-/* ============ STATION 4: STUDIO (3 Stufen) ============ */
+/* ============ STATION 2: SPARK (Tag 1) ============ */
+.st-spark { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 1.4rem; }
+.st-spark .spark-cap { font-family:var(--mono); font-size:.64rem; letter-spacing:.28em; text-transform:uppercase; color:var(--iv-30); margin-bottom:1.6rem; }
+.st-spark h2 { font-family:var(--disp); font-weight:500; font-style:italic; font-size:clamp(1.3rem,2.6vw,2.1rem); color:var(--iv-70); }
+.st-spark .spark-big { font-family:var(--disp); font-weight:900; font-size:clamp(3.4rem,11vw,9rem); line-height:1; color:var(--ivory); margin-top:1.2rem; }
+.st-spark .spark-big em { font-style:italic; color:var(--pink); }
+.st-spark .spark-sub { margin-top:1.6rem; font-weight:300; line-height:1.7; color:var(--iv-70); font-size:clamp(.9rem,1.2vw,1.05rem); max-width:44ch; }
+.st-spark .spark-note { margin-top:2rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--teal); border:1px solid rgba(26,165,145,.35); padding:.7rem 1.3rem; border-radius:40px; }
+
+/* ============ STATION 3: REISE (86 Tage) ============ */
+.st-reise { padding:5.6rem clamp(1.2rem,4vw,3.2rem) 1.5rem; display:flex; flex-direction:column; justify-content:center; }
+.st-reise .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:.9rem; }
+.st-reise h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.8vw,3.2rem); line-height:1.08; max-width:20ch; }
+.st-reise h2 em { font-style:italic; color:var(--teal); }
+.route { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:clamp(.7rem,1.6vw,1.6rem); margin-top:2.2rem; max-width:1240px; }
+.route-stop { border-top:2px solid var(--ink-12); padding-top:.9rem; position:relative; }
+.route-stop b { font-family:var(--disp); font-weight:900; font-size:1.3rem; color:var(--ink-30); display:block; }
+.route-stop span { display:block; font-weight:400; font-size:.8rem; line-height:1.35; margin-top:.3rem; }
+.route-stop i { display:block; font-style:normal; font-family:var(--mono); font-size:.56rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-30); margin-top:.45rem; }
+.route-stop.done { border-top-color:var(--teal); }
+.route-stop.done b { color:var(--teal); }
+.route-stop.now { border-top-color:var(--pink); }
+.route-stop.now b { color:var(--pink); }
+.route-stop.now i { color:var(--pink); }
+.reise-stats { display:flex; gap:clamp(1.4rem,3.5vw,3.2rem); margin-top:2.4rem; flex-wrap:wrap; }
+.reise-stats b { font-family:var(--disp); font-weight:900; font-size:clamp(1.2rem,2vw,1.7rem); display:block; }
+.reise-stats span { font-family:var(--mono); font-size:.56rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-30); }
+@media (max-width:860px){ .route { grid-template-columns:repeat(2,1fr); } }
+
+/* ============ STATION 9: PITCH (Was ich suche) ============ */
+.st-pitch { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 clamp(1.2rem,4vw,3.2rem); }
+.st-pitch .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.28em; text-transform:uppercase; color:var(--teal); margin-bottom:1rem; }
+.st-pitch h2 { font-family:var(--disp); font-weight:900; font-size:clamp(2rem,4.6vw,3.8rem); line-height:1.08; }
+.st-pitch h2 em { font-style:italic; color:var(--teal); }
+.st-pitch .pitch-lead { margin-top:1.1rem; max-width:54ch; font-weight:300; line-height:1.7; color:var(--ink-60); font-size:clamp(.9rem,1.15vw,1rem); }
+.st-pitch .pitch-tags { display:flex; gap:.7rem; margin-top:1.8rem; flex-wrap:wrap; justify-content:center; }
+.st-pitch .pitch-tags b { font-family:var(--mono); font-weight:400; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; border:1px solid var(--ink-12); padding:.6rem 1.2rem; border-radius:40px; color:var(--ink-60); }
+.st-pitch .pitch-note { margin-top:2rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-30); }
+
+/* ============ STATION 6: STUDIO (3 Stufen) ============ */
 .st-studio { padding:5.6rem clamp(1.2rem,4vw,3.2rem) 1.5rem; display:flex; flex-direction:column; justify-content:center; }
 .st-studio .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:.9rem; }
 .st-studio h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.8vw,3.2rem); line-height:1.08; max-width:18ch; }
@@ -195,7 +234,7 @@ body.static #gl, body.static .prog, body.static .loader { display:none; }
 body.static .stage { position:static; pointer-events:auto; }
 body.static .stage .st { position:relative; inset:auto; opacity:1 !important; visibility:visible; transform:none !important; min-height:88vh; padding-top:6rem; padding-bottom:3rem; }
 body.static .st-reel { background:var(--pink); }
-body.static .st-void, body.static .st-end, body.static .st-galaxie { background:var(--ink); }
+body.static .st-void, body.static .st-end, body.static .st-galaxie, body.static .st-spark { background:var(--ink); }
 body.static .st-void .line { position:static; transform:none; opacity:1 !important; }
 body.static .st-void .line + .line { margin-top:3rem; }
 body.static .card__media img, body.static .stage-card__media img { opacity:1; }
@@ -463,7 +502,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   <a class="nav__cta" href="mailto:a.heyers@gmail.com">Lass uns reden</a>
 </nav>
 
-<div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="prog" id="prog"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
 
 <div class="stage" id="stage">
 
@@ -484,8 +523,37 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
     <div class="sub">Sechs Systeme · vier davon hier klickbar · öffentlich dokumentiert</div>
   </section>
 
-  <!-- 2 · PROJEKTE -->
-  <section class="st st-work" data-st="2">
+  <!-- 2 · SPARK: Tag 1 (Story-Origin) -->
+  <section class="st st-spark" data-st="2">
+    <div class="spark-cap rev" style="--d:0s">Tag 1 · 07. Mai · 18:07 Uhr · Die Vorstellungsrunde</div>
+    <h2 class="rev" style="--d:.1s">„Wer von euch kann coden?"</h2>
+    <div class="spark-big rev" style="--d:.45s">Ich <em>nicht</em>.</div>
+    <p class="spark-sub rev" style="--d:.8s">Zwanzig Jahre Tresen, null Zeile Code. Genau da fing es an.</p>
+    <div class="spark-note rev" style="--d:1.1s">„noch nicht können" ist ein Startpunkt, kein Urteil</div>
+  </section>
+
+  <!-- 3 · REISE: 86 Tage / 6 Module -->
+  <section class="st st-reise" data-st="3">
+    <div class="kicker rev" style="--d:0s">86 Tage · 6 Module · 26 Live-Sessions</div>
+    <h2 class="rev" style="--d:.08s">Vom ersten Prompt zum eigenen <em>Agenten</em>.</h2>
+    <div class="route">
+      <div class="route-stop done rev" style="--d:.2s"><b>M1</b><span>Creative Foundations</span><i>erledigt</i></div>
+      <div class="route-stop done rev" style="--d:.3s"><b>M2</b><span>Technical Foundations</span><i>erledigt</i></div>
+      <div class="route-stop now rev" style="--d:.4s"><b>M3</b><span>Prompt Engineering</span><i>läuft — hier bin ich</i></div>
+      <div class="route-stop rev" style="--d:.5s"><b>M4</b><span>System Flow &amp; Automation</span><i>Heimspiel: n8n</i></div>
+      <div class="route-stop rev" style="--d:.6s"><b>M5</b><span>Agentic AI Engineering</span><i>echtes Neuland</i></div>
+      <div class="route-stop rev" style="--d:.7s"><b>M6</b><span>Career &amp; Abschluss</span><i>Aus Können wird Position</i></div>
+    </div>
+    <div class="reise-stats">
+      <div class="rev" style="--d:.85s"><b>636</b><span>Unterrichtseinheiten</span></div>
+      <div class="rev" style="--d:.95s"><b>26</b><span>Live-Sessions</span></div>
+      <div class="rev" style="--d:1.05s"><b>12</b><span>Wochen Vollzeit</span></div>
+      <div class="rev" style="--d:1.15s"><b>Zalando · XING · SumUp · OTTO</b><span>Trainer-Stab · inkl. DL-Summit-Ticket</span></div>
+    </div>
+  </section>
+
+  <!-- 4 · PROJEKTE -->
+  <section class="st st-work" data-st="4">
     <div class="head">
       <h2>Ausgewählte <em>Arbeiten</em></h2>
       <div class="count">04 / 06 — Auswahl · <em>Klick öffnet die Live-Demo</em></div>
@@ -511,12 +579,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   </section>
 
   <!-- 3 · VOID/TUNNEL (drei Textzeilen nacheinander) -->
-  <section class="st st-void" data-st="3">
-    <div class="line" data-line="origin">
-      <div class="mono">Tag 1 · Die Vorstellungsrunde</div>
-      <h2>„Wer kann coden?" — <em>Ich nicht.</em></h2>
-      <div class="vd-sub">86 Tage später: <b>Ich bau das.</b></div>
-    </div>
+  <section class="st st-void" data-st="5">
     <div class="line" data-line="0">
       <div class="mono">Schritt 1 — Zuhören</div>
       <h2>Aus Worten wird <em class="vd-asm" aria-label="Struktur"><span aria-hidden="true" style="--i:0;--dx:-.55em;--dy:-.4em;--dr:-14deg">S</span><span aria-hidden="true" style="--i:1;--dx:.4em;--dy:.5em;--dr:9deg">t</span><span aria-hidden="true" style="--i:2;--dx:-.3em;--dy:.45em;--dr:-7deg">r</span><span aria-hidden="true" style="--i:3;--dx:.6em;--dy:-.35em;--dr:12deg">u</span><span aria-hidden="true" style="--i:4;--dx:-.5em;--dy:.3em;--dr:-10deg">k</span><span aria-hidden="true" style="--i:5;--dx:.35em;--dy:-.5em;--dr:8deg">t</span><span aria-hidden="true" style="--i:6;--dx:-.4em;--dy:-.3em;--dr:-6deg">u</span><span aria-hidden="true" style="--i:7;--dx:.5em;--dy:.4em;--dr:11deg">r</span></em>.</h2>
@@ -529,26 +592,26 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   </section>
 
   <!-- 4 · STUDIO (3 Stufen) -->
-  <section class="st st-studio" data-st="4">
+  <section class="st st-studio" data-st="6">
     <div class="kicker">Das Studio · Drei Stufen</div>
     <h2>Andere enden beim Report. Das Studio <em>baut</em>.</h2>
     <p class="lead">Verstehen, Designen, Bauen — ein Pfad, kein Übergabedokument; pro Abteilung eine ehrliche Empfehlung. Ada hört zu, sieben Analyse-Agenten zerlegen den Befund, die Ziel-Systemlandschaft entsteht, n8n setzt sie um.</p>
     <p class="studio-proof rev" style="--d:.5s" aria-label="105 Fragen, 7 Agenten, 1 Pfad"><span><b>105</b>Fragen</span><i aria-hidden="true"></i><span><b>7</b>Agenten</span><i aria-hidden="true"></i><span><b class="pk">1</b>Pfad</span></p>
     <div class="stage-grid">
       <article class="stage-card rev" style="--d:.08s">
-        <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-verstehen.jpg" alt="Stufe 1 — Verstehen"></div>
+        <div class="stage-card__media gl-img" data-win="6.05,6.95"><img src="assets/stage-verstehen.jpg" alt="Stufe 1 — Verstehen"></div>
         <div class="stage-card__num"><b>01</b><span>Verstehen</span></div>
         <div class="stage-card__title">Ada fragt nach.</div>
         <p class="stage-card__text">Voice-Agent Ada führt das Interview — 105 Fragen im Pool, gestellt werden nur die richtigen. Sieben Agenten zerlegen die Antworten in Befunde.</p>
       </article>
       <article class="stage-card rev" style="--d:.22s">
-        <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-designen.jpg" alt="Stufe 2 — Designen"></div>
+        <div class="stage-card__media gl-img" data-win="6.05,6.95"><img src="assets/stage-designen.jpg" alt="Stufe 2 — Designen"></div>
         <div class="stage-card__num"><b>02</b><span>Designen</span></div>
         <div class="stage-card__title">Jede Kante hat einen Mechanismus.</div>
         <p class="stage-card__text">Aus Befunden wird die Ziel-Systemlandschaft. Keine Tool-Liste: jede Verbindung hat einen Mechanismus, jeder Datenfluss eine Quelle.</p>
       </article>
       <article class="stage-card rev" style="--d:.36s">
-        <div class="stage-card__media gl-img" data-win="4.05,4.95"><img src="assets/stage-bauen.jpg" alt="Stufe 3 — Bauen"></div>
+        <div class="stage-card__media gl-img" data-win="6.05,6.95"><img src="assets/stage-bauen.jpg" alt="Stufe 3 — Bauen"></div>
         <div class="stage-card__num"><b>03</b><span>Bauen</span></div>
         <div class="stage-card__title">n8n schaltet scharf.</div>
         <p class="stage-card__text">Aus dem Design wird Workflow-JSON — generiert, validiert, deployt. Kein Report. Ein laufendes System.</p>
@@ -557,7 +620,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   </section>
 
   <!-- 5 · GALAXIE (Systemkarte) -->
-  <section class="st st-galaxie" data-st="5">
+  <section class="st st-galaxie" data-st="7">
     <div class="kicker">Das System, live</div>
     <h2>Die Systemkarte zeichnet sich <em>selbst</em>.</h2>
     <p class="sub rev" style="--d:.08s">Keine Illustration: <code class="gal-fn">to_galaxy(landscape)</code> zeichnet jeden Knoten, jede Linie direkt aus den Daten — die Karte ist Code, nicht Folie. Nicht eine Präsentation bauen. <em class="gal-q">Ein System bauen, das Präsentationen baut.</em></p>
@@ -570,7 +633,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   </section>
 
   <!-- 6 · AGENTEN -->
-  <section class="st st-agents" data-st="6">
+  <section class="st st-agents" data-st="8">
     <div class="kicker">Wie hier gebaut wird</div>
     <h2><span class="num">8</span> Agenten. <span class="num">1</span> Nacht. <span class="num">2.462</span> <em>Zeilen</em>.</h2>
     <p class="agents-lead rev" style="--d:.04s"><b>Claude Code</b> ist das Werkzeug, das <b>Agent SDK</b> der programmierbare Unterbau, <b>Managed Agents</b> dasselbe SDK — von Anthropic gehostet, im eigenen Cloud-Container. Genau diese Kette steckt im Studio.</p>
@@ -606,8 +669,17 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
     </div>
   </section>
 
-  <!-- 7 · LICHT/ABOUT -->
-  <section class="st st-about" data-st="7">
+  <!-- 9 · PITCH: Was ich suche -->
+  <section class="st st-pitch" data-st="9">
+    <div class="kicker rev" style="--d:0s">Was ich suche</div>
+    <h2 class="rev" style="--d:.08s">Die Brücke zwischen <em>Tech</em> und Gast.</h2>
+    <p class="pitch-lead rev" style="--d:.22s">Solutions Engineer oder Customer Success bei einer SaaS im DACH-Raum — als Mensch, der beide Sprachen spricht. Hospitality ist mein Heimspiel, die Methode ist branchenfrei.</p>
+    <div class="pitch-tags rev" style="--d:.4s"><b>Hotel</b><b>Gastronomie</b><b>Handwerk</b><b>Kanzlei</b><b>Agentur</b></div>
+    <div class="pitch-note rev" style="--d:.6s">Diese Seite ist Lebenslauf, Portfolio und Arbeitsprobe in einem — Antwort meist in 24 Stunden.</div>
+  </section>
+
+  <!-- 10 · LICHT/ABOUT -->
+  <section class="st st-about" data-st="10">
     <div class="panel">
       <div class="abk rev" style="--d:0s">In eigener Sache</div>
       <h2 class="rev" style="--d:.05s">20 Jahre von der Bar zu <em>Bytes</em>. Gastgeber zuerst, <span class="hl">Builder</span> aus Überzeugung.</h2>
@@ -623,7 +695,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   </section>
 
   <!-- 8 · FINALE -->
-  <section class="st st-end" data-st="8">
+  <section class="st st-end" data-st="11">
     <p class="end-proof rev"><span class="end-proof__dot" aria-hidden="true"></span>9 Stationen · <b>1 Szene</b> · alles live gebaut</p>
     <h2 class="rev" style="--d:.12s">Eine Idee?<br><em>Lass uns reden.</em></h2>
     <a class="mail rev" style="--d:.25s" href="mailto:a.heyers@gmail.com"><span class="mail__txt">a.heyers@gmail.com</span><span class="mail__arr" aria-hidden="true">→</span></a>
@@ -708,10 +780,10 @@ const IVORY = new THREE.Color('#F2EFE8'), PINK = new THREE.Color('#E94B5D'),
 // Keyframes über Gesamtfortschritt P∈[0,9]
 const BG_KEYS = [
   [0.0, IVORY], [0.75, IVORY], [1.15, PINK], [1.85, PINK],
-  [2.25, IVORY], [2.85, IVORY], [3.25, INK], [3.7, DEEP],
-  [4.05, LIGHT], [4.85, LIGHT], [5.2, DEEP], [5.9, DEEP],
-  [6.2, IVORY], [6.95, IVORY], [7.1, LIGHT], [7.85, LIGHT],
-  [8.2, INK], [9.0, INK],
+  [2.1, INK], [2.9, INK], [3.2, IVORY], [4.9, IVORY],
+  [5.25, INK], [5.7, DEEP], [6.05, LIGHT], [6.85, LIGHT],
+  [7.2, DEEP], [7.9, DEEP], [8.2, IVORY], [8.95, IVORY],
+  [9.1, LIGHT], [10.85, LIGHT], [11.2, INK], [12.0, INK],
 ];
 function bgAt(p, out){
   for (let i=0;i<BG_KEYS.length-1;i++){
@@ -720,12 +792,12 @@ function bgAt(p, out){
   }
   out.copy(BG_KEYS[BG_KEYS.length-1][1]); return out;
 }
-const darkAt = p => (win(p,1.0,2.0)>0.5) || (win(p,3.0,4.0)>0.5) || (win(p,5.05,6.05)>0.5) || (p>8.0);
+const darkAt = p => (win(p,1.0,2.0)>0.5) || (win(p,2.05,3.0)>0.5) || (win(p,5.0,6.0)>0.5) || (win(p,7.05,8.05)>0.5) || (p>11.0);
 
 /* ============================================================
    SCROLL — nativer Scroll, federgeglättet → P∈[0,9]
    ============================================================ */
-const STATIONS = 9;
+const STATIONS = 12;
 let progress = 0;
 const scrollSpring = new SecondOrder(1.6, 1.0, 1.2, 0);
 function rawP(){ const h = document.body.scrollHeight - vh; return clamp(scrollY/Math.max(h,1),0,1)*STATIONS; }
@@ -1345,7 +1417,7 @@ function syncPlane(plane, rect){
 document.querySelectorAll('.gl-img').forEach(h=>{
   const img = h.querySelector('img');
   const plane = makePlane(h, img.currentSrc || img.src);
-  const [wa, wb] = (h.dataset.win || '2.05,2.95').split(',').map(Number);
+  const [wa, wb] = (h.dataset.win || '4.05,4.95').split(',').map(Number);
   plane.userData.wa = wa; plane.userData.wb = wb;
   const card = h.closest('.card');
   if (card && !isTouch){
@@ -1419,7 +1491,7 @@ function syncReel(p){
   const on1 = placeReel(reelPlane, win(p, 1.02, 1.92, .2), vw/2, vh*.40, w1);
   // Station 7 (About): die Lady taucht wieder auf — kleines Fenster unten rechts
   const w2 = Math.min(vw*.26, 430);
-  const on2 = placeReel(reelPlane2, win(p, 7.08, 7.92, .2)*.96,
+  const on2 = placeReel(reelPlane2, win(p, 10.08, 10.92, .2)*.96,
     vw - w2/2 - vw*.05, vh - (w2*9/16)/2 - vh*.09, w2);
   if (on1 || on2) tryPlayReel();
   else if (reelPlaying){ reelVideo.pause(); reelPlaying = false; }
@@ -1616,15 +1688,18 @@ const galStatEls = [...document.querySelectorAll('.st-galaxie .stats b')];
 const navEl = document.getElementById('nav');
 // Sichtfenster pro Station [in, out]
 const WINDOWS = [
-  [ -0.35, 0.9 ],  // 0 Hero
-  [ 0.95, 1.95 ],  // 1 Reel
-  [ 2.05, 2.95 ],  // 2 Projekte
-  [ 3.0, 4.0 ],    // 3 Void/Tunnel
-  [ 4.05, 4.95 ],  // 4 Studio
-  [ 5.05, 5.95 ],  // 5 Galaxie
-  [ 6.05, 6.95 ],  // 6 Agenten
-  [ 7.05, 7.95 ],  // 7 About
-  [ 8.05, 9.3 ],   // 8 Finale
+  [ -0.35, 0.9 ],   // 0 Hero
+  [ 0.95, 1.95 ],   // 1 Reel
+  [ 2.05, 2.95 ],   // 2 Spark
+  [ 3.05, 3.95 ],   // 3 Reise
+  [ 4.05, 4.95 ],   // 4 Projekte
+  [ 5.0, 6.0 ],     // 5 Void/Tunnel
+  [ 6.05, 6.95 ],   // 6 Studio
+  [ 7.05, 7.95 ],   // 7 Galaxie
+  [ 8.05, 8.95 ],   // 8 Agenten
+  [ 9.05, 9.95 ],   // 9 Pitch
+  [ 10.05, 10.95 ], // 10 About
+  [ 11.05, 12.3 ],  // 11 Finale
 ];
 function domStep(p, detailOpen){
   for (let i=0;i<sts.length;i++){
@@ -1642,21 +1717,21 @@ function domStep(p, detailOpen){
     el.style.transform = `translateY(${dy.toFixed(1)}px) scale(${sc.toFixed(4)})`;
   }
   // Void: drei Zeilen nacheinander (Origin → Struktur → Klarheit)
-  const vws = [[3.02, 3.32], [3.36, 3.66], [3.70, 3.98]];
+  const vws = [[5.04, 5.48], [5.52, 5.96]];
   for (let v = 0; v < voidLines.length && v < 3; v++){
     const lo = win(p, vws[v][0], vws[v][1], .12);
     voidLines[v].style.opacity = lo.toFixed(3);
     voidLines[v].style.transform = `translate(-50%,-50%) scale(${(0.92+lo*.08).toFixed(3)})`;
   }
   // Galaxie-Stats zählen scrollgebunden hoch
-  if (p > 4.8 && p < 6.2){
-    const cu = sat((p - 5.05) / .45);
+  if (p > 6.8 && p < 8.2){
+    const cu = sat((p - 7.05) / .45);
     for (const el of galStatEls){
       el.textContent = Math.round(Number(el.dataset.count) * cu);
     }
   }
   // Progress-Punkte + Nav-Farbe
-  const idx = clamp(Math.round(p - .45), 0, 8);
+  const idx = clamp(Math.round(p - .45), 0, 11);
   progDots.forEach((d,i)=>d.classList.toggle('on', i===idx));
   const dark = darkAt(p);
   document.body.style.color = dark ? 'var(--ivory)' : 'var(--ink)';
@@ -1676,15 +1751,15 @@ function frame(){
   const t = clock.getElapsedTime();
   const dt = Math.min(t - prevT, .05); prevT = t;
   progress += (rawP() - progress) * (1 - Math.exp(-12 * dt));
-  const p = clamp(progress, 0, 9);
+  const p = clamp(progress, 0, STATIONS);   // an STATIONS gekoppelt — nie wieder der Klemmen-Bug
   window.__p = p;
 
   /* Kamera-Fahrt: z=9 (Hero) … Tunnel … Studio … durch die Galaxie … Finale bei z≈-88 */
   let cz = 9;
-  if (p > 2.9) cz = 9 - (p-2.9)/1.1 * 47;     // 2.9→4.0: durch den Tunnel bis z=-38
-  if (p > 4.0) cz = -38 - (p-4.0) * 10;       // 4.0→5.0: Studio-Licht bis z=-48
-  if (p > 5.0) cz = -48 - (p-5.0) * 14;       // 5.0→6.0: mitten durch die Galaxie bis z=-62
-  if (p > 6.0) cz = -62 - (p-6.0) * 8;        // 6.0→9.0: Agenten → About → Finale bis z=-86
+  if (p > 4.9) cz = 9 - (p-4.9)/1.1 * 47;     // 4.9→6.0: durch den Tunnel bis z=-38
+  if (p > 6.0) cz = -38 - (p-6.0) * 10;       // 6.0→7.0: Studio-Licht bis z=-48
+  if (p > 7.0) cz = -48 - (p-7.0) * 14;       // 7.0→8.0: über die Galaxie bis z=-62
+  if (p > 8.0) cz = -62 - (p-8.0) * 7;        // 8.0→12: Agenten → Pitch → About → Finale bis z=-90
   cam.position.z = cz;
   cam.position.x = camSpring.x.update(dt, (mouse.x/vw-.5) * .7);
   cam.position.y = camSpring.y.update(dt, -(mouse.y/vh-.5) * .5);
@@ -1704,13 +1779,13 @@ function frame(){
     bodies.forEach(b=>b.mesh.material.uniforms.uFade.value = cw);
   }
   /* Tunnel sichtbar im Void-Fenster; zweiter Warp vor dem Finale */
-  tunnelGroup.visible = p > 2.85 && p < 4.35;
-  tunnel2.visible = p > 7.82 && p < 8.78;
+  tunnelGroup.visible = p > 4.85 && p < 6.35;
+  tunnel2.visible = p > 10.82 && p < 11.78;
   /* Galaxie: Drehung, Pulse auf den Kanten, Satelliten-Orbits */
-  galaxyGroup.visible = p > 4.97 && p < 6.2;
+  galaxyGroup.visible = p > 6.97 && p < 8.2;
   if (galaxyGroup.visible){
-    const gw = win(p, 4.97, 6.2, .3);               // Fenster-Intensität (Kamera-Nähe)
-    const gp = clamp(p - 5.0, 0, 1);                // Fahrt-Fortschritt durch die Galaxie
+    const gw = win(p, 6.97, 8.2, .3);               // Fenster-Intensität (Kamera-Nähe)
+    const gp = clamp(p - 7.0, 0, 1);                // Fahrt-Fortschritt durch die Galaxie
     const gs = .55 + gw * .45;                      // wächst herein statt zu poppen
     galaxyGroup.scale.setScalar(gs);
     /* (a) Scroll-Kipp: erst Draufsicht von oben, dann kippt der Blick in die Scheibe */
@@ -1741,7 +1816,7 @@ function frame(){
     });
   }
   /* Agenten-Orbit */
-  agentGroup.visible = p > 5.95 && p < 6.9;
+  agentGroup.visible = p > 7.95 && p < 8.9;
   if (agentGroup.visible){
     agentGroup.rotation.y = t * .2;
     agentGroup.children.forEach(ag=>{
@@ -1751,7 +1826,7 @@ function frame(){
     });
   }
   /* Sticker drehen sich langsam */
-  stickGroup.visible = p > 7.97;
+  stickGroup.visible = p > 10.97;
   if (stickGroup.visible){
     stickGroup.children.forEach((sp,i)=>{
       if (sp.userData.isFinaleHero){ sp.rotation.y = t*.5; sp.rotation.x = Math.sin(t*.8)*.18; return; }
@@ -1780,8 +1855,8 @@ function frame(){
 
   /* Reel-Videotextur (Station 1) + Hintergrund-Plates (Galaxie/Finale) */
   syncReel(p);
-  syncBgPlate(bgGal, win(p, 5.0, 6.0, .25), .32);
-  syncBgPlate(bgEnd, win(p, 8.05, 9.0, .3), .28);
+  syncBgPlate(bgGal, win(p, 7.0, 8.0, .25), .32);
+  syncBgPlate(bgEnd, win(p, 11.05, 12.0, .3), .28);
 
   /* Bild-Planes (sichtbar im Fenster ihrer Station oder bei offenem Transmorph) */
   planes.forEach(plane=>{
@@ -1834,10 +1909,10 @@ function frame(){
   gradeMat.uniforms.uPaint.value = paintA.texture;
   gradeMat.uniforms.uTime.value = t;
   sStr = Math.min(1, sStr + Math.abs(p - pPrev) * 2); sStr *= Math.exp(-10 * dt); pPrev = p;
-  gradeMat.uniforms.uChroma.value = win(p, 2.95, 4.05, .25) + win(p, 5.0, 6.1, .3)*.35 + win(p, 7.9, 8.7, .25)*.6 + sStr*.25;
+  gradeMat.uniforms.uChroma.value = win(p, 4.95, 6.05, .25) + win(p, 7.0, 8.1, .3)*.35 + win(p, 10.9, 11.7, .25)*.6 + sStr*.25;
   // Lusion-Blenden: Überbelichtung beim Stimmungswechsel statt Crossfade
-  const blend = win(p, 3.9, 4.2, .1) * 1.1 + win(p, 7.95, 8.25, .1) * .9;
-  gradeMat.uniforms.uBloomAmt.value = (darkAt(p) ? .36 : .13) + win(p, 4.9, 6.1, .3)*.3 + blend;
+  const blend = win(p, 5.9, 6.2, .1) * 1.1 + win(p, 10.95, 11.25, .1) * .9;
+  gradeMat.uniforms.uBloomAmt.value = (darkAt(p) ? .36 : .13) + win(p, 6.9, 8.1, .3)*.3 + blend;
   gradeMat.uniforms.uDark.value = darkAt(p) ? 1 : 0;
   renderer.setRenderTarget(null); renderer.clear();
   renderer.render(gradeScene, fsCam);
