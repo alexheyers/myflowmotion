@@ -135,7 +135,7 @@ body.gl .card__media img { opacity:0; }
 /* ============ STATION 9: PITCH (Was ich suche) ============ */
 .st-pitch { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 clamp(1.2rem,4vw,3.2rem); }
 .st-pitch .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.28em; text-transform:uppercase; color:var(--teal); margin-bottom:1rem; }
-.st-pitch h2 { font-family:var(--disp); font-weight:900; font-size:clamp(2rem,4.6vw,3.8rem); line-height:1.08; }
+.st-pitch h2 { font-family:var(--disp); font-weight:900; font-size:clamp(2.2rem,5.2vw,4.3rem); line-height:1.08; }
 .st-pitch h2 em { font-style:italic; color:var(--teal); }
 .st-pitch .pitch-lead { margin-top:1.1rem; max-width:54ch; font-weight:300; line-height:1.7; color:var(--ink-60); font-size:clamp(.9rem,1.15vw,1rem); }
 .st-pitch .pitch-tags { display:flex; gap:.7rem; margin-top:1.8rem; flex-wrap:wrap; justify-content:center; }
@@ -481,6 +481,60 @@ body.static .st-about .panel::before{-webkit-mask:none;mask:none;}
 body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:none;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23g)'/></svg>") repeat;background-size:160px 160px;opacity:.05;mix-blend-mode:overlay;animation:cdGrain 1.4s steps(2) infinite}
 @keyframes cdGrain{0%{transform:translate3d(0,0,0)}25%{transform:translate3d(-3%,2%,0)}50%{transform:translate3d(2%,-4%,0)}75%{transform:translate3d(-2%,-3%,0)}100%{transform:translate3d(3%,3%,0)}}
 @media (prefers-reduced-motion:reduce){body::after{animation:none}}
+
+/* === Choreo: Station 2 SPARK === */
+/* ST2 SPARK · Moment-Choreografie */
+.st-spark{position:relative}
+.st-spark::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 54% 40% at 50% 46%,rgba(242,239,232,.055),transparent 70%);opacity:0;transition:opacity 1.6s var(--ezl) .9s}
+.st-spark.live::before{opacity:1}
+.st-spark .spark-cap{opacity:0}
+.st-spark.live .spark-cap{opacity:1;animation:spkType 1.2s steps(51,end) .1s both}
+@keyframes spkType{from{clip-path:inset(0 100% 0 -2px)}to{clip-path:inset(0 -2px 0 -2px)}}
+.st-spark .spark-big{opacity:0}
+.st-spark.live .spark-big{animation:spkVerdict .85s var(--ezl) 1s both}
+@keyframes spkVerdict{from{opacity:0;transform:scale(1.15) translateY(-10px);filter:blur(16px)}55%{opacity:1}to{opacity:1;transform:none;filter:blur(0)}}
+.st-spark.live .spark-big em{animation:spkPulse 1.05s ease-out 1.8s 1 both}
+@keyframes spkPulse{0%{text-shadow:0 0 0 rgba(233,75,93,0)}30%{text-shadow:0 0 70px rgba(233,75,93,.9),0 0 26px rgba(233,75,93,.55)}100%{text-shadow:0 0 0 rgba(233,75,93,0)}}
+.st-spark.live .spark-note{animation:spkStamp .5s cubic-bezier(.3,1.6,.5,1) 2.35s both}
+@keyframes spkStamp{from{opacity:0;transform:scale(1.55)}to{opacity:1;transform:scale(1)}}
+body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
+@media (prefers-reduced-motion:reduce){.st-spark.live :is(.spark-cap,.spark-big,.spark-big em,.spark-note){animation:none!important}.st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}.st-spark::before{transition:none}.st-spark.live::before{opacity:1}}
+
+/* === Choreo: Station 3 REISE (.st-reise) === */
+.st-reise .route{position:relative}
+.st-reise .route::before{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:var(--ink-12);transform:scaleX(0);transform-origin:left}
+.st-reise.live .route::before,body.static .st-reise .route::before{transform:scaleX(1);transition:transform 1.7s var(--ezl) .25s}
+.st-reise .route-stop{--stopc:var(--ink-12);border-top-color:transparent}
+.st-reise .route-stop.done{--stopc:var(--teal)}
+.st-reise .route-stop.now{--stopc:var(--pink)}
+@keyframes reiseArrive{to{border-top-color:var(--stopc)}}
+.st-reise.live .route-stop,body.static .st-reise .route-stop{animation:reiseArrive .5s var(--ezl) calc(var(--d)*2.9 - .23s) both}
+.st-reise .route-stop.now::after{content:"";position:absolute;left:0;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--pink);opacity:0;transform:scale(.3)}
+.st-reise.live .route-stop.now::after,body.static .st-reise .route-stop.now::after{animation:reiseDot .5s var(--ezl) 1.15s both,reisePulse 2.2s ease-out 1.8s infinite}
+@keyframes reiseDot{to{opacity:1;transform:scale(1)}}
+@keyframes reisePulse{0%{box-shadow:0 0 0 0 #E94B5D66}70%,100%{box-shadow:0 0 0 12px #E94B5D00}}
+.st-reise .reise-stats b{font-size:clamp(1.9rem,3.2vw,2.8rem);line-height:1}
+.st-reise .reise-trainer b{font-size:clamp(.95rem,1.25vw,1.15rem);font-weight:500;font-style:italic;color:var(--ink-60)}
+@media (prefers-reduced-motion:reduce){.st-reise .route::before,.st-reise .route-stop,.st-reise .route-stop.now::after{transition-duration:0s!important;animation-duration:0s!important;animation-delay:0s!important}}
+
+/* === Choreo: st-pitch === */
+/* ST9 PITCH — Brücke */
+.st-pitch h2 .pitch-und{position:relative}
+.st-pitch h2 .pitch-und::before{content:"";position:absolute;left:-150%;right:-150%;bottom:96%;height:.5em;border:2px solid var(--teal);border-bottom:none;border-radius:50% 50% 0 0/100% 100% 0 0;opacity:0;clip-path:inset(0 100% 0 0);pointer-events:none}
+.st-pitch.live h2 .pitch-und::before{animation:pitchBridge 1.3s var(--ezl) .75s forwards}
+@keyframes pitchBridge{from{opacity:1;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+.st-pitch .pitch-tags b{opacity:0;transform:translateY(18px) scale(.7);transition:background-color .35s var(--ezl),border-color .35s var(--ezl),color .35s var(--ezl)}
+.st-pitch.live .pitch-tags b{animation:pitchDock .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.st-pitch.live .pitch-tags b:nth-child(1){animation-delay:.55s}
+.st-pitch.live .pitch-tags b:nth-child(2){animation-delay:.68s}
+.st-pitch.live .pitch-tags b:nth-child(3){animation-delay:.81s}
+.st-pitch.live .pitch-tags b:nth-child(4){animation-delay:.94s}
+.st-pitch.live .pitch-tags b:nth-child(5){animation-delay:1.07s}
+@keyframes pitchDock{from{opacity:0;transform:translateY(18px) scale(.7)}to{opacity:1;transform:none}}
+.st-pitch .pitch-tags b:hover{background:var(--teal);border-color:var(--teal);color:var(--ivory)}
+.st-pitch .pitch-note{background:linear-gradient(var(--teal),var(--teal)) no-repeat 0 100%/0% 1px;padding-bottom:.5em;transition:background-size 1s var(--ezl) 1.3s}
+.st-pitch.live .pitch-note{background-size:100% 1px}
+@media (prefers-reduced-motion:reduce){.st-pitch .pitch-tags b{animation:none!important;opacity:1;transform:none}.st-pitch h2 .pitch-und::before{animation:none!important;opacity:1;clip-path:none}.st-pitch .pitch-note{transition:none;background-size:100% 1px}}
 </style>
 </head>
 <body>
@@ -525,10 +579,10 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
 
   <!-- 2 · SPARK: Tag 1 (Story-Origin) -->
   <section class="st st-spark" data-st="2">
-    <div class="spark-cap rev" style="--d:0s">Tag 1 · 07. Mai · 18:07 Uhr · Die Vorstellungsrunde</div>
+    <div class="spark-cap">Tag 1 · 07. Mai · 18:07 Uhr · Die Vorstellungsrunde</div>
     <h2 class="rev" style="--d:.1s">„Wer von euch kann coden?"</h2>
-    <div class="spark-big rev" style="--d:.45s">Ich <em>nicht</em>.</div>
-    <p class="spark-sub rev" style="--d:.8s">Zwanzig Jahre Tresen, null Zeile Code. Genau da fing es an.</p>
+    <div class="spark-big">Ich <em>nicht</em>.</div>
+    <p class="spark-sub rev" style="--d:1.95s">Zwanzig Jahre Tresen, null Zeile Code. Genau da fing es an.</p>
     <div class="spark-note rev" style="--d:1.1s">„noch nicht können" ist ein Startpunkt, kein Urteil</div>
   </section>
 
@@ -548,7 +602,7 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
       <div class="rev" style="--d:.85s"><b>636</b><span>Unterrichtseinheiten</span></div>
       <div class="rev" style="--d:.95s"><b>26</b><span>Live-Sessions</span></div>
       <div class="rev" style="--d:1.05s"><b>12</b><span>Wochen Vollzeit</span></div>
-      <div class="rev" style="--d:1.15s"><b>Zalando · XING · SumUp · OTTO</b><span>Trainer-Stab · inkl. DL-Summit-Ticket</span></div>
+      <div class="rev reise-trainer" style="--d:1.15s"><b>Zalando · XING · SumUp · OTTO</b><span>Trainer-Stab · inkl. DL-Summit-Ticket</span></div>
     </div>
   </section>
 
@@ -672,9 +726,9 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
   <!-- 9 · PITCH: Was ich suche -->
   <section class="st st-pitch" data-st="9">
     <div class="kicker rev" style="--d:0s">Was ich suche</div>
-    <h2 class="rev" style="--d:.08s">Die Brücke zwischen <em>Tech</em> und Gast.</h2>
+    <h2 class="rev" style="--d:.08s">Die Brücke zwischen <em>Tech</em> <span class="pitch-und">und</span> Gast.</h2>
     <p class="pitch-lead rev" style="--d:.22s">Solutions Engineer oder Customer Success bei einer SaaS im DACH-Raum — als Mensch, der beide Sprachen spricht. Hospitality ist mein Heimspiel, die Methode ist branchenfrei.</p>
-    <div class="pitch-tags rev" style="--d:.4s"><b>Hotel</b><b>Gastronomie</b><b>Handwerk</b><b>Kanzlei</b><b>Agentur</b></div>
+    <div class="pitch-tags"><b>Hotel</b><b>Gastronomie</b><b>Handwerk</b><b>Kanzlei</b><b>Agentur</b></div>
     <div class="pitch-note rev" style="--d:.6s">Diese Seite ist Lebenslauf, Portfolio und Arbeitsprobe in einem — Antwort meist in 24 Stunden.</div>
   </section>
 
