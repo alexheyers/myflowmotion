@@ -103,13 +103,14 @@ body.gl .card__media img { opacity:0; }
 .st-void .line .mono { font-family:var(--mono); font-size:.66rem; letter-spacing:.3em; text-transform:uppercase; color:var(--iv-30); margin-bottom:1.4rem; }
 
 /* ============ STATION 4: STUDIO (3 Stufen) ============ */
-.st-studio { padding:0 clamp(1.2rem,4vw,3.2rem); display:flex; flex-direction:column; justify-content:center; }
+.st-studio { padding:5.6rem clamp(1.2rem,4vw,3.2rem) 1.5rem; display:flex; flex-direction:column; justify-content:center; }
 .st-studio .kicker { font-family:var(--mono); font-size:.66rem; letter-spacing:.26em; text-transform:uppercase; color:var(--teal); margin-bottom:.9rem; }
 .st-studio h2 { font-family:var(--disp); font-weight:900; font-size:clamp(1.8rem,3.8vw,3.2rem); line-height:1.08; max-width:18ch; }
 .st-studio h2 em { font-style:italic; color:var(--teal); }
-.st-studio .lead { margin-top:.9rem; max-width:56ch; font-weight:300; line-height:1.65; color:var(--ink-60); font-size:clamp(.85rem,1.1vw,.98rem); }
-.stage-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(.9rem,2vw,2rem); margin-top:2.2rem; max-width:1060px; }
-.stage-card__media { position:relative; overflow:hidden; border-radius:6px; aspect-ratio:3/4; max-height:32vh; background:var(--ink-12); }
+.st-studio .lead { margin-top:.7rem; max-width:58ch; font-weight:300; line-height:1.6; color:var(--ink-60); font-size:clamp(.85rem,1.1vw,.98rem); }
+.stage-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(1rem,2.4vw,2.6rem); margin-top:1.8rem; max-width:1240px; }
+.stage-card__media { position:relative; overflow:hidden; border-radius:6px; aspect-ratio:4/4.6; max-height:26vh; background:var(--ink-12); }
+.stage-card__text { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 body.gl .stage-card__media img { opacity:0; }
 .stage-card__num { font-family:var(--mono); font-size:.64rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-30); margin-top:.85rem; }
 .stage-card__title { font-family:var(--disp); font-weight:700; font-size:1.06rem; margin-top:.3rem; }
@@ -1646,8 +1647,10 @@ function frame(){
   tunnelGroup.visible = p > 2.85 && p < 4.35;
   tunnel2.visible = p > 7.82 && p < 8.78;
   /* Galaxie: Drehung, Pulse auf den Kanten, Satelliten-Orbits */
-  galaxyGroup.visible = p > 4.55 && p < 6.2;
+  galaxyGroup.visible = p > 4.97 && p < 6.2;
   if (galaxyGroup.visible){
+    const gs = .55 + win(p, 4.97, 6.2, .3) * .45;   // wächst herein statt zu poppen
+    galaxyGroup.scale.setScalar(gs);
     galaxyGroup.rotation.y = t * .055;
     for (const sp of galPulses){
       const u = sp.userData;
