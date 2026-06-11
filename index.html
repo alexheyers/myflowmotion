@@ -752,9 +752,9 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
       <div class="route-stop rev" style="--d:.7s"><b>M6</b><span>Career &amp; Abschluss</span><i>Aus Können wird Position</i></div>
     </div>
     <div class="reise-stats">
-      <div class="rev" style="--d:.85s"><b>636</b><span>Unterrichtseinheiten</span></div>
-      <div class="rev" style="--d:.95s"><b>26</b><span>Live-Sessions</span></div>
-      <div class="rev" style="--d:1.05s"><b>12</b><span>Wochen Vollzeit</span></div>
+      <div class="rev" style="--d:.85s"><b class="rcount" data-count="636">636</b><span>Unterrichtseinheiten</span></div>
+      <div class="rev" style="--d:.95s"><b class="rcount" data-count="26">26</b><span>Live-Sessions</span></div>
+      <div class="rev" style="--d:1.05s"><b class="rcount" data-count="12">12</b><span>Wochen Vollzeit</span></div>
       <div class="rev reise-trainer" style="--d:1.15s"><b>Zalando · XING · SumUp · OTTO</b><span>Trainer-Stab · inkl. DL-Summit-Ticket</span></div>
     </div>
   </section>
@@ -2139,6 +2139,7 @@ const sts = [...document.querySelectorAll('.st')];
 const voidLines = [...document.querySelectorAll('.st-void .line')];
 const progDots = [...document.querySelectorAll('.prog i')];
 const galStatEls = [...document.querySelectorAll('.st-galaxie .stats b')];
+const reiseCountEls = [...document.querySelectorAll('.st-reise .rcount')];
 const chapNumEl = document.getElementById('chapNum'), chapNameEl = document.getElementById('chapName');
 const CHAP_NAMES = ['Hero','Reel','Arbeiten','Klarheit','Studio','Galaxie','Agenten','Tag 1','86 Tage','Die Brücke','Der Mensch','Finale'];
 let chapIdx = -1;
@@ -2180,6 +2181,13 @@ function domStep(p, detailOpen, pv = 0){
     const lo = win(p, vws[v][0], vws[v][1], .12);
     voidLines[v].style.opacity = lo.toFixed(3);
     voidLines[v].style.transform = `translate(-50%,-50%) scale(${(0.92+lo*.08).toFixed(3)})`;
+  }
+  // Reise-Zahlen scrubben mit dem Scroll (vor- und rückwärts)
+  if (p > 7.8 && p < 9.2){
+    const rcu = sat((p - 8.05) / .5);
+    for (const el of reiseCountEls){
+      el.textContent = Math.round(Number(el.dataset.count) * rcu);
+    }
   }
   // Galaxie-Stats zählen scrollgebunden hoch
   if (p > 4.8 && p < 6.2){
@@ -2261,8 +2269,15 @@ function frame(){
     /* (b) Nähe-Glühen: Knoten-Material hellt emissive-artig auf (children[0] = nodesIM) */
     galaxyGroup.children[0].material.color.setScalar(.72 + gw * .4 + Math.sin(t * 2.6) * .06 * gw);
     Sound.padLevel(gw);
-    /* Boot-Sequenz: die Kanten zeichnen sich beim Ankommen selbst */
+    /* Boot-Sequenz: Kanten zeichnen sich, Knoten zünden gestaffelt */
     if (galEdges) galEdges.geometry.setDrawRange(0, Math.floor(galEdges.userData.total * clamp(gp * 1.6 + .04, 0, 1)));
+    const nodesIM2 = galaxyGroup.children[0];
+    const ignite = clamp(gp * 2.2 + .08, 0, 1);
+    const lit = Math.floor(galCount.n * ignite);
+    if (lit !== galaxyGroup.userData.lit){
+      galaxyGroup.userData.lit = lit;
+      nodesIM2.count = Math.max(1, lit);   // InstancedMesh.count = gezündete Knoten
+    }
     /* (c) Staub driftet gegenläufig zur Scheiben-Drehung — Parallax-Tiefe */
     if (galDust) galDust.rotation.y = -t * .12 - gp * .55;
     /* (d) Cluster-Labels faden distanzabhängig zur Kamera (8 Sprites, 1×/Frame) */
