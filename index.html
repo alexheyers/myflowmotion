@@ -52,14 +52,22 @@ body.static .chapter { display:none; }
 body.static .st .rev { opacity:1; transform:none; }
 body.gl .st-reel h2, body.gl .st-spark .spark-big, body.gl .st-end h2 { opacity:0 !important; visibility:hidden; }
 
-/* ============ LOADER ============ */
-.loader { position:fixed; inset:0; z-index:200; background:var(--ivory); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.2rem; transition:opacity .9s cubic-bezier(.16,1,.3,1), visibility .9s; }
-.loader.is-done { opacity:0; visibility:hidden; }
-.loader__word { font-family:var(--disp); font-weight:900; font-size:clamp(1.6rem,4vw,2.6rem); }
+/* ============ LOADER — Vorhang mit großem Zähler (Lusion-Handover) ============ */
+.loader { position:fixed; inset:0; z-index:200; background:var(--ivory); transition:transform 1.1s var(--ezl), visibility 1.1s; will-change:transform; }
+.loader.is-done { transform:translateY(-100.5%); visibility:hidden; }
+.loader__word { position:absolute; top:1.3rem; left:clamp(1.2rem,4vw,3.2rem); font-family:var(--disp); font-weight:900; font-size:1.12rem; }
 .loader__word em { font-style:italic; color:var(--teal); }
-.loader__pct { font-family:var(--mono); font-size:.78rem; color:var(--ink-60); letter-spacing:.22em; }
-.loader__bar { width:min(280px,60vw); height:1px; background:var(--ink-12); position:relative; overflow:hidden; }
-.loader__bar i { position:absolute; inset:0; background:var(--teal); transform-origin:left; transform:scaleX(0); transition:transform .25s; }
+.loader__pct { position:absolute; left:clamp(1.2rem,4vw,3.2rem); bottom:4.2rem; font-family:var(--disp); font-weight:900; font-size:clamp(4.5rem,14vw,11rem); line-height:1; color:var(--ink); font-variant-numeric:tabular-nums; }
+.loader__pct::after { content:"%"; font-size:.32em; vertical-align:.18em; color:var(--teal); margin-left:.06em; }
+.loader__hint { position:absolute; right:clamp(1.2rem,4vw,3.2rem); bottom:4.6rem; font-family:var(--mono); font-size:.62rem; letter-spacing:.26em; text-transform:uppercase; color:var(--ink-30); }
+.loader__bar { position:absolute; left:0; right:0; bottom:2.6rem; height:1px; background:var(--ink-12); overflow:hidden; }
+.loader__bar i { position:absolute; inset:0; background:var(--teal); transform-origin:left; transform:scaleX(0); transition:transform .3s var(--ezl); }
+/* Hero-Entrance wartet auf den Vorhang */
+body:not(.booted) .st-hero.live .kicker,
+body:not(.booted) .st-hero.live .hln__in,
+body:not(.booted) .st-hero.live p,
+body:not(.booted) .st-hero.live .hero-sig,
+body:not(.booted) .st-hero.live .hint { animation-play-state:paused; }
 
 /* ============ CURSOR ============ */
 .cursor-dot,.cursor-ring { position:fixed; top:0; left:0; pointer-events:none; z-index:150; border-radius:50%; will-change:transform; }
@@ -550,8 +558,9 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
 
 <div class="loader" id="loader">
   <div class="loader__word">My<em>Flow</em>Motion</div>
+  <div class="loader__pct" id="loaderPct">0</div>
+  <div class="loader__hint">Eine Szene · zwölf Stationen · alles live gebaut</div>
   <div class="loader__bar"><i id="loaderBar"></i></div>
-  <div class="loader__pct" id="loaderPct">0%</div>
 </div>
 
 <div class="cursor-dot" id="cDot"></div>
@@ -977,8 +986,21 @@ const orthoCam = new THREE.OrthographicCamera(0,vw,0,-vh,-100,100); orthoCam.pos
 /* ---------- Lade-Manager ---------- */
 const manager = new THREE.LoadingManager();
 const pctEl = document.getElementById('loaderPct'), barEl = document.getElementById('loaderBar');
-manager.onProgress = (u,l,t)=>{ const p=Math.round(l/t*100); pctEl.textContent=p+'%'; barEl.style.transform=`scaleX(${p/100})`; };
-manager.onLoad = ()=> setTimeout(()=>document.getElementById('loader').classList.add('is-done'), 400);
+/* Zähler läuft weich auf den echten Fortschritt zu — kein Springen */
+let loadTarget = 0, loadShown = 0;
+manager.onProgress = (u,l,t)=>{ loadTarget = Math.round(l/t*100); barEl.style.transform=`scaleX(${loadTarget/100})`; };
+const cntTimer = setInterval(()=>{
+  loadShown = Math.min(100, loadShown + Math.max(1, Math.round((loadTarget - loadShown) * .18)));
+  pctEl.textContent = loadShown;
+  if (loadShown >= 100){
+    clearInterval(cntTimer);
+    setTimeout(()=>{
+      document.getElementById('loader').classList.add('is-done');
+      setTimeout(()=>document.body.classList.add('booted'), 320);   // Hero-Entrance startet im Vorhang-Lift
+    }, 280);
+  }
+}, 40);
+manager.onLoad = ()=>{ loadTarget = 100; };
 const texLoader = new THREE.TextureLoader(manager);
 const gltfLoader = new GLTFLoader(manager);
 
