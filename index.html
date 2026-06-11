@@ -80,7 +80,7 @@ body.c-hover .cursor-ring { width:60px; height:60px; }
 /* ============ STATION 1: REEL (pink) ============ */
 .st-reel { display:flex; align-items:flex-end; justify-content:center; text-align:center; }
 .st-reel h2 { font-family:var(--disp); font-weight:900; font-style:italic; font-size:clamp(2.6rem,8vw,7rem); color:#fff; letter-spacing:.01em; mix-blend-mode:normal; margin-bottom:9vh; }
-.st-reel .sub { position:absolute; bottom:14vh; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:rgba(255,255,255,.75); }
+.st-reel .sub { position:absolute; top:12.5vh; left:50%; transform:translateX(-50%); font-family:var(--mono); font-size:.68rem; letter-spacing:.24em; text-transform:uppercase; color:rgba(255,255,255,.75); }
 
 /* ============ STATION 2: PROJEKTE ============ */
 .st-work { padding:0 clamp(1.2rem,4vw,3.2rem); display:flex; flex-direction:column; justify-content:center; }
@@ -352,7 +352,7 @@ body.static .st-hero .hln__in{transform:none}
 @media (prefers-reduced-motion:reduce){.st-hero *,.st-hero *::after{animation:none!important}.st-hero :is(.kicker,p,.hero-sig,.hint){opacity:1}.st-hero .hln__in{transform:none}}
 
 /* === Next-Level: Station 1 · Reel (.st-reel) === */
-.st-reel .hud{position:absolute;bottom:14vh;display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.st-reel .hud{position:absolute;bottom:4.5vh;display:flex;align-items:center;gap:.55rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85)}
 .st-reel .hud--bl{left:clamp(1.2rem,4vw,3.2rem)}
 .st-reel .hud--br{right:clamp(1.2rem,4vw,3.2rem);color:rgba(255,255,255,.5)}
 .st-reel .hud__dot{width:7px;height:7px;border-radius:50%;background:#fff;flex:none}
@@ -488,14 +488,14 @@ body::after{content:"";position:fixed;inset:-100%;z-index:115;pointer-events:non
 .st-spark::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 54% 40% at 50% 46%,rgba(242,239,232,.055),transparent 70%);opacity:0;transition:opacity 1.6s var(--ezl) .9s}
 .st-spark.live::before{opacity:1}
 .st-spark .spark-cap{opacity:0}
-.st-spark.live .spark-cap{opacity:1;animation:spkType 1.2s steps(51,end) .1s both}
+.st-spark.live .spark-cap{opacity:1;animation:spkType .9s steps(51,end) .05s both}
 @keyframes spkType{from{clip-path:inset(0 100% 0 -2px)}to{clip-path:inset(0 -2px 0 -2px)}}
 .st-spark .spark-big{opacity:0}
-.st-spark.live .spark-big{animation:spkVerdict .85s var(--ezl) 1s both}
+.st-spark.live .spark-big{animation:spkVerdict .8s var(--ezl) .55s both}
 @keyframes spkVerdict{from{opacity:0;transform:scale(1.15) translateY(-10px);filter:blur(16px)}55%{opacity:1}to{opacity:1;transform:none;filter:blur(0)}}
-.st-spark.live .spark-big em{animation:spkPulse 1.05s ease-out 1.8s 1 both}
+.st-spark.live .spark-big em{animation:spkPulse 1s ease-out 1.15s 1 both}
 @keyframes spkPulse{0%{text-shadow:0 0 0 rgba(233,75,93,0)}30%{text-shadow:0 0 70px rgba(233,75,93,.9),0 0 26px rgba(233,75,93,.55)}100%{text-shadow:0 0 0 rgba(233,75,93,0)}}
-.st-spark.live .spark-note{animation:spkStamp .5s cubic-bezier(.3,1.6,.5,1) 2.35s both}
+.st-spark.live .spark-note{animation:spkStamp .5s cubic-bezier(.3,1.6,.5,1) 1.55s both}
 @keyframes spkStamp{from{opacity:0;transform:scale(1.55)}to{opacity:1;transform:scale(1)}}
 body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
 @media (prefers-reduced-motion:reduce){.st-spark.live :is(.spark-cap,.spark-big,.spark-big em,.spark-note){animation:none!important}.st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}.st-spark::before{transition:none}.st-spark.live::before{opacity:1}}
@@ -699,7 +699,7 @@ body.static .st-spark :is(.spark-cap,.spark-big){opacity:1;clip-path:none}
     <div class="spark-cap">Tag 1 · 07. Mai · 18:07 Uhr · Die Vorstellungsrunde</div>
     <h2 class="rev" style="--d:.1s">„Wer von euch kann coden?"</h2>
     <div class="spark-big">Ich <em>nicht</em>.</div>
-    <p class="spark-sub rev" style="--d:1.95s">Zwanzig Jahre Tresen, null Zeile Code. Genau da fing es an.</p>
+    <p class="spark-sub rev" style="--d:1.15s">Zwanzig Jahre Tresen, null Zeile Code. Genau da fing es an.</p>
     <div class="spark-note rev" style="--d:1.1s">Alles auf dieser Seite entstand in den 86 Tagen danach</div>
   </section>
 
@@ -856,7 +856,7 @@ const STATIONS = 12;
 let progress = 0;
 const scrollSpring = new SecondOrder(1.6, 1.0, 1.2, 0);
 /* Gewichtete Taktung: schwere Stationen bekommen mehr Scroll-Weg (Lusion-Prinzip) */
-const ST_W = [1, .9, 1.05, .85, 1.15, 1.3, 1, .55, 1.1, .85, 1, 1.25];  // Summe = 12
+const ST_W = [.85, .9, 1.05, .85, 1.1, 1.25, .95, 1.1, 1.0, .8, .95, 1.2];  // Summe = 12 — Spark ist jetzt ein MOMENT, kein Blitz
 const ST_CUM = [0];
 for (const w of ST_W) ST_CUM.push(ST_CUM[ST_CUM.length-1] + w);
 function rawP(){
@@ -1115,6 +1115,18 @@ gltfLoader.load('assets/flow-objects.glb', g => {
     m.userData = { a, r, sp: .15 + (i%5)*.07 };
     stickGroup.add(m);
   }
+  // Drift-Feld: Flow-Objekte säumen die hintere Kamerastrecke (Spark→Finale)
+  for (let i = 0; i < 14; i++){
+    const k = kinds[i % 3];
+    const dm = new THREE.Mesh(meshes[k].geometry,
+      new THREE.MeshMatcapMaterial({ matcap, color: i % 5 === 0 ? '#1AA591' : (i % 7 === 0 ? '#E94B5D' : '#F2EFE8') }));
+    dm.scale.setScalar((.25 + (i % 4) * .09) / kindR[k]);
+    const side = i % 2 ? 1 : -1;
+    dm.position.set(side * (2.6 + (i % 3) * 1.1), ((i * 7919) % 100) / 100 * 3 - 1.5, -64 - i * 2.1);
+    dm.rotation.set((i * 1.1) % 3.1, (i * 1.9) % 3.1, 0);
+    dm.userData = { sp: .12 + (i % 4) * .05 };
+    driftGroup.add(dm);
+  }
   // Agenten-Orbit auf dieselbe Formsprache umrüsten
   agentGroup.clear();
   const coreA = new THREE.Mesh(meshes.flowDisc.geometry,
@@ -1128,7 +1140,7 @@ gltfLoader.load('assets/flow-objects.glb', g => {
       new THREE.MeshMatcapMaterial({ matcap, color: i===0 ? '#1AA591' : '#F2EFE8' }));
     ag.scale.setScalar((.2 + (i%3)*.04) / kindR[k]);
     ag.rotation.set((i*1.7)%3.1, (i*.9)%3.1, 0);
-    ag.userData = { a: i/8*Math.PI*2, r: 1.1 + (i%4)*.3, sp: .35 + (i%4)*.09 };
+    ag.userData = { a: i/8*Math.PI*2, r: .85 + (i%4)*.22, sp: .35 + (i%4)*.09 };
     agentGroup.add(ag);
   }
 });
@@ -1400,7 +1412,7 @@ const galLblV = new THREE.Vector3();   // Scratch fürs Label-Fading — keine F
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map:new THREE.CanvasTexture(lc),
         transparent:true, opacity:.8, depthWrite:false }));
       sp.position.set(c[0]*S, c[1]*S + 1.7, c[2]*S);
-      sp.scale.set(2.1, .39, 1);
+      sp.scale.set(1.5, .28, 1);
       galaxyGroup.add(sp); galLabels.push(sp);
     }
   });
@@ -1412,8 +1424,10 @@ const galLblV = new THREE.Vector3();   // Scratch fürs Label-Fading — keine F
 /* ============================================================
    AGENTEN-ORBIT — 8 Agenten kreisen um einen Kern (Station 6)
    ============================================================ */
+const driftGroup = new THREE.Group();
+scene.add(driftGroup);
 const agentGroup = new THREE.Group();
-agentGroup.position.set(vw > 860 ? 2.7 : 0, .1, -70);
+agentGroup.position.set(vw > 860 ? 3.3 : 0, .55, -70);
 scene.add(agentGroup);
 {
   const aMat = new THREE.MeshMatcapMaterial({ matcap, color:'#F2EFE8' });
@@ -1423,7 +1437,7 @@ scene.add(agentGroup);
   for (let i=0;i<8;i++){
     const ag = new THREE.Mesh(new THREE.SphereGeometry(.14 + (i%3)*.03, 20, 16),
       i===0 ? new THREE.MeshMatcapMaterial({ matcap, color:'#1AA591' }) : aMat);
-    ag.userData = { a: i/8*Math.PI*2, r: 1.1 + (i%4)*.3, sp: .35 + (i%4)*.09 };
+    ag.userData = { a: i/8*Math.PI*2, r: .85 + (i%4)*.22, sp: .35 + (i%4)*.09 };
     agentGroup.add(ag);
   }
 }
@@ -1867,7 +1881,7 @@ function frame(){
       const ls = galLabels[i];
       ls.getWorldPosition(galLblV);
       const d = galLblV.distanceTo(cam.position);
-      ls.material.opacity = clamp((d - 1.4) * .65, 0, 1) * clamp((15 - d) * .2, 0, 1) * (.3 + .7 * gw);
+      ls.material.opacity = clamp((d - 4.2) * .55, 0, 1) * clamp((15 - d) * .2, 0, 1) * (.25 + .75 * gw);
     }
     for (const sp of galPulses){
       const u = sp.userData;
@@ -1881,6 +1895,15 @@ function frame(){
       const ph = u.a + t * u.sp * .6 + u.b;
       sm.position.set(Math.cos(ph)*u.r, Math.sin(ph*1.7)*.09, Math.sin(ph)*u.r);
     });
+  }
+  /* Drift-Feld: dezente Begleiter auf der hinteren Strecke */
+  driftGroup.visible = p > 6.3 && p < 11.2;
+  if (driftGroup.visible){
+    for (let di = 0; di < driftGroup.children.length; di++){
+      const dm = driftGroup.children[di];
+      dm.rotation.x += dt * dm.userData.sp * .6;
+      dm.rotation.y += dt * dm.userData.sp;
+    }
   }
   /* Agenten-Orbit */
   agentGroup.visible = p > 5.95 && p < 6.9;
@@ -2001,7 +2024,7 @@ addEventListener('resize', ()=>{
   initPaint();
   paintMat.uniforms.uAspect.value = vw/vh;
   gradeMat.uniforms.uAspect.value = vw/vh;
-  agentGroup.position.x = vw > 860 ? 2.7 : 0;
+  agentGroup.position.x = vw > 860 ? 3.3 : 0;
   planes.forEach(pl=>{ pl.material.uniforms.uViewport.value.set(vw*dpr,vh*dpr); fitCover(pl, pl.userData.tex); });
 });
 } // main()
